@@ -4,6 +4,7 @@ title:  "lib-ruby-parser"
 date:   2020-11-23 00:00:00 +0300
 categories: ruby parser rust
 toc: true
+comments: true
 ---
 ## Intro
 

@@ -4,6 +4,7 @@ title:  "Redis cluster. Quick overview"
 date:   2015-04-13 00:00:00 +0300
 categories: redis databases
 toc: true
+comments: true
 ---
 Today I've tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.
 

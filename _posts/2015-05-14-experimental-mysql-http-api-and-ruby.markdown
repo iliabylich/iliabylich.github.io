@@ -4,6 +4,7 @@ title:  "Experimental MySQL HTTP API and Ruby"
 date:   2015-05-14 00:00:00 +0300
 categories: ruby MySQL databases
 toc: true
+comments: true
 ---
 Yes, MySQL has an HTTP API which is:
 1. an experimental feature

@@ -4,6 +4,7 @@ title:  "My favorite parts of Ruby"
 date:   2018-07-19 00:00:00 +0300
 categories: ruby language tricks
 toc: true
+comments: true
 ---
 **Disclaimer #1** first of all I'd like to say that I really like Ruby. I write a ton of Ruby code every single day and I prefer it over other languages. Please, do not take it seriously, Ruby is nice, and this post is mostly a joke.
 

@@ -4,6 +4,7 @@ title:  "Apipie - amazing tool for documenting your Rails API"
 date:   2015-06-08 00:00:00 +0300
 categories: ruby apipie documenting API
 toc: true
+comments: true
 ---
 This article is about [Apipie gem](https://github.com/Apipie/apipie-rails) which provides a DSL for documenting your API. I will try to cover features that I personally use on my project.
 

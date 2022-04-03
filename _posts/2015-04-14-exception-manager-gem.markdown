@@ -4,6 +4,7 @@ title:  "ExceptionManager gem"
 date:   2015-04-14 00:00:00 +0300
 categories: ruby gem exceptions
 toc: true
+comments: true
 ---
 ExceptionManager is a gem for getting extra information from your exception.
 

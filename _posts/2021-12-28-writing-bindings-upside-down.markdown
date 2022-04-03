@@ -4,6 +4,7 @@ title:  "Writing bindings upside down"
 date:   2021-12-28 00:00:00 +0300
 categories: rust c c++ ruby js node bindings llvm lto
 toc: true
+comments: true
 ---
 Quite a long time ago I started writing C/C++/Ruby/Node.JS/WASM bindings so I could call [my Rust project](https://github.com/lib-ruby-parser/lib-ruby-parser) from those languages. It is a Ruby language parser.
 

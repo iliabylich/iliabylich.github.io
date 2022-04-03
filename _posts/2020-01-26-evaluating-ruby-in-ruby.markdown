@@ -4,6 +4,7 @@ title:  "Evaluating Ruby in Ruby"
 date:   2020-01-26 00:00:00 +0300
 categories: ruby vm
 toc: true
+comments: true
 ---
 # Evaluating Ruby in Ruby
 
