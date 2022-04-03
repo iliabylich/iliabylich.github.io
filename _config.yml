@@ -22,16 +22,18 @@ title: Ilya Bylich
 email: ibylich@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   I'm a Ruby/Rust developer, sometimes I write long technical stories
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "/" # the subpath of your site, e.g. /blog
 url: "https://iliabylich.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: IlyaBylich
 github_username:  iliabylich
 permalink: /:year/:month/:day/:title:output_ext
+paginate: 5
+paginate_path: "/page:num/"
 
 # Build settings
-theme: minima
 plugins:
   - jekyll-feed
+  - jekyll-paginate
 
 # Exclude from processing.
 # The following items will not be processed, by default.
