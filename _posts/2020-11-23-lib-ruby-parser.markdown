@@ -3,18 +3,8 @@ layout: post
 title:  "lib-ruby-parser"
 date:   2020-11-23 00:00:00 +0300
 categories: ruby parser rust
+toc: true
 ---
-## Contents
-
-1. [Intro](#intro_2)
-2. [Implementation](#implementation_2)
-3. [Future improvements](#future-improvements_2)
-4. [C bindings](#c-bindings_2)
-5. [Cpp bindings](#cpp-bindings_2)
-6. [Node bindings](#node-bindings_2)
-7. [WASM](#wasm_2)
-8. [Final thoughts](#final-thoughts_2)
-
 ## Intro
 
 So, I'm ready to announce that I've finished working on a new Ruby parser. It's called `lib-ruby-parser`.

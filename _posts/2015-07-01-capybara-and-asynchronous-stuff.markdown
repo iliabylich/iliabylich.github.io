@@ -3,6 +3,7 @@ layout: post
 title:  "Capybara and asynchronous stuff"
 date:   2015-07-01 00:00:00 +0300
 categories: ruby capybara webdriver
+toc: true
 ---
 In this entry I will try to cover the following aspects:
 1. Running asynchronous code in a web driver

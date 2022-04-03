@@ -3,6 +3,7 @@ layout: post
 title:  "What is Ruby DSL"
 date:   2015-05-26 00:00:00 +0300
 categories: ruby DSL
+toc: true
 ---
 As you already know, DSL means domain-specific language. It's like a language in a language. Here are some examples that we use every day:
 ``` ruby

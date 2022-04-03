@@ -3,6 +3,7 @@ layout: post
 title:  "Wrapping JavaScript library with Opal"
 date:   2015-07-23 00:00:00 +0300
 categories: ruby opal
+toc: true
 ---
 # Introduction
 

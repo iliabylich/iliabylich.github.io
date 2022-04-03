@@ -3,6 +3,7 @@ layout: post
 title:  "HandlerSocket + Ruby"
 date:   2015-11-10 00:00:00 +0300
 categories: ruby mysql handlersocket databases sql nosql
+toc: true
 ---
 # What is HandlerSocket (HS)
 

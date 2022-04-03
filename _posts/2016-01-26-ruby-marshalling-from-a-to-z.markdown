@@ -3,6 +3,7 @@ layout: post
 title:  "Ruby Marshalling from A to Z"
 date:   2016-01-26 00:00:00 +0300
 categories: ruby marshalling serialization tlv
+toc: true
 ---
 Marshalling is a serialization process when you convert an object to a binary string.
 Ruby has a standard class `Marshal` that does all the job for serialization and deserialization.

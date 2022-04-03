@@ -3,8 +3,9 @@ layout: post
 title:  "Saving execution context for later debugging"
 date:   2015-08-21 00:00:00 +0300
 categories: ruby binding closure debugging
+toc: true
 ---
-Consider the following situation: you've got an exception in production. Of course, all of us are good developers, but you know, sometimes *it just happens. What do you usually do to get some information about the error? You just grab the request parameters to test it locally, right? Then I might have a better solution for you: dump your memory once an error happens and restore the dump later to debug it.
+Consider the following situation: you've got an exception in production. Of course, all of us are good developers, but you know, sometimes \*it just happens. What do you usually do to get some information about the error? You just grab the request parameters to test it locally, right? Then I might have a better solution for you: dump your memory once an error happens and restore the dump later to debug it.
 
 ## Binding
 
