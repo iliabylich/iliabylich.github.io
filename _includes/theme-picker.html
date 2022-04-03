@@ -1,0 +1,36 @@
+<span class="sidebar-nav-item">
+  <label for="current-theme">Theme</label>
+  <select id="current-theme">
+    <option>08</option>
+    <option>09</option>
+    <option>0a</option>
+    <option>0b</option>
+    <option>0c</option>
+    <option>0d</option>
+    <option>0f</option>
+  </select>
+
+  <script type="text/javascript">
+    class Theme {
+      static DEFAULT = "0b";
+
+      static getCurrent() {
+        return localStorage.getItem("current-theme") || Theme.DEFAULT;
+      }
+
+      static setCurrent(theme) {
+        localStorage.setItem("current-theme", theme);
+        document.body.className = `theme-base-${theme}`;
+      }
+    }
+
+    const themeSelector = document.getElementById("current-theme");
+    Theme.setCurrent(Theme.getCurrent());
+    themeSelector.value = Theme.getCurrent();
+
+    themeSelector.onchange = (e) => {
+      const theme = e.target.value;
+      Theme.setCurrent(theme);
+    }
+  </script>
+</span>
