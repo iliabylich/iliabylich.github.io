@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Wrapping JavaScript library with Opal &middot; Ilya Bylich
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    <div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="/">
+          Ilya Bylich
+        </a>
+      </h1>
+      <p class="lead">I'm a Ruby/Rust developer, sometimes I write long technical stories</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item" href="/">Home</a>
+
+      
+
+      <a class="sidebar-nav-item" href="https://github.com/iliabylich">GitHub</a>
+      <a class="sidebar-nav-item" href="https://twitter.com/IlyaBylich">Twitter</a>
+      <a class="sidebar-nav-item" href="mailto:ibylich@gmail.com">Email me</a>
+
+      <span class="sidebar-nav-item">
+  <label for="current-theme">Theme</label>
+  <select id="current-theme">
+    <option>08</option>
+    <option>09</option>
+    <option>0a</option>
+    <option>0b</option>
+    <option>0c</option>
+    <option>0d</option>
+    <option>0f</option>
+  </select>
+
+  <script type="text/javascript">
+    class Theme {
+      static DEFAULT = "0b";
+
+      static getCurrent() {
+        return localStorage.getItem("current-theme") || Theme.DEFAULT;
+      }
+
+      static setCurrent(theme) {
+        localStorage.setItem("current-theme", theme);
+        document.body.className = `theme-base-${theme}`;
+      }
+    }
+
+    const themeSelector = document.getElementById("current-theme");
+    Theme.setCurrent(Theme.getCurrent());
+    themeSelector.value = Theme.getCurrent();
+
+    themeSelector.onchange = (e) => {
+      const theme = e.target.value;
+      Theme.setCurrent(theme);
+    }
+  </script>
+</span>
+
+    </nav>
+
+    <p>&copy; 2022. All rights reserved.</p>
+  </div>
+</div>
+
+
+    <div class="content container">
+      <div class="post">
+  <h1 class="post-title">Wrapping JavaScript library with Opal</h1>
+  <span class="post-date">22 Jul 2015</span>
+
+  <div id="table-of-contents">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#introduction">Introduction</a></li>
+<li class="toc-entry toc-h1"><a href="#opal">Opal</a></li>
+<li class="toc-entry toc-h1"><a href="#environment">Environment</a></li>
+<li class="toc-entry toc-h1"><a href="#opening-the-page">Opening the page</a></li>
+<li class="toc-entry toc-h1"><a href="#compiling-opal">Compiling Opal</a></li>
+<li class="toc-entry toc-h1"><a href="#fetching-the-data-from-the-game">Fetching the data from the game</a></li>
+<li class="toc-entry toc-h1"><a href="#starting-the-game">Starting the game</a></li>
+<li class="toc-entry toc-h1"><a href="#time-to-wrap-the-code-of-the-game">Time to wrap the code of the game</a></li>
+<li class="toc-entry toc-h1"><a href="#entities">Entities</a></li>
+<li class="toc-entry toc-h1"><a href="#player-class">Player class</a></li>
+<li class="toc-entry toc-h1"><a href="#writing-the-code-of-the-bot">Writing the code of the bot</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#killing-a-mob">Killing a mob</a></li>
+<li class="toc-entry toc-h2"><a href="#picking-up-an-abstract-item">Picking up an abstract item</a></li>
+<li class="toc-entry toc-h2"><a href="#picking-up-a-weapon">Picking up a weapon</a></li>
+<li class="toc-entry toc-h2"><a href="#picking-up-an-armor">Picking up an armor</a></li>
+<li class="toc-entry toc-h2"><a href="#whats-missing">What’s missing?</a></li>
+</ul>
+</li>
+<li class="toc-entry toc-h1"><a href="#wrapping-a-wrapper">Wrapping a wrapper</a></li>
+<li class="toc-entry toc-h1"><a href="#conclusion">Conclusion</a></li>
+</ul>
+  </div>
+
+  <h1 id="introduction">Introduction</h1>
+
+<p>The task that is solved here is not real, but it’s still a good example of (probably?) real work with Opal. I could choose some complex enough JavaScript library and write a simple wrapper using Opal, but there’s no fun. Instead, let’s write a wrapper for existing rich client-side application (it may show you how to wrap your existing application logic). Well, wrapper for something like a client-side scheduler may sound boring, so I’ve chosen a JS-based browser game called <a href="http://browserquest.mozilla.org">BrowserQuest</a> <a href="https://github.com/mozilla/BrowserQuest">written</a> by Mozilla, and I’ll show you how to write a bot for it using Opal.</p>
+
+<h1 id="opal">Opal</h1>
+
+<p>There are so many posts about <a href="https://github.com/opal/opal">Opal</a>, so I’m just going to say “it’s a Ruby to JavaScript” compiler, that’s enough.</p>
+
+<h1 id="environment">Environment</h1>
+
+<p>First of all, we need something that runs the game and injects a bot into the page. I, personally, while writing integration tests (this is the place, where we usually face to web drivers), prefer PhantomJS, but it’s headless, so you can’t enjoy watching how your bot works. We have to use something like Capybara + Selenium:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Gemfile</span>
+<span class="n">gem</span> <span class="s1">'capybara'</span>
+<span class="n">gem</span> <span class="s1">'selenium-webdriver'</span>
+
+<span class="c1"># runner.rb</span>
+<span class="nb">require</span> <span class="s1">'capybara'</span>
+
+<span class="no">Capybara</span><span class="p">.</span><span class="nf">register_driver</span> <span class="ss">:selenium</span> <span class="k">do</span> <span class="o">|</span><span class="n">app</span><span class="o">|</span>
+  <span class="no">Capybara</span><span class="o">::</span><span class="no">Selenium</span><span class="o">::</span><span class="no">Driver</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="ss">:browser</span> <span class="o">=&gt;</span> <span class="ss">:firefox</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="no">Capybara</span><span class="p">.</span><span class="nf">javascript_driver</span> <span class="o">=</span> <span class="ss">:selenium</span>
+<span class="no">Capybara</span><span class="p">.</span><span class="nf">default_driver</span> <span class="o">=</span> <span class="ss">:selenium</span>
+<span class="no">Capybara</span><span class="p">.</span><span class="nf">run_server</span> <span class="o">=</span> <span class="kp">false</span>
+</code></pre></div></div>
+
+<p>So, the script registers a driver, specifies its browser (Firefox), makes it default and runs Capybara in browser mode (i.e. without own server in the background)</p>
+
+<h1 id="opening-the-page">Opening the page</h1>
+
+<p>Dead simple:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Capybara</span><span class="p">.</span><span class="nf">current_session</span><span class="p">.</span><span class="nf">visit</span><span class="p">(</span><span class="s1">'http://browserquest.mozilla.org'</span><span class="p">)</span>
+<span class="c1"># or in object-oriented style</span>
+<span class="k">class</span> <span class="nc">Game</span>
+  <span class="kp">include</span> <span class="no">Capybara</span><span class="o">::</span><span class="no">DSL</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="c1"># all methods of</span>
+    <span class="c1"># Capybara.current_session</span>
+    <span class="c1"># are available here</span>
+    <span class="n">visit</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">play</span>
+    <span class="c1"># logic of the bot</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Game</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s1">'http://browserquest.mozilla.org/'</span><span class="p">).</span><span class="nf">play</span>
+</code></pre></div></div>
+
+<p>Now it runs a Firefox and opens the page with the game.</p>
+
+<h1 id="compiling-opal">Compiling Opal</h1>
+
+<p>So, there are two ways to compile Ruby into Javascript:</p>
+<ul>
+  <li>compiling Ruby code as a string to JS string</li>
+  <li>compiling specified Ruby file to JS string</li>
+</ul>
+
+<p>To compile a file with Ruby, run:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Opal</span><span class="p">.</span><span class="nf">append_path</span><span class="p">(</span><span class="s1">'some/path/to/dir/with/your/files'</span><span class="p">)</span>
+<span class="no">Opal</span><span class="o">::</span><span class="no">Builder</span><span class="p">.</span><span class="nf">build</span><span class="p">(</span><span class="s1">'relative/path/from/that/dir/to/you/file'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>To compile a string with ruby:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Opal</span><span class="p">.</span><span class="nf">compile</span><span class="p">(</span><span class="s2">"plain ruby code"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The first way is what we really need:</p>
+<ol>
+  <li>create a directory with all opal files</li>
+  <li>add it to Opal’s load path</li>
+  <li>(all <code class="language-plaintext highlighter-rouge">require</code> commands work as in MRI)</li>
+  <li>create a file called <code class="language-plaintext highlighter-rouge">app.rb</code> that <code class="language-plaintext highlighter-rouge">require</code>-s other files</li>
+  <li>embed <code class="language-plaintext highlighter-rouge">app.rb</code> to the page</li>
+</ol>
+
+<h1 id="fetching-the-data-from-the-game">Fetching the data from the game</h1>
+
+<p><a href="https://github.com/mozilla/BrowserQuest/blob/master/client/js/main.js#L7">This</a> is the place where the main <code class="language-plaintext highlighter-rouge">App</code> class is created. But! It’s defined in anonymous function, so this variable is not available outside the context.</p>
+
+<p>This game uses CommonJS for loading files. This library caches(?) all previously required files and instantly returns cached result on the seconds <code class="language-plaintext highlighter-rouge">require</code>.</p>
+
+<p>We can use it:</p>
+<ol>
+  <li>require <code class="language-plaintext highlighter-rouge">app</code> file.</li>
+  <li>wrap any of its methods with some logic that stores current app instance globally and then call <code class="language-plaintext highlighter-rouge">super</code></li>
+</ol>
+
+<p>I’ve chosen a method called <code class="language-plaintext highlighter-rouge">start</code>:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># opal/bot.rb</span>
+<span class="k">module</span> <span class="nn">Patch</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">apply</span>
+    <span class="sx">%x{
+      var app = require('app');
+      oldStart = app.prototype.start;
+      app.prototype.start = function(username) {
+        window.currentApplication = this;
+        oldStart.apply(this, arguments);
+      }
+    }</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">Patch</span><span class="p">.</span><span class="nf">apply</span>
+</code></pre></div></div>
+
+<p>Some explanations:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">%x{js code}</code> just passes provided JS into compiled version (i.e. runs it without any translation)</li>
+  <li>After compiling this file we have access to a variable <code class="language-plaintext highlighter-rouge">currentApplication</code> that contains an instance of <code class="language-plaintext highlighter-rouge">App</code> class</li>
+</ul>
+
+<h1 id="starting-the-game">Starting the game</h1>
+
+<p>As you can see, to start the game you need to:</p>
+<ol>
+  <li>type your player name</li>
+  <li>wait for ‘Play’ button to activate (become red)</li>
+  <li>press ‘Play’ button</li>
+  <li>wait until all assets will be loaded</li>
+  <li>close instructions that the game opens for any new player</li>
+</ol>
+
+<p>After all of these steps the game will be ready, but the point here is that most of the steps are asynchronous. You can’t just type your name and <strong>immediately</strong> press ‘Play’ button (and you can’t press ‘Play’ without waiting for loading)</p>
+
+<p>This is the place where promises shine. Opal has its own standard library that</p>
+<ul>
+  <li>ships with Opal’s code, so it’s already in the page</li>
+  <li>has a class called <code class="language-plaintext highlighter-rouge">Promise</code> that acts pretty much like a <code class="language-plaintext highlighter-rouge">jQuery.Deferred()</code></li>
+</ul>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'promise'</span>
+
+<span class="n">promise</span> <span class="o">=</span> <span class="no">Promise</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">promise</span><span class="p">.</span><span class="nf">then</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s1">'Done'</span> <span class="p">}</span>
+<span class="n">promise</span><span class="p">.</span><span class="nf">fail</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s1">'Fail'</span> <span class="p">}</span>
+<span class="n">promise</span><span class="p">.</span><span class="nf">resolve</span>
+<span class="c1"># =&gt; 'Done' (in JS console)</span>
+<span class="c1"># or</span>
+<span class="n">promise</span><span class="p">.</span><span class="nf">reject</span>
+<span class="c1"># =&gt; 'Fail'</span>
+</code></pre></div></div>
+
+<p>(<code class="language-plaintext highlighter-rouge">Promise</code> is like an object that is a combination of <code class="language-plaintext highlighter-rouge">callback</code>-s and <code class="language-plaintext highlighter-rouge">errback</code>-s, but you don’t invoke callbacks manually, instead you just switch the state of your promise-object and it automatically triggers callbacks/errobacks)</p>
+
+<p>Here is a little helper module that saves our time:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Utils</span>
+  <span class="k">def</span> <span class="nf">wait_for</span><span class="p">(</span><span class="n">promise</span> <span class="o">=</span> <span class="no">Promise</span><span class="p">.</span><span class="nf">new</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">waiting</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">waiting</span><span class="p">.</span><span class="nf">call</span>
+    <span class="k">if</span> <span class="o">!!</span><span class="n">result</span>
+      <span class="n">promise</span><span class="p">.</span><span class="nf">resolve</span>
+    <span class="k">else</span>
+      <span class="n">after</span> <span class="mf">0.1</span> <span class="k">do</span>
+        <span class="n">wait_for</span><span class="p">(</span><span class="n">promise</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">waiting</span><span class="p">)</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+    <span class="n">promise</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="c1"># and usage</span>
+
+<span class="k">class</span> <span class="nc">MyClass</span>
+  <span class="kp">include</span> <span class="no">Utils</span>
+
+  <span class="k">def</span> <span class="nf">call</span>
+    <span class="n">some_async_method_without_ability_to_pass_callback</span>
+    <span class="n">wait_for</span> <span class="k">do</span>
+      <span class="n">method_called</span> <span class="o">&amp;&amp;</span> <span class="n">result_is_success</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">wait_for</code> method takes a promise (which is a blank promise object by default) and a block (which will be converted to JS function). It calls the block and <code class="language-plaintext highlighter-rouge">resolve</code>-s the promise if it is returned true. If not, it calls itself again after 100ms (<code class="language-plaintext highlighter-rouge">after</code> = <code class="language-plaintext highlighter-rouge">setTimeout</code>) with <strong>the same promise object</strong></p>
+
+<p>To type player’s name we should run:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># I'm using opal-jquery here</span>
+<span class="c1"># I think it doesn't require any explanation</span>
+<span class="n">input</span> <span class="o">=</span> <span class="no">Element</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="s1">'#nameinput'</span><span class="p">)</span>
+<span class="n">input</span><span class="p">.</span><span class="nf">value</span> <span class="o">=</span> <span class="vi">@player_name</span>
+<span class="n">wait_for</span> <span class="k">do</span>
+  <span class="no">Element</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="s1">'.play.button.disabled'</span><span class="p">).</span><span class="nf">length</span> <span class="o">==</span> <span class="mi">0</span>
+<span class="k">end</span><span class="p">.</span><span class="nf">then</span> <span class="k">do</span>
+  <span class="c1"># Button is ready, we can click it here</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>To click the button, run:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">button</span> <span class="o">=</span> <span class="no">Element</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="s1">'#createcharacter .play.button div'</span><span class="p">)</span>
+<span class="n">button</span><span class="p">.</span><span class="nf">trigger</span><span class="p">(</span><span class="ss">:click</span><span class="p">)</span>
+<span class="n">wait_for</span> <span class="k">do</span>
+  <span class="no">Element</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="s1">'#instructions'</span><span class="p">).</span><span class="nf">has_class?</span><span class="p">(</span><span class="s1">'active'</span><span class="p">)</span>
+<span class="k">end</span><span class="p">.</span><span class="nf">then</span> <span class="k">do</span>
+  <span class="c1"># The game is ready here</span>
+  <span class="c1"># And it shows us instructions</span>
+  <span class="c1"># We are almost ready to start the game</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>To close instructions, run:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Element</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="s1">'#instructions'</span><span class="p">).</span><span class="nf">trigger</span><span class="p">(</span><span class="ss">:click</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><a href="https://github.com/iliabylich/opal-browserquest-bot/blob/master/bot/opal/commands/start_game.rb">And put everything together</a></p>
+
+<p>To run this command, call</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">StartGame</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s1">'Bot player'</span><span class="p">).</span><span class="nf">invoke</span><span class="p">.</span><span class="nf">then</span> <span class="k">do</span>
+  <span class="n">alert</span><span class="p">(</span><span class="s2">"I'm in the game"</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="time-to-wrap-the-code-of-the-game">Time to wrap the code of the game</h1>
+
+<p>As an enter point we are going to use global JS variable <code class="language-plaintext highlighter-rouge">currentApplication</code>. It has a property <code class="language-plaintext highlighter-rouge">game</code> (that, unexpectedly, returns instance of <code class="language-plaintext highlighter-rouge">Game</code> class). <code class="language-plaintext highlighter-rouge">game</code> has a <code class="language-plaintext highlighter-rouge">player</code> property (instance of <code class="language-plaintext highlighter-rouge">Player</code>) and <code class="language-plaintext highlighter-rouge">entities</code> property which is an object containing all entities on the map, their types and coordinates. You can easily find their JS implementations in the GitHub repository of the game.</p>
+
+<p>So, our main objects are:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">currentApplication</code></li>
+  <li><code class="language-plaintext highlighter-rouge">currentApplication.game</code></li>
+  <li><code class="language-plaintext highlighter-rouge">currentApplication.game.player</code></li>
+  <li><code class="language-plaintext highlighter-rouge">currentApplication.game.entities</code></li>
+</ul>
+
+<p>First class for wrapping is definitely an <code class="language-plaintext highlighter-rouge">App</code>:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Application</span>
+  <span class="kp">include</span> <span class="no">Native</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="sb">`currentApplication`</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">native</span><span class="p">)</span>
+    <span class="vi">@native</span> <span class="o">=</span> <span class="n">native</span>
+  <span class="k">end</span>
+
+  <span class="n">alias_native</span> <span class="ss">:game</span><span class="p">,</span> <span class="ss">:game</span><span class="p">,</span> <span class="ss">as: </span><span class="no">Game</span>
+
+  <span class="k">def</span> <span class="nf">to_n</span>
+    <span class="vi">@native</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<p>So, we have a class called <code class="language-plaintext highlighter-rouge">Application</code> that wraps some native JS object and has a ruby-method <code class="language-plaintext highlighter-rouge">game</code> that calls JS-method <code class="language-plaintext highlighter-rouge">game</code> and wraps it using <code class="language-plaintext highlighter-rouge">Game</code> class (see below). As a bonus, we have a class-method <code class="language-plaintext highlighter-rouge">current</code> that returns wrapped <code class="language-plaintext highlighter-rouge">currentApplication</code>.</p>
+
+<p>The next class is a <code class="language-plaintext highlighter-rouge">Game</code>:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Game</span>
+  <span class="kp">include</span> <span class="no">Native</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current</span>
+    <span class="no">Application</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">game</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">native</span><span class="p">)</span>
+    <span class="vi">@native</span> <span class="o">=</span> <span class="n">native</span>
+  <span class="k">end</span>
+
+  <span class="n">alias_native</span> <span class="ss">:player</span><span class="p">,</span> <span class="ss">:player</span><span class="p">,</span> <span class="ss">as: </span><span class="no">Player</span>
+  <span class="n">alias_native</span> <span class="ss">:say</span>
+
+  <span class="k">def</span> <span class="nf">to_n</span>
+    <span class="vi">@native</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">entities</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">native_entities</span> <span class="o">=</span> <span class="sb">`currentApplication.game.entities`</span>
+    <span class="no">Native</span><span class="o">::</span><span class="no">Hash</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">native_entities</span><span class="p">).</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">e_id</span><span class="p">,</span> <span class="n">e</span><span class="o">|</span>
+      <span class="n">res</span> <span class="o">&lt;&lt;</span> <span class="no">Native</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">end</span>
+    <span class="no">EntityCollection</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And again, this class can wrap any JS game object, has methods <code class="language-plaintext highlighter-rouge">player</code>, <code class="language-plaintext highlighter-rouge">say</code> and <code class="language-plaintext highlighter-rouge">entities</code> (<code class="language-plaintext highlighter-rouge">EntityCollection</code> is our next class to implement).</p>
+
+<p>(we can test method <code class="language-plaintext highlighter-rouge">say</code> write now, just put <code class="language-plaintext highlighter-rouge">Game.current.say('Hello')</code> to the block where the game is ready and start chatting with other players)</p>
+
+<h1 id="entities">Entities</h1>
+
+<p>The game provides a global JS object <code class="language-plaintext highlighter-rouge">Types</code> with all mobs/items/armors/weapons information, it allows to identify unknown entity, compare armors and weapons by rank. Basically, it provides everything for writing a bot logic.</p>
+
+<p>To convert it to Ruby, use <code class="language-plaintext highlighter-rouge">Types = Native(`Types`)</code> and use this object in the Ruby world!</p>
+
+<p>Here is my definition of <code class="language-plaintext highlighter-rouge">Entity</code> class:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Entity</span>
+  <span class="kp">include</span> <span class="no">Native</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">native</span><span class="p">)</span>
+    <span class="vi">@native</span> <span class="o">=</span> <span class="n">native</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">to_n</span>
+    <span class="vi">@native</span>
+  <span class="k">end</span>
+
+  <span class="n">alias_native</span> <span class="ss">:kind</span>
+
+  <span class="k">def</span> <span class="nf">player?</span>
+    <span class="no">Types</span><span class="p">.</span><span class="nf">isPlayer</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="c1"># some other methods</span>
+  <span class="c1"># like mob?</span>
+  <span class="c1"># or heal?</span>
+
+  <span class="k">def</span> <span class="nf">weapon_rank</span>
+    <span class="no">Types</span><span class="p">.</span><span class="nf">getWeaponRank</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">armor_rank</span>
+    <span class="no">Types</span><span class="p">.</span><span class="nf">getArmorRank</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Well, this class can wrap player/mob/armor/weapon/healing, but this is only a value-object, we still need to implement our collection-object <code class="language-plaintext highlighter-rouge">EntityCollection</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EntityCollection</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">native_entities</span><span class="p">)</span>
+    <span class="vi">@entities</span> <span class="o">=</span> <span class="n">native_entities</span><span class="p">.</span><span class="nf">map</span> <span class="k">do</span> <span class="o">|</span><span class="n">native_entity</span><span class="o">|</span>
+      <span class="no">Entity</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">native_entity</span><span class="p">.</span><span class="nf">to_n</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">players</span>
+    <span class="n">entities</span> <span class="o">=</span> <span class="vi">@entities</span><span class="p">.</span><span class="nf">select</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:player?</span><span class="p">)</span>
+    <span class="no">EntityCollection</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="c1"># similar methods like</span>
+  <span class="c1"># mobs/weapons/armors/healings</span>
+  <span class="c1"># are omitted and are just like 'players' method</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="player-class">Player class</h1>
+
+<p>(quickly and without any explanation):</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Player</span>
+  <span class="kp">include</span> <span class="no">Utils</span>
+  <span class="kp">include</span> <span class="no">Native</span>
+
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">current</span>
+    <span class="no">Game</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">player</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">native</span><span class="p">)</span>
+    <span class="vi">@native</span> <span class="o">=</span> <span class="n">native</span>
+  <span class="k">end</span>
+
+  <span class="n">alias_native</span> <span class="ss">:distance_to</span><span class="p">,</span> <span class="ss">:getDistanceToEntity</span>
+  <span class="n">alias_native</span> <span class="ss">:moving?</span><span class="p">,</span> <span class="ss">:isMoving</span>
+  <span class="n">alias_native</span> <span class="ss">:attacking?</span><span class="p">,</span> <span class="ss">:isAttacking</span>
+  <span class="n">alias_native</span> <span class="ss">:hp</span><span class="p">,</span> <span class="ss">:hitPoints</span>
+  <span class="n">alias_native</span> <span class="ss">:max_hp</span><span class="p">,</span> <span class="ss">:maxHitPoints</span>
+
+  <span class="k">def</span> <span class="nf">full_hp?</span>
+    <span class="n">hp</span> <span class="o">==</span> <span class="n">max_hp</span>
+  <span class="k">end</span>
+
+  <span class="n">alias_native</span> <span class="ss">:weapon_name</span><span class="p">,</span> <span class="ss">:getWeaponName</span>
+  <span class="n">alias_native</span> <span class="ss">:armor_name</span><span class="p">,</span> <span class="ss">:getArmorName</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="writing-the-code-of-the-bot">Writing the code of the bot</h1>
+
+<p>It’s not as difficult once we have all these classes prepared. The algorithm of  farming is like:</p>
+<ol>
+  <li>Find a closest mob and kill it</li>
+  <li>Find a closest weapon (and pick up if it’s enough close)</li>
+  <li>Find a closest armor (and pick up if it’s enough close)</li>
+  <li>Find a closest healing (and pick up if it’s enough close)</li>
+  <li>GOTO 1</li>
+</ol>
+
+<p>All of these steps will be our methods, and all of them <strong>must</strong> be asynchronous.</p>
+
+<p>Just one method is missing here (<code class="language-plaintext highlighter-rouge">closest</code>):</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">EntityCollection</span>
+  <span class="k">def</span> <span class="nf">by_distance</span>
+    <span class="n">entities</span> <span class="o">=</span> <span class="vi">@entities</span><span class="p">.</span><span class="nf">sort_by</span> <span class="k">do</span> <span class="o">|</span><span class="n">entity</span><span class="o">|</span>
+      <span class="no">Player</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">distance_to</span><span class="p">(</span><span class="n">entity</span><span class="p">)</span>
+    <span class="k">end</span>
+    <span class="no">EntityCollection</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">entities</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">first</span>
+    <span class="vi">@entities</span><span class="p">.</span><span class="nf">first</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">last</span>
+    <span class="vi">@entities</span><span class="p">.</span><span class="nf">last</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">closest</span>
+    <span class="n">by_distance</span><span class="p">.</span><span class="nf">first</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="killing-a-mob">Killing a mob</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">kill_mob</span>
+  <span class="n">closest_mob</span> <span class="o">=</span> <span class="no">Game</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">entities</span><span class="p">.</span><span class="nf">mobs</span><span class="p">.</span><span class="nf">closest</span>
+  <span class="sb">`</span><span class="si">#{</span><span class="no">Game</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">to_n</span><span class="si">}</span><span class="sb">.makePlayerAttack(</span><span class="si">#{</span><span class="n">closest_mob</span><span class="p">.</span><span class="nf">to_n</span><span class="si">}</span><span class="sb">)`</span>
+  <span class="c1"># TODO: move this method to the game class</span>
+  <span class="c1"># using alias_native :)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="picking-up-an-abstract-item">Picking up an abstract item</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">pick_up</span>
+  <span class="sb">`</span><span class="si">#{</span><span class="no">Game</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">to_n</span><span class="si">}</span><span class="sb">.makePlayerGoToItem(</span><span class="si">#{</span><span class="n">item</span><span class="p">.</span><span class="nf">to_n</span><span class="si">}</span><span class="sb">);`</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="picking-up-a-weapon">Picking up a weapon</h2>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_armor</span>
+  <span class="n">current_weapon_name</span> <span class="o">=</span> <span class="no">Player</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">weapon_name</span>
+  <span class="n">weapons</span> <span class="o">=</span> <span class="no">Game</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">entities</span><span class="p">.</span><span class="nf">weapons</span>
+  <span class="n">closest_weapon</span> <span class="o">=</span> <span class="n">weapons</span><span class="p">.</span><span class="nf">better_than</span><span class="p">(</span><span class="n">current_weapon_name</span><span class="p">).</span><span class="nf">closest</span>
+  <span class="k">if</span> <span class="n">closest_weapon</span><span class="p">.</span><span class="nf">nil?</span>
+    <span class="c1"># No weapon, probably next time</span>
+    <span class="k">return</span>
+  <span class="k">end</span>
+  <span class="k">if</span> <span class="no">Player</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">distance_to</span><span class="p">(</span><span class="n">closest_weapon</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100</span>
+    <span class="c1"># Weapon is too far away, next time</span>
+    <span class="k">return</span>
+  <span class="k">end</span>
+  <span class="n">pick_up</span><span class="p">(</span><span class="n">closest_weapon</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="picking-up-an-armor">Picking up an armor</h2>
+
+<p>Just like a previous snippet, but with <code class="language-plaintext highlighter-rouge">armors</code> instead of <code class="language-plaintext highlighter-rouge">weapons</code></p>
+
+<h2 id="whats-missing">What’s missing?</h2>
+
+<p>All of these steps should return promises, every single method written below should wait for player to stop moving and attacking. To make this we need some common method like:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">wait_until_inactive</span>
+  <span class="n">promise</span> <span class="o">=</span> <span class="no">Promise</span><span class="p">.</span><span class="nf">new</span>
+  <span class="n">wait_for</span> <span class="k">do</span>
+    <span class="o">!</span><span class="no">Player</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">moving?</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="no">Player</span><span class="p">.</span><span class="nf">current</span><span class="p">.</span><span class="nf">attacking?</span>
+  <span class="k">end</span><span class="p">.</span><span class="nf">then</span> <span class="k">do</span>
+    <span class="c1"># Wait 1 more second to continue</span>
+    <span class="n">after</span> <span class="mi">1</span> <span class="k">do</span>
+      <span class="n">promise</span><span class="p">.</span><span class="nf">resolve</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+  <span class="n">promise</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And put it to the end of each action method.</p>
+
+<h1 id="wrapping-a-wrapper">Wrapping a wrapper</h1>
+
+<p>We need the main method <code class="language-plaintext highlighter-rouge">farm</code>, right?</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">farm</span>
+  <span class="n">kill_mob</span><span class="p">.</span><span class="nf">then</span> <span class="k">do</span>
+    <span class="n">get_weapon</span><span class="p">.</span><span class="nf">then</span> <span class="k">do</span>
+      <span class="n">get_armor</span><span class="p">.</span><span class="nf">then</span> <span class="k">do</span>
+        <span class="n">heal</span><span class="p">.</span><span class="nf">then</span> <span class="k">do</span>
+          <span class="n">farm</span>
+        <span class="k">end</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This, is probably the thing that I’ve personally learned during writing this article. Even if you think in Ruby, you still have to deal with asynchronous components like callbacks/promises. When you need to make an HTTP request in Ruby, you just get you favorite HTTP adapter (mine is <code class="language-plaintext highlighter-rouge">RestClient</code>), send a request and your interpreter waits for response. In JS you have to process response in some callback, because you can’t just stop your interpreter (you know, it blocks UI).</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>As for me, the main thing Opal gives to you is some ability to think in terms of Ruby classes/modules/inheritance system. But it doesn’t let you completely escape from JS ecosystem (no callbacks? - block is a callback). I would say, most of Opal functionality related to Ruby classes can be replaced with, for example, <a href="http://jsclass.jcoglan.com/">JsClass</a> library (which is really wonderful). Opal allows you to compile <strong>existing</strong> Ruby libraries to JavaScript and use them on the client - this is probably the main feature. Some day significant amount of Ruby libraries will be ported to client-side and probably some day we will think in terms of Ruby even on the client.</p>
+
+</div>
+
+
+  <div class="comments">
+    <div id="disqus_thread"></div>
+    <script>
+        var disqus_config = function () {
+          this.page.url = document.location.href;  // Replace PAGE_URL with your page's canonical URL variable
+          this.page.identifier = document.location.pathname; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        (function() { // DON'T EDIT BELOW THIS LINE
+          var d = document, s = d.createElement('script');
+          s.src = 'https://ibylich-myblog.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2021/12/27/writing-bindings-upside-down.html">
+            Writing bindings upside down
+            <small>27 Dec 2021</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/11/22/lib-ruby-parser.html">
+            lib-ruby-parser
+            <small>22 Nov 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/01/25/evaluating-ruby-in-ruby.html">
+            Evaluating Ruby in Ruby
+            <small>25 Jan 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+    </div>
+  </body>
+</html>

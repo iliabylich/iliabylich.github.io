@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      ExceptionManager gem &middot; Ilya Bylich
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    <div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="/">
+          Ilya Bylich
+        </a>
+      </h1>
+      <p class="lead">I'm a Ruby/Rust developer, sometimes I write long technical stories</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item" href="/">Home</a>
+
+      
+
+      <a class="sidebar-nav-item" href="https://github.com/iliabylich">GitHub</a>
+      <a class="sidebar-nav-item" href="https://twitter.com/IlyaBylich">Twitter</a>
+      <a class="sidebar-nav-item" href="mailto:ibylich@gmail.com">Email me</a>
+
+      <span class="sidebar-nav-item">
+  <label for="current-theme">Theme</label>
+  <select id="current-theme">
+    <option>08</option>
+    <option>09</option>
+    <option>0a</option>
+    <option>0b</option>
+    <option>0c</option>
+    <option>0d</option>
+    <option>0f</option>
+  </select>
+
+  <script type="text/javascript">
+    class Theme {
+      static DEFAULT = "0b";
+
+      static getCurrent() {
+        return localStorage.getItem("current-theme") || Theme.DEFAULT;
+      }
+
+      static setCurrent(theme) {
+        localStorage.setItem("current-theme", theme);
+        document.body.className = `theme-base-${theme}`;
+      }
+    }
+
+    const themeSelector = document.getElementById("current-theme");
+    Theme.setCurrent(Theme.getCurrent());
+    themeSelector.value = Theme.getCurrent();
+
+    themeSelector.onchange = (e) => {
+      const theme = e.target.value;
+      Theme.setCurrent(theme);
+    }
+  </script>
+</span>
+
+    </nav>
+
+    <p>&copy; 2022. All rights reserved.</p>
+  </div>
+</div>
+
+
+    <div class="content container">
+      <div class="post">
+  <h1 class="post-title">ExceptionManager gem</h1>
+  <span class="post-date">13 Apr 2015</span>
+
+  <div id="table-of-contents">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#integration-with-newrelic">Integration with NewRelic</a></li>
+<li class="toc-entry toc-h1"><a href="#how-it-works">How it works</a></li>
+<li class="toc-entry toc-h1"><a href="#compatibility">Compatibility</a></li>
+<li class="toc-entry toc-h1"><a href="#questions">Questions</a></li>
+</ul>
+  </div>
+
+  <p>ExceptionManager is a gem for getting extra information from your exception.</p>
+
+<p>Source code: <a href="https://github.com/iliabylich/exception_manager">https://github.com/iliabylich/exception_manager</a></p>
+
+<p>With this gem every time when you get an exception, it’s possible to grab <code class="language-plaintext highlighter-rouge">subject</code> of exception (the instance of class where <code class="language-plaintext highlighter-rouge">raise</code> happened), <code class="language-plaintext highlighter-rouge">locals</code> - local variables, <code class="language-plaintext highlighter-rouge">subject_instance_variables</code> and <code class="language-plaintext highlighter-rouge">subject_class_variables</code></p>
+
+<p>Examples:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'exception_manager'</span>
+<span class="no">ExceptionManager</span><span class="p">.</span><span class="nf">enable!</span>
+
+<span class="k">class</span> <span class="nc">TestClassThatRaisesException</span>
+  <span class="vc">@@class_variable</span> <span class="o">=</span> <span class="ss">:class_value</span>
+
+  <span class="k">def</span> <span class="nf">test_error</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+    <span class="vi">@instance_variable</span> <span class="o">=</span> <span class="ss">:instance_value</span>
+
+    <span class="k">raise</span> <span class="s1">'Test error'</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">begin</span>
+  <span class="no">TestClassThatRaisesException</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">test_error</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+  <span class="nb">puts</span> <span class="s2">"Subject: </span><span class="si">#{</span><span class="n">e</span><span class="p">.</span><span class="nf">subject</span><span class="si">}</span><span class="s2">"</span>
+  <span class="nb">puts</span> <span class="s2">"Locals: </span><span class="si">#{</span><span class="n">e</span><span class="p">.</span><span class="nf">locals</span><span class="si">}</span><span class="s2">"</span>
+  <span class="nb">puts</span> <span class="s2">"Instance variables: </span><span class="si">#{</span><span class="n">e</span><span class="p">.</span><span class="nf">subject_instance_variables</span><span class="si">}</span><span class="s2">"</span>
+  <span class="nb">puts</span> <span class="s2">"Class variables: </span><span class="si">#{</span><span class="n">e</span><span class="p">.</span><span class="nf">subject_class_variables</span><span class="si">}</span><span class="s2">"</span>
+  <span class="nb">puts</span> <span class="s2">"Summary: </span><span class="si">#{</span><span class="n">e</span><span class="p">.</span><span class="nf">summary</span><span class="p">.</span><span class="nf">inspect</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This code snippet prints:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Subject</span><span class="p">:</span> <span class="c1">#&lt;TestClassThatRaisesException:0x00000001512268&gt;</span>
+<span class="no">Locals</span><span class="p">:</span> <span class="p">{</span><span class="ss">:args</span><span class="o">=&gt;</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]}</span>
+<span class="no">Instance</span> <span class="ss">variables: </span><span class="p">{</span><span class="ss">:@instance_variable</span><span class="o">=&gt;</span><span class="ss">:instance_value</span><span class="p">}</span>
+<span class="no">Class</span> <span class="ss">variables: </span><span class="p">{</span><span class="ss">:@@class_variable</span><span class="o">=&gt;</span><span class="ss">:class_value</span><span class="p">}</span>
+<span class="no">Summary</span><span class="p">:</span> <span class="p">{</span>
+  <span class="ss">:locals</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="ss">:klass</span> <span class="o">=&gt;</span> <span class="no">TestClassThatRaisesException</span><span class="p">,</span>
+    <span class="ss">:args</span><span class="o">=&gt;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+  <span class="p">},</span>
+  <span class="ss">:subject</span> <span class="o">=&gt;</span> <span class="c1">#&lt;TestClassThatRaisesException:0x00000001512268&gt;,</span>
+  <span class="ss">:subject_instance_variables</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="ss">:@instance_variable</span> <span class="o">=&gt;</span> <span class="ss">:instance_value</span>
+  <span class="p">},</span>
+  <span class="ss">:subject_class_variables</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="ss">:@@class_variable</span> <span class="o">=&gt;</span> <span class="ss">:class_value</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>So, you can get local variables of you exception, instance where it happened and the whole context.</p>
+
+<p>If you have <code class="language-plaintext highlighter-rouge">pry</code> installed, you can inject pry session into stored binding:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">begin</span>
+  <span class="no">TestClassThatRaisesException</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">test_error</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+  <span class="n">e</span><span class="p">.</span><span class="nf">_binding</span><span class="p">.</span><span class="nf">pry</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h1 id="integration-with-newrelic">Integration with NewRelic</h1>
+
+<p>Just use the following snippet:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">StandardError</span>
+  <span class="k">def</span> <span class="nf">original_exception</span>
+    <span class="n">message_for_new_relic</span> <span class="o">=</span> <span class="p">[</span><span class="n">message</span><span class="p">,</span> <span class="n">summary</span><span class="p">.</span><span class="nf">inspect</span><span class="p">].</span><span class="nf">join</span><span class="p">(</span><span class="s1">' '</span><span class="p">)</span>
+    <span class="nb">self</span><span class="p">.</span><span class="nf">exception</span><span class="p">(</span><span class="n">message_for_new_relic</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>NewRelic gem by default calls <code class="language-plaintext highlighter-rouge">.original_exception.to_s</code> on every caught exception. Yes, looks dirty, but saves a lot of time!</p>
+
+<h1 id="how-it-works">How it works</h1>
+
+<p>In old versions of ruby there was a <code class="language-plaintext highlighter-rouge">Kernel</code> method called <code class="language-plaintext highlighter-rouge">set_trace_func</code> which allows to set trigger for every executed line (including c-calls).</p>
+
+<p>Ruby 2.0.0 (and newer) has a class called <code class="language-plaintext highlighter-rouge">TracePoint</code> which allows to subscribe to any specific method call (<code class="language-plaintext highlighter-rouge">raise</code> in our case).</p>
+
+<p>So, simplified version of the main code looks like:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Exception</span>
+  <span class="nb">attr_accessor</span> <span class="ss">:_binding</span>
+<span class="k">end</span>
+
+<span class="no">TracePoint</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">:raise</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">tp</span><span class="o">|</span>
+  <span class="n">tp</span><span class="p">.</span><span class="nf">raised_exception</span><span class="p">.</span><span class="nf">_binding</span> <span class="o">=</span> <span class="n">tp</span><span class="p">.</span><span class="nf">binding</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And then we can get everything through this binding</p>
+
+<h1 id="compatibility">Compatibility</h1>
+
+<p>ExceptionManager is compatible (and tested on travis) with the following versions of ruby</p>
+
+<ul>
+  <li>2.0.0</li>
+  <li>2.1.0</li>
+  <li>2.2.0</li>
+</ul>
+
+<p>(In other words, in all versions of ruby that has <code class="language-plaintext highlighter-rouge">TracePoint</code> class).</p>
+
+<h1 id="questions">Questions</h1>
+
+<p>If you have any questions/suggestions feel free <a href="https://github.com/iliabylich/exception_manager/issues">to create an issue on GitHub</a>.</p>
+
+</div>
+
+
+  <div class="comments">
+    <div id="disqus_thread"></div>
+    <script>
+        var disqus_config = function () {
+          this.page.url = document.location.href;  // Replace PAGE_URL with your page's canonical URL variable
+          this.page.identifier = document.location.pathname; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        (function() { // DON'T EDIT BELOW THIS LINE
+          var d = document, s = d.createElement('script');
+          s.src = 'https://ibylich-myblog.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2021/12/27/writing-bindings-upside-down.html">
+            Writing bindings upside down
+            <small>27 Dec 2021</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/11/22/lib-ruby-parser.html">
+            lib-ruby-parser
+            <small>22 Nov 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/01/25/evaluating-ruby-in-ruby.html">
+            Evaluating Ruby in Ruby
+            <small>25 Jan 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+    </div>
+  </body>
+</html>

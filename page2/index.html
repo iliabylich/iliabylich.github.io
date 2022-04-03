@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Ilya Bylich &middot; 
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    <div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="/">
+          Ilya Bylich
+        </a>
+      </h1>
+      <p class="lead">I'm a Ruby/Rust developer, sometimes I write long technical stories</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item" href="/">Home</a>
+
+      
+
+      <a class="sidebar-nav-item" href="https://github.com/iliabylich">GitHub</a>
+      <a class="sidebar-nav-item" href="https://twitter.com/IlyaBylich">Twitter</a>
+      <a class="sidebar-nav-item" href="mailto:ibylich@gmail.com">Email me</a>
+
+      <span class="sidebar-nav-item">
+  <label for="current-theme">Theme</label>
+  <select id="current-theme">
+    <option>08</option>
+    <option>09</option>
+    <option>0a</option>
+    <option>0b</option>
+    <option>0c</option>
+    <option>0d</option>
+    <option>0f</option>
+  </select>
+
+  <script type="text/javascript">
+    class Theme {
+      static DEFAULT = "0b";
+
+      static getCurrent() {
+        return localStorage.getItem("current-theme") || Theme.DEFAULT;
+      }
+
+      static setCurrent(theme) {
+        localStorage.setItem("current-theme", theme);
+        document.body.className = `theme-base-${theme}`;
+      }
+    }
+
+    const themeSelector = document.getElementById("current-theme");
+    Theme.setCurrent(Theme.getCurrent());
+    themeSelector.value = Theme.getCurrent();
+
+    themeSelector.onchange = (e) => {
+      const theme = e.target.value;
+      Theme.setCurrent(theme);
+    }
+  </script>
+</span>
+
+    </nav>
+
+    <p>&copy; 2022. All rights reserved.</p>
+  </div>
+</div>
+
+
+    <div class="content container">
+      <div class="posts">
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/2015/11/09/handlersocket-with-ruby.html">
+        HandlerSocket + Ruby
+      </a>
+    </h1>
+
+    <span class="post-date">09 Nov 2015</span>
+  </div>
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/2015/08/20/saving-execution-context-for-later-debugging.html">
+        Saving execution context for later debugging
+      </a>
+    </h1>
+
+    <span class="post-date">20 Aug 2015</span>
+  </div>
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/2015/07/22/wrapping-javascript-library-with-opal.html">
+        Wrapping JavaScript library with Opal
+      </a>
+    </h1>
+
+    <span class="post-date">22 Jul 2015</span>
+  </div>
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/2015/06/30/capybara-and-asynchronous-stuff.html">
+        Capybara and asynchronous stuff
+      </a>
+    </h1>
+
+    <span class="post-date">30 Jun 2015</span>
+  </div>
+  
+  <div class="post">
+    <h1 class="post-title">
+      <a href="/2015/06/07/apipie-amazing-tool-for-documenting-your-rails-api.html">
+        Apipie - amazing tool for documenting your Rails API
+      </a>
+    </h1>
+
+    <span class="post-date">07 Jun 2015</span>
+  </div>
+  
+</div>
+
+<div class="pagination">
+  
+    <a class="pagination-item older" href="/page3">Older</a>
+  
+  
+    
+      <a class="pagination-item newer" href="/">Newer</a>
+    
+  
+</div>
+
+    </div>
+  </body>
+</html>

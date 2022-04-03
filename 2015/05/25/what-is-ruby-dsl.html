@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      What is Ruby DSL &middot; Ilya Bylich
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    <div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="/">
+          Ilya Bylich
+        </a>
+      </h1>
+      <p class="lead">I'm a Ruby/Rust developer, sometimes I write long technical stories</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item" href="/">Home</a>
+
+      
+
+      <a class="sidebar-nav-item" href="https://github.com/iliabylich">GitHub</a>
+      <a class="sidebar-nav-item" href="https://twitter.com/IlyaBylich">Twitter</a>
+      <a class="sidebar-nav-item" href="mailto:ibylich@gmail.com">Email me</a>
+
+      <span class="sidebar-nav-item">
+  <label for="current-theme">Theme</label>
+  <select id="current-theme">
+    <option>08</option>
+    <option>09</option>
+    <option>0a</option>
+    <option>0b</option>
+    <option>0c</option>
+    <option>0d</option>
+    <option>0f</option>
+  </select>
+
+  <script type="text/javascript">
+    class Theme {
+      static DEFAULT = "0b";
+
+      static getCurrent() {
+        return localStorage.getItem("current-theme") || Theme.DEFAULT;
+      }
+
+      static setCurrent(theme) {
+        localStorage.setItem("current-theme", theme);
+        document.body.className = `theme-base-${theme}`;
+      }
+    }
+
+    const themeSelector = document.getElementById("current-theme");
+    Theme.setCurrent(Theme.getCurrent());
+    themeSelector.value = Theme.getCurrent();
+
+    themeSelector.onchange = (e) => {
+      const theme = e.target.value;
+      Theme.setCurrent(theme);
+    }
+  </script>
+</span>
+
+    </nav>
+
+    <p>&copy; 2022. All rights reserved.</p>
+  </div>
+</div>
+
+
+    <div class="content container">
+      <div class="post">
+  <h1 class="post-title">What is Ruby DSL</h1>
+  <span class="post-date">25 May 2015</span>
+
+  <div id="table-of-contents">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#blocks-and-context">Blocks and context</a></li>
+<li class="toc-entry toc-h2"><a href="#so">So?</a></li>
+<li class="toc-entry toc-h2"><a href="#advanced-dsl-example">Advanced DSL example</a></li>
+<li class="toc-entry toc-h2"><a href="#defining-methods-dynamically">Defining methods dynamically</a></li>
+<li class="toc-entry toc-h2"><a href="#where-is-the-code">Where is the code?</a></li>
+<li class="toc-entry toc-h2"><a href="#whats-wrong-in-the-previous-example">What’s wrong in the previous example?</a></li>
+<li class="toc-entry toc-h2"><a href="#conclusion">Conclusion</a></li>
+</ul>
+  </div>
+
+  <p>As you already know, DSL means domain-specific language. It’s like a language in a language. Here are some examples that we use every day:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
+  <span class="nb">attr_reader</span> <span class="ss">:name</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Profile</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">has_many</span> <span class="ss">:posts</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">ApiController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">before_action</span> <span class="ss">:authenticate</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>But all these examples use rails-provided DSL, how about your own? First of all, you should know that all these methods (<code class="language-plaintext highlighter-rouge">attr_reader</code>, <code class="language-plaintext highlighter-rouge">has_many</code> and <code class="language-plaintext highlighter-rouge">before_action</code>) are actually class-methods of <code class="language-plaintext highlighter-rouge">Module</code>, <code class="language-plaintext highlighter-rouge">ActiveRecord::Base</code> and <code class="language-plaintext highlighter-rouge">ActionController::Base</code>. So you can write something like:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TestClass</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">my_dsl_method</span><span class="p">(</span><span class="n">dsl_method_arg</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s2">"dsl method called with </span><span class="si">#{</span><span class="n">dsl_method_arg</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+  <span class="n">my_dsl_method</span> <span class="ss">:some_argument</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And the body of <code class="language-plaintext highlighter-rouge">my_dsl_method</code> can be more dynamic then just printing a string. It can define methods, execute some calculations, etc. Less words, more code!</p>
+
+<p>For example, we want a DSL like this:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">survey</span> <span class="s1">'Survey title'</span> <span class="k">do</span>
+  <span class="n">question</span> <span class="s1">'Question 1 title'</span> <span class="k">do</span>
+    <span class="n">answer</span> <span class="s1">'Option 1'</span>
+    <span class="n">answer</span> <span class="s2">"Option 2"</span>
+  <span class="k">end</span>
+
+  <span class="n">question</span> <span class="s1">'Question 2 title'</span> <span class="k">do</span>
+    <span class="n">answer</span> <span class="s1">'Option 3'</span>
+    <span class="n">answer</span> <span class="s1">'Option 4'</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="blocks-and-context">Blocks and context</h2>
+
+<p>Ruby blocks are the heart of DSL in ruby. Blocks can be <code class="language-plaintext highlighter-rouge">call</code>-ed, <code class="language-plaintext highlighter-rouge">instance_eval</code>-ed and <code class="language-plaintext highlighter-rouge">instance_exec</code>-ed. The difference between <code class="language-plaintext highlighter-rouge">call</code>-ing and <code class="language-plaintext highlighter-rouge">instance_eval</code>-ing is the context of block execution:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'ostruct'</span>
+
+<span class="n">proc1</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span> <span class="nb">puts</span> <span class="nb">self</span><span class="p">.</span><span class="nf">name</span> <span class="p">}</span>
+<span class="n">proc2</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span> <span class="o">|</span><span class="n">obj</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">obj</span><span class="p">.</span><span class="nf">name</span> <span class="p">}</span>
+
+<span class="n">object</span> <span class="o">=</span> <span class="no">OpenStruct</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">name: </span><span class="s1">'John'</span><span class="p">)</span>
+<span class="n">object</span><span class="p">.</span><span class="nf">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">proc1</span><span class="p">)</span> <span class="c1"># self in proc1 is object</span>
+<span class="c1"># =&gt; 'John'</span>
+<span class="n">proc2</span><span class="p">.</span><span class="nf">call</span><span class="p">(</span><span class="n">object</span><span class="p">)</span> <span class="c1"># obj in proc2 is object</span>
+<span class="c1"># =&gt; 'John'</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">instance_exec</code> is pretty much like <code class="language-plaintext highlighter-rouge">instance_eval</code> but it also takes extra arguments that becomes accessible in the block.</p>
+
+<h2 id="so">So?</h2>
+
+<p>Here is the draft of the code that simulates a survey:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Survey</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="vi">@title</span> <span class="o">=</span> <span class="n">title</span>
+    <span class="nb">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">question</span><span class="p">(</span><span class="n">question_title</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="c1"># Storing question</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">run</span>
+    <span class="c1"># Printing stored questions</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">def</span> <span class="nf">survey</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+  <span class="no">Survey</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">).</span><span class="nf">run</span>
+<span class="k">end</span>
+
+<span class="n">survey</span> <span class="s1">'Survey title'</span> <span class="k">do</span>
+  <span class="n">question</span> <span class="s1">'My Question1'</span>
+  <span class="n">question</span> <span class="s1">'My Question2'</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>This DSL does not make anything yet, but it’s a good prototype of how it should look. We <code class="language-plaintext highlighter-rouge">instance_eval</code> passed block, so DSL-method <code class="language-plaintext highlighter-rouge">question</code> becomes instance method of <code class="language-plaintext highlighter-rouge">Survey</code> class, and instance of <code class="language-plaintext highlighter-rouge">Survey</code> becomes the context of internal DSL block.</p>
+
+<p>Let’s implement <code class="language-plaintext highlighter-rouge">question</code> and <code class="language-plaintext highlighter-rouge">run</code> methods.</p>
+
+<p>Method question should build instance of <code class="language-plaintext highlighter-rouge">Question</code> class with passed <code class="language-plaintext highlighter-rouge">title</code> and store it.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Survey</span>
+  <span class="c1"># ...</span>
+  <span class="k">def</span> <span class="nf">question</span><span class="p">(</span><span class="n">question_title</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="n">questions</span> <span class="o">&lt;&lt;</span> <span class="no">Question</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="n">question_title</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">questions</span>
+    <span class="c1"># With this code we have pre-defined value</span>
+    <span class="c1"># of `questions` method</span>
+    <span class="vi">@questions</span> <span class="o">||=</span> <span class="p">[]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>And the <code class="language-plaintext highlighter-rouge">Question</code> class:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Question</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="vi">@title</span> <span class="o">=</span> <span class="n">title</span>
+    <span class="nb">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">answer</span><span class="p">(</span><span class="n">answer_text</span><span class="p">)</span>
+    <span class="n">answers</span> <span class="o">&lt;&lt;</span> <span class="n">answer_text</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">answers</span>
+    <span class="vi">@answers</span> <span class="o">||=</span> <span class="p">[]</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Let’s put all together:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">survey</span> <span class="s1">'Survey title'</span> <span class="k">do</span>
+  <span class="c1"># here `self` is an instance of Survey class</span>
+  <span class="c1"># so we can call ANY instance methods of Survey</span>
+  <span class="n">question</span> <span class="s1">'Question 1'</span> <span class="k">do</span>
+    <span class="c1"># here `self` is an instance of Question class</span>
+    <span class="n">answer</span> <span class="s1">'Answer 1'</span>
+    <span class="n">answer</span> <span class="s1">'Answer 2'</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>The only missing method is <code class="language-plaintext highlighter-rouge">Survey#run</code>:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Survey</span>
+  <span class="c1"># ...</span>
+  <span class="k">def</span> <span class="nf">run</span>
+    <span class="nb">puts</span> <span class="vi">@title</span>
+    <span class="n">questions</span><span class="p">.</span><span class="nf">each</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:run</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">Question</span>
+  <span class="c1"># ...</span>
+  <span class="k">def</span> <span class="nf">run</span>
+    <span class="nb">puts</span> <span class="vi">@title</span>
+    <span class="n">answers</span><span class="p">.</span><span class="nf">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">answer</span><span class="p">,</span> <span class="n">index</span><span class="o">|</span>
+      <span class="nb">puts</span> <span class="s2">"</span><span class="si">#{</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">. </span><span class="si">#{</span><span class="n">answer</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">end</span>
+    <span class="n">result_number</span> <span class="o">=</span> <span class="nb">gets</span><span class="p">.</span><span class="nf">chomp</span><span class="p">.</span><span class="nf">to_i</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">answers</span><span class="p">[</span><span class="n">result_number</span><span class="p">]</span>
+    <span class="nb">puts</span> <span class="s2">"Your answer is </span><span class="si">#{</span><span class="n">result</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Full code is available on gist:
+https://gist.github.com/iliabylich/9ea5dd31ee92571f8d59</p>
+
+<p>Or a bit more complex example with tests on github:
+https://github.com/iliabylich/multi-level-dsl</p>
+
+<h2 id="advanced-dsl-example">Advanced DSL example</h2>
+
+<p>DSL that we’ve made before allows us to write some code using shortcuts, but usually we create DSL to define new methods (or change existing ones).</p>
+
+<p>Let’s build something like:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
+  <span class="kp">extend</span> <span class="no">MyModuleWithDSL</span>
+
+  <span class="n">accessor_with_default_value</span> <span class="ss">:full_name</span><span class="p">,</span> <span class="s1">'Fname Lname'</span>
+<span class="k">end</span>
+
+<span class="n">u</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">u</span><span class="p">.</span><span class="nf">full_name</span>
+<span class="c1"># =&gt; 'Fname Lname'</span>
+<span class="n">u</span><span class="p">.</span><span class="nf">full_name</span> <span class="o">=</span> <span class="s1">'Another Name'</span>
+<span class="n">u</span><span class="p">.</span><span class="nf">full_name</span>
+<span class="c1"># =&gt; 'Another Name'</span>
+</code></pre></div></div>
+
+<h2 id="defining-methods-dynamically">Defining methods dynamically</h2>
+
+<p>Here we need <code class="language-plaintext highlighter-rouge">define_method</code> method. It takes two parameters: a method name and a block that becomes body of created method:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
+  <span class="n">define_method</span> <span class="ss">:my_method</span> <span class="k">do</span> <span class="o">|</span><span class="n">arg</span><span class="o">|</span>
+    <span class="nb">puts</span> <span class="s2">"Called with </span><span class="si">#{</span><span class="n">arg</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">User</span><span class="p">.</span><span class="nf">new</span><span class="p">.</span><span class="nf">my_method</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="c1"># =&gt; Called with 123</span>
+</code></pre></div></div>
+
+<p>A huge difference between defining method with <code class="language-plaintext highlighter-rouge">define_method</code> and <code class="language-plaintext highlighter-rouge">def method_name</code> is that <code class="language-plaintext highlighter-rouge">define_method</code> does not lose current context:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">local_var</span> <span class="o">=</span> <span class="s1">'test'</span>
+<span class="n">define_method</span> <span class="ss">:method1</span> <span class="k">do</span>
+  <span class="nb">puts</span> <span class="n">local_var</span> <span class="c1"># Works here</span>
+<span class="k">end</span>
+<span class="n">method1</span>
+<span class="c1"># =&gt; 'test'</span>
+
+<span class="k">def</span> <span class="nf">method2</span>
+  <span class="nb">puts</span> <span class="n">local_var</span> <span class="c1"># Does not work</span>
+<span class="k">end</span>
+<span class="n">method2</span>
+<span class="c1"># =&gt; NameError: undefined local variable or method `local_var' for main:Object</span>
+</code></pre></div></div>
+
+<p>This allows us to pass any variables to DSL and use them in dynamically defined methods.</p>
+
+<h2 id="where-is-the-code">Where is the code?</h2>
+
+<p>Here is it:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">ModuleWithDSL</span>
+  <span class="k">def</span> <span class="nf">accessor_with_default_value</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">default_value</span><span class="p">)</span>
+    <span class="c1"># Here we need to build something like</span>
+    <span class="c1"># def full_name</span>
+    <span class="c1">#  @full_name || 'Fname Lname'</span>
+    <span class="c1"># end</span>
+    <span class="c1"># attr_writer :full_name</span>
+    <span class="n">define_method</span> <span class="n">attr_name</span> <span class="k">do</span>
+      <span class="nb">instance_variable_get</span><span class="p">(</span><span class="s2">"@</span><span class="si">#{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="o">||</span> <span class="n">default_value</span>
+    <span class="k">end</span>
+    <span class="nb">attr_writer</span> <span class="n">attr_name</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">User</span>
+  <span class="kp">extend</span> <span class="no">ModuleWithDSL</span>
+  <span class="c1"># so all methods from ModuleWithDSL</span>
+  <span class="c1"># become class-methods of User</span>
+  <span class="n">accessor_with_default_value</span> <span class="ss">:full_name</span><span class="p">,</span> <span class="s1">'default'</span>
+<span class="k">end</span>
+
+<span class="n">u</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">u</span><span class="p">.</span><span class="nf">full_name</span>
+<span class="c1"># =&gt; 'default'</span>
+<span class="n">u</span><span class="p">.</span><span class="nf">full_name</span> <span class="o">=</span> <span class="s1">'Full Name'</span>
+<span class="n">u</span><span class="p">.</span><span class="nf">full_name</span>
+<span class="c1"># =&gt; 'Full Name'</span>
+</code></pre></div></div>
+
+<h2 id="whats-wrong-in-the-previous-example">What’s wrong in the previous example?</h2>
+
+<p>What I personally don’t like here is that there is no way to override defined method using <code class="language-plaintext highlighter-rouge">super</code> (I don’t like <code class="language-plaintext highlighter-rouge">alias_method_chain</code>, we really can make it work using super method). Why super does not work? Because the method is defined directly on the class:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">instance_method</span><span class="p">(</span><span class="ss">:full_name</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;UnboundMethod: User#full_name&gt;</span>
+</code></pre></div></div>
+
+<p>The following example is quite complex, but still:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">ModuleWithDSL</span>
+  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">extended</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">const_set</span><span class="p">(</span><span class="ss">:AccessorsWithDefaultValues</span><span class="p">,</span> <span class="no">Module</span><span class="p">.</span><span class="nf">new</span><span class="p">)</span>
+    <span class="n">base</span><span class="p">.</span><span class="nf">send</span><span class="p">(</span><span class="ss">:include</span><span class="p">,</span> <span class="n">mod</span><span class="p">)</span>
+    <span class="k">super</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">accessor_with_default_value</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="n">default_value</span><span class="p">)</span>
+    <span class="nb">const_get</span><span class="p">(</span><span class="ss">:AccessorsWithDefaultValues</span><span class="p">).</span><span class="nf">module_eval</span> <span class="k">do</span>
+      <span class="n">define_method</span> <span class="n">attr_name</span> <span class="k">do</span>
+        <span class="nb">instance_variable_get</span><span class="p">(</span><span class="s2">"@</span><span class="si">#{</span><span class="n">attr_name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="o">||</span> <span class="n">default_value</span>
+      <span class="k">end</span>
+      <span class="nb">attr_writer</span> <span class="n">attr_name</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>Here when this module <code class="language-plaintext highlighter-rouge">extend</code>-s some class/module, we define a sub-module called <code class="language-plaintext highlighter-rouge">AccessorsWithDefaultValues</code> in the class using <code class="language-plaintext highlighter-rouge">extended</code> hook, include it in the class and define ALL dynamic methods on this module. What does it give us?</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">instance_method</span><span class="p">(</span><span class="ss">:full_name</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;UnboundMethod: User(User::AccessorsWithDefaultValues)#full_name&gt;</span>
+<span class="no">User</span><span class="p">.</span><span class="nf">ancestors</span>
+<span class="c1"># =&gt; [User, User::AccessorsWithDefaultValues, ...]</span>
+</code></pre></div></div>
+
+<p>So now we can override our <code class="language-plaintext highlighter-rouge">accessor</code>-s on <code class="language-plaintext highlighter-rouge">User</code>:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
+  <span class="kp">extend</span> <span class="no">ModuleWithDSL</span>
+  <span class="n">accessor_with_default_value</span> <span class="ss">:counter</span><span class="p">,</span> <span class="mi">123</span>
+
+  <span class="k">def</span> <span class="nf">counter</span>
+    <span class="k">super</span> <span class="o">+</span> <span class="mi">10</span> <span class="c1"># default behavior + 10</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">new</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">counter</span>
+<span class="c1"># =&gt; 133 (123 + 10 = default + custom)</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">counter</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">user</span><span class="p">.</span><span class="nf">counter</span>
+<span class="c1"># =&gt; 25</span>
+</code></pre></div></div>
+
+<p>ActiveRecord does the same job, you can override any column-method:</p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">instance_method</span><span class="p">(</span><span class="ss">:email</span><span class="p">)</span>
+<span class="c1"># =&gt; #&lt;UnboundMethod: User(#&lt;#&lt;Class:0x00000008c44ac0&gt;:0x00000008c44b38&gt;)#email(__temp__56d61696c6)&gt;</span>
+<span class="c1"># This module is anonymous, but it doesn't matter, it wasn't defined _directly_ on User:</span>
+
+<span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="c1"># If you have column `email`</span>
+  <span class="k">def</span> <span class="nf">email</span>
+    <span class="k">super</span><span class="p">.</span><span class="nf">upcase</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<p>A lot of developers build a DSL in their libraries to simplify the code, and this allows us to write our code in a more declarative fashion. But they forgot (quite often) about allowing us to override the code generated with this DSL. When the library doesn’t support overriding generated code, use <code class="language-plaintext highlighter-rouge">alias_method</code>:</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
+  <span class="kp">include</span> <span class="no">SomeModule</span>
+
+  <span class="c1"># here we call some DSL</span>
+  <span class="c1"># and, let's say, it generates method 'run'</span>
+  <span class="c1"># and we need to add before hooks</span>
+  <span class="c1"># to this method</span>
+  <span class="kp">alias_method</span> <span class="ss">:original_run</span><span class="p">,</span> <span class="ss">:run</span>
+  <span class="k">def</span> <span class="nf">run</span>
+    <span class="c1"># before hook goes here..</span>
+    <span class="n">original_run</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>DSL is a tool for fast prototyping, here are some advantages:</p>
+<ol>
+  <li>It makes your code look nicer (the code that calls DSL)</li>
+  <li>Amazing level of abstraction, you can focus exactly on your logic and forget about any code-related stuff.</li>
+</ol>
+
+<p>And disadvantages:</p>
+<ol>
+  <li>Your code becomes slow (usually just a little bit, but sometimes it can be critical)</li>
+  <li>The effort to maintain your DSL grows with its complexity. Yes, it’s very easy to make DSL implementation look ugly</li>
+</ol>
+
+<p>I really love to use DSL from third-party libraries (AR, RSpec, Capybara, FactoryGirl). But as I said before, I don’t write it in enterprise and usually I ask people to avoid it.</p>
+
+<p>But if you write DSL, please wrap generated stuff into module to let developers override your code and be happy, this is what DSL is made for :)</p>
+
+</div>
+
+
+  <div class="comments">
+    <div id="disqus_thread"></div>
+    <script>
+        var disqus_config = function () {
+          this.page.url = document.location.href;  // Replace PAGE_URL with your page's canonical URL variable
+          this.page.identifier = document.location.pathname; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        (function() { // DON'T EDIT BELOW THIS LINE
+          var d = document, s = d.createElement('script');
+          s.src = 'https://ibylich-myblog.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2021/12/27/writing-bindings-upside-down.html">
+            Writing bindings upside down
+            <small>27 Dec 2021</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/11/22/lib-ruby-parser.html">
+            lib-ruby-parser
+            <small>22 Nov 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/01/25/evaluating-ruby-in-ruby.html">
+            Evaluating Ruby in Ruby
+            <small>25 Jan 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      HandlerSocket + Ruby &middot; Ilya Bylich
+    
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/poole.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/apple-touch-icon-144-precomposed.png">
+                                 <link rel="shortcut icon" href="/public/favicon.ico">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    <div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      <h1>
+        <a href="/">
+          Ilya Bylich
+        </a>
+      </h1>
+      <p class="lead">I'm a Ruby/Rust developer, sometimes I write long technical stories</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item" href="/">Home</a>
+
+      
+
+      <a class="sidebar-nav-item" href="https://github.com/iliabylich">GitHub</a>
+      <a class="sidebar-nav-item" href="https://twitter.com/IlyaBylich">Twitter</a>
+      <a class="sidebar-nav-item" href="mailto:ibylich@gmail.com">Email me</a>
+
+      <span class="sidebar-nav-item">
+  <label for="current-theme">Theme</label>
+  <select id="current-theme">
+    <option>08</option>
+    <option>09</option>
+    <option>0a</option>
+    <option>0b</option>
+    <option>0c</option>
+    <option>0d</option>
+    <option>0f</option>
+  </select>
+
+  <script type="text/javascript">
+    class Theme {
+      static DEFAULT = "0b";
+
+      static getCurrent() {
+        return localStorage.getItem("current-theme") || Theme.DEFAULT;
+      }
+
+      static setCurrent(theme) {
+        localStorage.setItem("current-theme", theme);
+        document.body.className = `theme-base-${theme}`;
+      }
+    }
+
+    const themeSelector = document.getElementById("current-theme");
+    Theme.setCurrent(Theme.getCurrent());
+    themeSelector.value = Theme.getCurrent();
+
+    themeSelector.onchange = (e) => {
+      const theme = e.target.value;
+      Theme.setCurrent(theme);
+    }
+  </script>
+</span>
+
+    </nav>
+
+    <p>&copy; 2022. All rights reserved.</p>
+  </div>
+</div>
+
+
+    <div class="content container">
+      <div class="post">
+  <h1 class="post-title">HandlerSocket + Ruby</h1>
+  <span class="post-date">09 Nov 2015</span>
+
+  <div id="table-of-contents">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h1"><a href="#what-is-handlersocket-hs">What is HandlerSocket (HS)</a></li>
+<li class="toc-entry toc-h1"><a href="#installation">Installation</a></li>
+<li class="toc-entry toc-h1"><a href="#configuration">Configuration</a></li>
+<li class="toc-entry toc-h1"><a href="#simple-queries">Simple queries</a></li>
+<li class="toc-entry toc-h1"><a href="#use-cases">Use cases</a></li>
+<li class="toc-entry toc-h1"><a href="#ruby-adapter">Ruby adapter</a></li>
+<li class="toc-entry toc-h1"><a href="#adapter-api">Adapter API</a></li>
+<li class="toc-entry toc-h1"><a href="#benchmarks">Benchmarks</a></li>
+<li class="toc-entry toc-h1"><a href="#future-plans">Future plans</a></li>
+<li class="toc-entry toc-h1"><a href="#conclusion">Conclusion</a></li>
+<li class="toc-entry toc-h1"><a href="#links">Links</a></li>
+</ul>
+  </div>
+
+  <h1 id="what-is-handlersocket-hs">What is HandlerSocket (HS)</h1>
+
+<ul>
+  <li>a plugin for MySQL</li>
+  <li>which allows you to read/write to MySQL</li>
+  <li>and gives you a separate connection to MySQL</li>
+  <li>and doesn’t allow you to run SQL queries</li>
+  <li>but allows to run simple CRUD queries <em>only</em> using indexes</li>
+</ul>
+
+<p>HandlerSocket query language is very simple (I’d even say it’s primitive), but it’s much faster than MySQL’s one. Though, of course, there are some limitations. Interested?</p>
+
+<h1 id="installation">Installation</h1>
+
+<p>You already have it if you are using Percona Server or MariaDB. If not, install it from <a href="https://github.com/DeNA/HandlerSocket-Plugin-for-MySQL">the source</a>.</p>
+
+<p>To activate the plugin, run:</p>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">INSTALL</span> <span class="n">PLUGIN</span> <span class="n">handlersocket</span> <span class="n">SONAME</span> <span class="s1">'handlersocket.so'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<h1 id="configuration">Configuration</h1>
+
+<p>My configuration is the following:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># [mysqld] section
+# the port number to bind to for read requests
+loose_handlersocket_port = 9998
+# the port number to bind to for write requests
+loose_handlersocket_port_wr = 9999
+# the number of worker threads for read requests
+loose_handlersocket_threads = 16
+# the number of worker threads for write requests
+loose_handlersocket_threads_wr = 1
+open_files_limit = 65535
+</code></pre></div></div>
+
+<p>You can find a detailed documentation of all available configuration options <a href="https://github.com/ahiguti/HandlerSocket-Plugin-for-MySQL/blob/master/docs-en/configuration-options.en.txt">here</a></p>
+
+<p>Restart your MySQL server and run:</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">show</span> <span class="n">processlist</span><span class="err">\</span><span class="k">G</span>
+</code></pre></div></div>
+
+<p>You should see a lot of rows like:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>           Id: 1
+         User: system user
+         Host: connecting host
+           db: NULL
+      Command: Connect
+         Time: NULL
+        State: handlersocket: mode=rd, 0 conns, 0 active
+         Info: NULL
+    Rows_sent: 0
+Rows_examined: 0
+</code></pre></div></div>
+<p>which means that HS daemon is up and running.</p>
+
+<h1 id="simple-queries">Simple queries</h1>
+
+<p>You can test it locally using <code class="language-plaintext highlighter-rouge">telnet</code>:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>telnet 0.0.0.0 9999
+Trying 0.0.0.0...
+Connected to 0.0.0.0.
+Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
+</code></pre></div></div>
+
+<p>Type <code class="language-plaintext highlighter-rouge">P -&gt; 0 -&gt; your_database -&gt; your_table -&gt; PRIMARY -&gt; id,some_column</code> (where <code class="language-plaintext highlighter-rouge">-&gt;</code> is Tab). And press Enter. It should return <code class="language-plaintext highlighter-rouge">0 -&gt; 1</code>.</p>
+
+<p>This protocol looks ugly, but it may save you a lot of network usage. It’s very compact, and parsing doesn’t require any CPU usage.</p>
+
+<h1 id="use-cases">Use cases</h1>
+
+<p>If you don’t have too much queries per second, probably you don’t need HS. It doesn’t optimize queries, but you may save some time on request parsing + some network. You may find it interesting if you have a lot of simple queries, like simple <code class="language-plaintext highlighter-rouge">SELECT</code>’s by primary key.</p>
+
+<h1 id="ruby-adapter">Ruby adapter</h1>
+
+<p>Here goes my Ruby for HandlerSocket protocol. You can find it <a href="https://github.com/iliabylich/handlersocket-ruby">here</a>.</p>
+
+<p>It has two implementations inside:</p>
+<ul>
+  <li><a href="https://github.com/iliabylich/handlersocket-ruby/blob/master/lib/handlersocket/pure.rb">Ruby-based</a></li>
+  <li><a href="https://github.com/iliabylich/handlersocket-ruby/blob/master/ext/handlersocket_ext/handlersocket_ext.c">C-based</a></li>
+</ul>
+
+<p>Ruby implementation is very slow, it’s there mainly to explain the protocol. C-based is quite fast.</p>
+
+<h1 id="adapter-api">Adapter API</h1>
+
+<p>To require a specific implementation, run</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># For slow pure Ruby implementation</span>
+<span class="nb">require</span> <span class="s1">'handlersocket/pure'</span>
+<span class="c1"># For fast C implementation</span>
+<span class="nb">require</span> <span class="s1">'handlersocket/ext'</span>
+</code></pre></div></div>
+
+<p>To create a connection, run</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">hs</span> <span class="o">=</span> <span class="no">Handlersocket</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="s1">'0.0.0.0'</span><span class="p">,</span> <span class="mi">9999</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Both pure Ruby and C implementations have the same API, so the <code class="language-plaintext highlighter-rouge">require</code> place is the only difference.</p>
+
+<p>To open an index, run</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">hs</span><span class="p">.</span><span class="nf">open_index</span><span class="p">(</span><span class="s1">'0'</span><span class="p">,</span> <span class="s1">'hs_test'</span><span class="p">,</span> <span class="s1">'users'</span><span class="p">,</span> <span class="s1">'PRIMARY'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'id'</span><span class="p">,</span> <span class="s1">'email'</span><span class="p">])</span>
+</code></pre></div></div>
+
+<p>To read the data from that index, run</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">hs</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="s1">'0'</span><span class="p">,</span> <span class="s1">'='</span><span class="p">,</span> <span class="p">[</span><span class="s1">'12'</span><span class="p">],</span> <span class="p">[</span><span class="s1">'100]'</span><span class="p">])</span>
+<span class="c1"># Which is equal to</span>
+<span class="c1"># SELECT id, name FROM hs_test.users WHERE id = 12 LIMIT 100</span>
+</code></pre></div></div>
+
+<p>Other commands like auth/insert/update/delete are not there yet. But it’s not that difficult to add them, check out <a href="https://github.com/iliabylich/handlersocket-ruby/blob/master/lib/handlersocket.rb#L37">this file</a>, implementation of other methods also takes ~2 lines of code.</p>
+
+<h1 id="benchmarks">Benchmarks</h1>
+
+<p>The most interesting part. To run benchmarks locally, clone the gem repository on <a href="https://github.com/iliabylich/handlersocket-ruby">github</a> and run <code class="language-plaintext highlighter-rouge">rake benchmark</code>. It compares Mysql2 gem to Ruby-based and C-based implementations. Here are my results:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Calculating -------------------------------------
+             pure HS     2.000  i/100ms
+              ext HS     3.149k i/100ms
+              mysql2   669.000  i/100ms
+-------------------------------------------------
+             pure HS     49.979  (± 2.0%) i/s -    250.000
+              ext HS    110.369M (±15.7%) i/s -    467.793M
+              mysql2      5.218M (±16.3%) i/s -     23.869M
+
+Comparison:
+              ext HS: 110369437.2 i/s
+              mysql2:  5218120.6 i/s - 21.15x slower
+             pure HS:       50.0 i/s - 2208314.91x slower
+</code></pre></div></div>
+
+<p>I’ve run these benchmarks on 4 cores server with 4GB ram on Percona server 5.6. On both small and huge (30 millions records) datasets, with enabled and disabled query cache, with a small and a big value of <code class="language-plaintext highlighter-rouge">innodb_buffer_pool_size</code>.</p>
+
+<p>There’s a 20-30x performance difference between Mysql2 and a C-based version of HandlerSocket because:</p>
+<ul>
+  <li>almost no time is taken for request parsing</li>
+  <li>mysql2 is just a way more complex than my gem</li>
+</ul>
+
+<p>And I was really disappointed by performance of Ruby-based implementation. It’s 2 millions times slower than C-based. Why? There’s a magical number <code class="language-plaintext highlighter-rouge">50.0 i/s</code>, but I cannot find what does it mean. If you have an answer, please, ping me on Twitter.</p>
+
+<h1 id="future-plans">Future plans</h1>
+
+<p>The gem <em>mostly</em> works, but there are some points that should be refined. Currently when network goes down there’s no way to reconnect because HS protocol is stateful. There’s no history tracking in HS objects, so if you open an index and then reconnect, you lose your opened index. I’m not sure if it should be implemented on a low level of abstraction in HS gem, probably it’s better to make a separated high-level gem for AR that does this job.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>Once again, HandlerSocket saves your time on query parsing, buliding a query plan, it’s more compact, but is very limited. If you don’t have too many requests, don’t even think about using it.</p>
+
+<h1 id="links">Links</h1>
+
+<p><a href="https://github.com/DeNA/HandlerSocket-Plugin-for-MySQL/blob/master/docs-en/protocol.en.txt">HandlerSocket protocol</a></p>
+
+<p><a href="https://github.com/iliabylich/handlersocket-ruby">Ruby gem for HandlerSocket</a></p>
+
+<p><a href="https://github.com/ahiguti/HandlerSocket-Plugin-for-MySQL/blob/master/docs-en/configuration-options.en.txt">HandlerSocket configuration</a></p>
+
+</div>
+
+
+  <div class="comments">
+    <div id="disqus_thread"></div>
+    <script>
+        var disqus_config = function () {
+          this.page.url = document.location.href;  // Replace PAGE_URL with your page's canonical URL variable
+          this.page.identifier = document.location.pathname; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        (function() { // DON'T EDIT BELOW THIS LINE
+          var d = document, s = d.createElement('script');
+          s.src = 'https://ibylich-myblog.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2021/12/27/writing-bindings-upside-down.html">
+            Writing bindings upside down
+            <small>27 Dec 2021</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/11/22/lib-ruby-parser.html">
+            lib-ruby-parser
+            <small>22 Nov 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/01/25/evaluating-ruby-in-ruby.html">
+            Evaluating Ruby in Ruby
+            <small>25 Jan 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+    </div>
+  </body>
+</html>
