@@ -6,7 +6,7 @@ categories: ruby gem exceptions
 ---
 ExceptionManager is a gem for getting extra information from your exception.
 
-Source code: https://github.com/iliabylich/exception_manager
+Source code: [https://github.com/iliabylich/exception_manager](https://github.com/iliabylich/exception_manager)
 
 With this gem every time when you get an exception, it's possible to grab `subject` of exception (the instance of class where `raise` happened), `locals` - local variables, `subject_instance_variables` and `subject_class_variables`
 
@@ -38,7 +38,8 @@ end
 ```
 
 This code snippet prints:
-```
+
+```ruby
 Subject: #<TestClassThatRaisesException:0x00000001512268>
 Locals: {:args=>[1, 2, 3]}
 Instance variables: {:@instance_variable=>:instance_value}
@@ -61,6 +62,7 @@ Summary: {
 So, you can get local variables of you exception, instance where it happened and the whole context.
 
 If you have `pry` installed, you can inject pry session into stored binding:
+
 ```ruby
 begin
   TestClassThatRaisesException.new.test_error(1, 2, 3)
@@ -91,6 +93,7 @@ In old versions of ruby there was a `Kernel` method called `set_trace_func` whic
 Ruby 2.0.0 (and newer) has a class called `TracePoint` which allows to subscribe to any specific method call (`raise` in our case).
 
 So, simplified version of the main code looks like:
+
 ```ruby
 class Exception
   attr_accessor :_binding
@@ -106,6 +109,7 @@ And then we can get everything through this binding
 # Compatibility
 
 ExceptionManager is compatible (and tested on travis) with the following versions of ruby
+
 + 2.0.0
 + 2.1.0
 + 2.2.0
@@ -114,5 +118,4 @@ ExceptionManager is compatible (and tested on travis) with the following version
 
 # Questions
 
-If you have any questions/suggestions feel free to create issues on GitHub.
-https://github.com/iliabylich/exception_manager/issues
+If you have any questions/suggestions feel free [to create an issue on GitHub](https://github.com/iliabylich/exception_manager/issues).

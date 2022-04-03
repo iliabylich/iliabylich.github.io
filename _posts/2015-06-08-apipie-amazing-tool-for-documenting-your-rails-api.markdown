@@ -4,7 +4,7 @@ title:  "Apipie - amazing tool for documenting your Rails API"
 date:   2015-06-08 00:00:00 +0300
 categories: ruby apipie documenting API
 ---
-This article is about for Apipie gem (https://github.com/Apipie/apipie-rails) which provides a DSL for documenting your API. I will try to cover features that I personally use on my project.
+This article is about [Apipie gem](https://github.com/Apipie/apipie-rails) which provides a DSL for documenting your API. I will try to cover features that I personally use on my project.
 
 Comparing to other tools for generating API documentation (yardoc, sdoc) I would say that the main thing that you gain with Apipie is that your documentation is a real ruby code, so you can write computations, concerns etc.
 
@@ -29,9 +29,6 @@ class UsersController < ApplicationController
 end
 ```
 
-And here how it looks generated:
-http://iliabylich.github.io/apipie-demo/doc/apidoc/public/users/create.html
-
 So, you invoke a DSL from Apipie before your action method and it automatically comes to generated docs.
 
 # Features
@@ -39,6 +36,7 @@ So, you invoke a DSL from Apipie before your action method and it automatically 
 ## Gathering information from your routes
 
 In the example above we've passed an http verb and a path of this action. We don't have to do it! Instead, we can simply write:
+
 ``` ruby
 api! 'Some description'
 # other docs here...
@@ -47,6 +45,7 @@ end
 ```
 
 It automatically takes information from your routes that look like
+
 ``` ruby
 resources :users, only: [:create]
 ```
@@ -71,6 +70,7 @@ Apipie has also:
 ## Parameters validation
 
 We have already typed parameters, so why do we ignore it and write custom `before_action`-s for validating parameters manually? This feature is enabled by default, but if you don't think that it's a good idea to validate your parameters through documenting tool, just pass
+
 ``` ruby
 config.validate = false
 ```
@@ -83,18 +83,18 @@ I would say that it doesn't work as people usually expect.
 
 `Apipie::DSL::Concern` allows you to document actions that are defined in concerns.
 
-A quick example: https://github.com/Apipie/apipie-rails#concerns
+[A quick example](https://github.com/Apipie/apipie-rails#concerns)
 
 Usually people think that it allows you to extract documentation from your controller in order to not mix code with documentation and application logic. And, to be honest, I think so too. The workaround for doing this goes below in the sections 'Extracting docs to mixins'
 
 ## Specs recording
 
-Are you tired of writing examples manually? Me too :) With Apipie you can record request/response pairs to separated yaml file and display them in generated html. Pass `:show_in_doc` to metadata of your RSpec example and enjoy. Apipie embeds a module for recording requests to `    ActionController::TestCase::Behavior` which is the core of all requests specs for RSpec and Minitest (yes, both of them delegate performing requests internally to `    ActionController::TestCase::Behavior` - https://github.com/rspec/rspec-rails/blob/master/lib/rspec/rails/example/controller_example_group.rb#L12).
+Are you tired of writing examples manually? Me too :) With Apipie you can record request/response pairs to separated yaml file and display them in generated html. Pass `:show_in_doc` to metadata of your RSpec example and enjoy. Apipie embeds a module for recording requests to `    ActionController::TestCase::Behavior` which is the core of all requests specs for RSpec and Minitest (yes, both of them delegate performing requests internally to `    ActionController::TestCase::Behavior` - [source](https://github.com/rspec/rspec-rails/blob/master/lib/rspec/rails/example/controller_example_group.rb#L12)).
 
 ## Other features
 There is a plenty of other things in Apipie that are very cool, by I didn't have a chance to use it yet.
 
-1. Localization. Currently it supports English, Russian, Chinese and Brazilian. If you want to add support for your language, use this as an example - https://github.com/Apipie/apipie-rails/blob/master/config/locales/en.yml
+1. Localization. Currently it supports English, Russian, Chinese and Brazilian. If you want to add support for your language, use this as an example - [source](https://github.com/Apipie/apipie-rails/blob/master/config/locales/en.yml)
 2. Disqus integration. This is extremely useful when you have a decentralized team. If you have any questions - just leave a comment and wait for response! No need to define any models for storing users/comments/relations, everything is in the cloud.
 3. Custom markup processors. Not sure that anyone can need it, default markup processor looks very stable.
 
@@ -222,7 +222,7 @@ UsersDoc.superclass == UsersController
 
 Refresh the page with documentation and see that it finally works!
 Here is a gist with a full code that wraps ugly code and blank methods:
-https://gist.github.com/iliabylich/d140f3a8fcfbcafc41b8
+[full gist](https://gist.github.com/iliabylich/c8032b193405673062e7)
 
 ## The power of ruby-based doc
 
@@ -329,15 +329,16 @@ So, we just store passed block and invoke it. This example is much simpler then 
 
 # Demo
 
-https://github.com/iliabylich/apipie-demo
+[URL](https://github.com/iliabylich/apipie-demo)
 
 You can click by statically generated docs (thanks to github pages):
-+ http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v1.html
-+ http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v2.html
-+ http://iliabylich.github.io/apipie-demo/doc/apidoc/public.html
+
++ [Private::V1](http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v1.html)
++ [Private::V2](http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v2.html)
++ [Public](http://iliabylich.github.io/apipie-demo/doc/apidoc/public.html)
 
 # Conclusion
 
 Apipie is an amazing library and its most significant advantage is that you document ruby using ruby (being a ruby developer), which gives you ability to define custom behaviors and scenarios. I can't even imagine myself writing API docs using yardoc (however, I use it to document plain ruby classes).
 
-If you have any bugs (or ideas to implement), please, create an issue on  GitHub (https://github.com/Apipie/apipie-rails/issues), let's make it even better!
+If you have any bugs (or ideas to implement), please, [create an issue on GitHub](https://github.com/Apipie/apipie-rails/issues), let's make it even better!

@@ -16,27 +16,35 @@ Basically, it allows you to work with your database in the following ways:
 ## SQL endpoint
 
 It gives an ability to run queries like
+
 ```
 GET http://host:port/sql/:database/:query
 ```
+
 For example
+
 ```
 GET http://localhost:8080/sql/testdb/SELECT+1
 ```
+
 is a synonym of SQL's `SELECT 1`.
 
 ## CRUD endpoint
 
 Interface is:
+
 ```
 GET http://host:port/crud/:database/:table/:id
 ```
+
 And
 
 ```
 GET http://localhost:8080/crud/test_db/test_table/101'
 ```
+
 produces:
+
 ```
 SELECT * FROM `test_db`.`test_table` WHERE `test_table`.`id` = 101
 ```
@@ -228,7 +236,8 @@ First of all this is an HTTP API, so it's available for both server-side and cli
 
 ## Playing with CRUD endpoint
 
-If we need to work with MySQL over HTTP API (let's imagine for a second that this is the only available way to fetch the data) we need something like ActiveResource (https://github.com/rails/activeresource).
+If we need to work with MySQL over HTTP API (let's imagine for a second that this is the only available way to fetch the data)
+we need something like [ActiveResource](https://github.com/rails/activeresource).
 
 ActiveResourse is a gem for building ActiveRecord-like classes that actually fetch data over HTTP API.
 
@@ -263,10 +272,10 @@ User.create(first_name: 'John', last_name: 'Watson)
 By default ActiveResource sends POST request to create a new record. However MySQL HTTP API has some other standards and it uses PUT for creating new record. Moreover, its required to specify primary key (`id`) of the record you want to insert (even if `id` has autoincrement)
 
 ActiveResource doesn't allow us to specify HTTP verbs for its API calls
-(https://github.com/rails/activeresource/blob/master/lib/active_resource/base.rb#L1435)
+[source](https://github.com/rails/activeresource/blob/master/lib/active_resource/base.rb#L1435)
 Without this we can't even create a single record in the database!
 
-Let's check for alternatives. Her (https://github.com/remiprev/her) is a popular (according to stars on GitHub it's even more popular then ActiveResource) alternative with a nice syntax sugar. Here is an example:
+Let's check for alternatives. [`Her`](https://github.com/remiprev/her) is a popular (according to stars on GitHub it's even more popular then ActiveResource) alternative with a nice syntax sugar. Here is an example:
 
 ```
 $ gem install her

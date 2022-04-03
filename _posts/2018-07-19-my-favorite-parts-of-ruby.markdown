@@ -505,7 +505,7 @@ proc { |a, *| }
 
 MRI generates it for you and then hides it.
 
-If you are interested in implementation details take a look at https://github.com/ruby/ruby/blob/trunk/parse.y#L3007-L3015 - there's a special field `excessed_comma` that works as a flag.
+If you are interested in implementation details take a look at [parse.y](https://github.com/ruby/ruby/blob/trunk/parse.y#L3007-L3015) - there's a special field `excessed_comma` that works as a flag.
 
 Also, you can clearly see in the Ripper's output:
 
