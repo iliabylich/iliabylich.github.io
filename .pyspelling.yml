@@ -2,7 +2,6 @@ spellchecker: hunspell
 
 matrix:
 
-
 - name: posts
   sources:
   - _posts/*.markdown

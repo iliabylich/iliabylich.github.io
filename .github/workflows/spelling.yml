@@ -1,0 +1,30 @@
+name: spelling
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  spelling:
+    name: check spelling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: install hunspell
+        run: |
+          sudo apt-get update
+          sudo apt-get install hunspell hunspell-en-us
+
+      - name: install pyspelling
+        run: pip install pyspelling pymdown-extensions
+
+      - name: run spellchecking
+        run: pyspelling
