@@ -2,16 +2,17 @@
 layout: post
 title:  "Apipie - amazing tool for documenting your Rails API"
 date:   2015-06-08 00:00:00 +0300
-categories: ruby apipie documenting API
+categories: Ruby Apipie documenting API
 toc: true
 comments: true
 ---
 This article is about [Apipie gem](https://github.com/Apipie/apipie-rails) which provides a DSL for documenting your API. I will try to cover features that I personally use on my project.
 
-Comparing to other tools for generating API documentation (yardoc, sdoc) I would say that the main thing that you gain with Apipie is that your documentation is a real ruby code, so you can write computations, concerns etc.
+Comparing to other tools for generating API documentation (`yardoc`, `sdoc`) I would say that the main thing that you gain with Apipie is that your documentation is a real ruby code, so you can write computations, concerns etc.
 
 Here is a simple example of how it looks in code:
-``` ruby
+
+```ruby
 class UsersController < ApplicationController
 
   resource_description do
@@ -37,9 +38,9 @@ So, you invoke a DSL from Apipie before your action method and it automatically 
 
 ## Gathering information from your routes
 
-In the example above we've passed an http verb and a path of this action. We don't have to do it! Instead, we can simply write:
+In the example above we have passed an HTTP verb and a path of this action. We don't have to do it! Instead, we can simply write:
 
-``` ruby
+```ruby
 api! 'Some description'
 # other docs here...
 def create
@@ -48,7 +49,7 @@ end
 
 It automatically takes information from your routes that look like
 
-``` ruby
+```ruby
 resources :users, only: [:create]
 ```
 
@@ -61,19 +62,19 @@ You can pass versions of your API that include this endpoint on
 ## Parameters typing
 
 As you can see, in the first example we had 3 types:
-1. Hash
-2. Array
-3. Fixnum
+1. `Hash`
+2. `Array`
+3. `Fixnum`
 
 Apipie has also:
-4. Enum
-5. Regexp
+4. `Enum`
+5. `Regexp`
 
 ## Parameters validation
 
 We have already typed parameters, so why do we ignore it and write custom `before_action`-s for validating parameters manually? This feature is enabled by default, but if you don't think that it's a good idea to validate your parameters through documenting tool, just pass
 
-``` ruby
+```ruby
 config.validate = false
 ```
 
@@ -81,7 +82,7 @@ The creator of the gem told me that 'People either love it or don't understand w
 
 ## Concerns
 
-I would say that it doesn't work as people usually expect.
+I would say that it does not work as people usually expect.
 
 `Apipie::DSL::Concern` allows you to document actions that are defined in concerns.
 
@@ -91,10 +92,10 @@ Usually people think that it allows you to extract documentation from your contr
 
 ## Specs recording
 
-Are you tired of writing examples manually? Me too :) With Apipie you can record request/response pairs to separated yaml file and display them in generated html. Pass `:show_in_doc` to metadata of your RSpec example and enjoy. Apipie embeds a module for recording requests to `    ActionController::TestCase::Behavior` which is the core of all requests specs for RSpec and Minitest (yes, both of them delegate performing requests internally to `    ActionController::TestCase::Behavior` - [source](https://github.com/rspec/rspec-rails/blob/master/lib/rspec/rails/example/controller_example_group.rb#L12)).
+Are you tired of writing examples manually? Me too :) With Apipie you can record request/response pairs to separated YAML file and display them in generated HTML. Pass `:show_in_doc` to metadata of your RSpec example and enjoy. Apipie embeds a module for recording requests to `    ActionController::TestCase::Behavior` which is the core of all requests specs for RSpec and Minitest (yes, both of them delegate performing requests internally to `ActionController::TestCase::Behavior` - [source](https://github.com/rspec/rspec-rails/blob/master/lib/rspec/rails/example/controller_example_group.rb#L12)).
 
 ## Other features
-There is a plenty of other things in Apipie that are very cool, by I didn't have a chance to use it yet.
+There is a plenty of other things in Apipie that are very cool, by I did not have a chance to use it yet.
 
 1. Localization. Currently it supports English, Russian, Chinese and Brazilian. If you want to add support for your language, use this as an example - [source](https://github.com/Apipie/apipie-rails/blob/master/config/locales/en.yml)
 2. Disqus integration. This is extremely useful when you have a decentralized team. If you have any questions - just leave a comment and wait for response! No need to define any models for storing users/comments/relations, everything is in the cloud.
@@ -106,9 +107,9 @@ Some of these items can be difficult to explain, if you have any questions after
 
 ## Extracting docs to mixins
 
-This is the main question I've got after reading official readme. I don't want to mix documentation and application logic. First of all we need to understand how exactly Apipie builds mapping between action names and compiled DSL. Even without reading source code the only guess that we may have is `method_added` hook. Every time when you define a method (on instance or on class, it doesn't matter), Ruby automatically fires `method_added` method on your class.
+This is the main question I have got after reading official README. I don't want to mix documentation and application logic. First of all we need to understand how exactly Apipie builds mapping between action names and compiled DSL. Even without reading source code the only guess that we may have is `method_added` hook. Every time when you define a method (on instance or on class, it does not matter), Ruby automatically fires `method_added` method on your class.
 
-``` ruby
+```ruby
 class TestClass
   def self.method_added(method_name)
     puts "Added method #{method_name}"
@@ -131,7 +132,8 @@ So, the algorithm is like this:
 7. When you visit `/docs`, Apipie displays all data from `Apipie.all_docs`
 
 And if it's true we can write something like:
-``` ruby
+
+```ruby
 # app/docs/users_doc.rb
 module UsersDoc
   # we need the DSL, right?
@@ -156,7 +158,8 @@ end
 ```
 
 And yes, it works! Let's add resource description
-``` ruby
+
+```ruby
 module UsersDoc
   extend Apipie::DSL::Concern
 
@@ -168,11 +171,14 @@ end
 ```
 
 Which breaks it...
+
 ```
 Apipie: Can not resolve resource UsersDoc name.
 ```
+
 Yes, because our resource is `UsersController`. The error happens in the following lines in Apipie source code:
-``` ruby
+
+```ruby
     def get_resource_name(klass)
       if klass.class == String
         klass
@@ -191,9 +197,9 @@ Yes, because our resource is `UsersController`. The error happens in the followi
     end
 ```
 
-Most of this code doesn't really matter, the thing is that Apipie doesn't know what to do with module `UsersDoc`. It has no `resource_id`, let's define it.
+Most of this code does not really matter, the thing is that Apipie does not know what to do with module `UsersDoc`. It has no `resource_id`, let's define it.
 
-``` ruby
+```ruby
 resource_description do
   resource_id 'Users'
   # other dsl
@@ -201,15 +207,16 @@ end
 ```
 
 Now we get an error
-``` ruby
+
+```ruby
 undefined method `superclass' for UsersDoc:Module
 ```
 
-But... Module (I mean, an instance of Module class) can't have a superclass. It's a module!
+But... Module (I mean, an instance of Module class) can't have a parent class. It's a module!
 
 Forget that you are a ruby developer and define a method called `superclass` on your module :)
 
-``` ruby
+```ruby
 # before calling DSL
 def self.superclass
   UsersController
@@ -217,7 +224,8 @@ end
 ```
 
 So, from this moment
-``` ruby
+
+```ruby
 UsersDoc.superclass == UsersController
 # => true
 ```
@@ -236,7 +244,7 @@ First API contains 100 actions in 10 controllers, so does the second one, too. T
 
 Instead of repeated copying the real description of authentication mechanism it would be really nice to have something like
 
-``` ruby
+```ruby
 # for Api::V1
 auth_with :password
 # for Api::V2
@@ -245,7 +253,7 @@ auth_with :token
 
 And describe authentication in a more declarative way. In order to make it we need to add our own method to DSL. Here is what it may look like:
 
-``` ruby
+```ruby
 module BaseDoc
   # ... code from the gist
 
@@ -289,7 +297,7 @@ end
 
 And from now we can write
 
-``` ruby
+```ruby
 module Api::V1::UsersDoc
   extend BaseDoc
 
@@ -307,7 +315,7 @@ So, we have a `resource_description` and `api` methods, but how can we define co
 
 We want to have a `defaults` method which takes a block and executes it for each action.
 
-``` ruby
+```ruby
 module BaseDoc
   # ...
 
@@ -333,14 +341,14 @@ So, we just store passed block and invoke it. This example is much simpler then 
 
 [URL](https://github.com/iliabylich/apipie-demo)
 
-You can click by statically generated docs (thanks to github pages):
+You can click by statically generated docs (thanks to GitHub pages):
 
-+ [Private::V1](http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v1.html)
-+ [Private::V2](http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v2.html)
-+ [Public](http://iliabylich.github.io/apipie-demo/doc/apidoc/public.html)
++ [`Private::V1`](http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v1.html)
++ [`Private::V2`](http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v2.html)
++ [`Public`](http://iliabylich.github.io/apipie-demo/doc/apidoc/public.html)
 
 # Conclusion
 
-Apipie is an amazing library and its most significant advantage is that you document ruby using ruby (being a ruby developer), which gives you ability to define custom behaviors and scenarios. I can't even imagine myself writing API docs using yardoc (however, I use it to document plain ruby classes).
+Apipie is an amazing library and its most significant advantage is that you document ruby using ruby (being a ruby developer), which gives you ability to define custom behaviors and scenarios. I can't even imagine myself writing API docs using `yardoc` (however, I use it to document plain ruby classes).
 
 If you have any bugs (or ideas to implement), please, [create an issue on GitHub](https://github.com/Apipie/apipie-rails/issues), let's make it even better!

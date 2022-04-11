@@ -2,11 +2,11 @@
 layout: post
 title:  "ExceptionManager gem"
 date:   2015-04-14 00:00:00 +0300
-categories: ruby gem exceptions
+categories: Ruby gem exceptions
 toc: true
 comments: true
 ---
-ExceptionManager is a gem for getting extra information from your exception.
+`ExceptionManager` is a gem for getting extra information from your exception.
 
 Source code: [https://github.com/iliabylich/exception_manager](https://github.com/iliabylich/exception_manager)
 
@@ -110,7 +110,7 @@ And then we can get everything through this binding
 
 # Compatibility
 
-ExceptionManager is compatible (and tested on travis) with the following versions of ruby
+`ExceptionManager` is compatible (and tested on Travis CI) with the following versions of ruby
 
 + 2.0.0
 + 2.1.0

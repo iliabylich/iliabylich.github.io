@@ -2,7 +2,7 @@
 layout: post
 title:  "HandlerSocket + Ruby"
 date:   2015-11-10 00:00:00 +0300
-categories: ruby mysql handlersocket databases sql nosql
+categories: Ruby MySQL HandlerSocket databases SQL NoSQL
 toc: true
 comments: true
 ---
@@ -11,7 +11,7 @@ comments: true
 + a plugin for MySQL
 + which allows you to read/write to MySQL
 + and gives you a separate connection to MySQL
-+ and doesn't allow you to run SQL queries
++ and does not allow you to run SQL queries
 + but allows to run simple CRUD queries *only* using indexes
 
 HandlerSocket query language is very simple (I'd even say it's primitive), but it's much faster than MySQL's one. Though, of course, there are some limitations. Interested?
@@ -21,7 +21,7 @@ HandlerSocket query language is very simple (I'd even say it's primitive), but i
 You already have it if you are using Percona Server or MariaDB. If not, install it from [the source](https://github.com/DeNA/HandlerSocket-Plugin-for-MySQL).
 
 To activate the plugin, run:
-``` sql
+```sql
 INSTALL PLUGIN handlersocket SONAME 'handlersocket.so';
 ```
 
@@ -45,7 +45,7 @@ You can find a detailed documentation of all available configuration options [he
 
 Restart your MySQL server and run:
 
-``` sql
+```sql
 show processlist\G
 ```
 
@@ -68,7 +68,7 @@ which means that HS daemon is up and running.
 
 You can test it locally using `telnet`:
 
-``` sh
+```sh
 $ telnet 0.0.0.0 9999
 Trying 0.0.0.0...
 Connected to 0.0.0.0.
@@ -77,11 +77,11 @@ Escape character is '^]'.
 
 Type `P -> 0 -> your_database -> your_table -> PRIMARY -> id,some_column` (where `->` is Tab). And press Enter. It should return `0 -> 1`.
 
-This protocol looks ugly, but it may save you a lot of network usage. It's very compact, and parsing doesn't require any CPU usage.
+This protocol looks ugly, but it may save you a lot of network usage. It's very compact, and parsing does not require any CPU usage.
 
 # Use cases
 
-If you don't have too much queries per second, probably you don't need HS. It doesn't optimize queries, but you may save some time on request parsing + some network. You may find it interesting if you have a lot of simple queries, like simple `SELECT`'s by primary key.
+If you don't have too much queries per second, probably you don't need HS. It does not optimize queries, but you may save some time on request parsing + some network. You may find it interesting if you have a lot of simple queries, like simple `SELECT`'s by primary key.
 
 # Ruby adapter
 
@@ -97,7 +97,7 @@ Ruby implementation is very slow, it's there mainly to explain the protocol. C-b
 
 To require a specific implementation, run
 
-``` ruby
+```ruby
 # For slow pure Ruby implementation
 require 'handlersocket/pure'
 # For fast C implementation
@@ -106,7 +106,7 @@ require 'handlersocket/ext'
 
 To create a connection, run
 
-``` ruby
+```ruby
 hs = Handlersocket.new('0.0.0.0', 9999)
 ```
 
@@ -114,23 +114,23 @@ Both pure Ruby and C implementations have the same API, so the `require` place i
 
 To open an index, run
 
-``` ruby
+```ruby
 hs.open_index('0', 'hs_test', 'users', 'PRIMARY', ['id', 'email'])
 ```
 
 To read the data from that index, run
 
-``` ruby
+```ruby
 hs.find('0', '=', ['12'], ['100]'])
 # Which is equal to
 # SELECT id, name FROM hs_test.users WHERE id = 12 LIMIT 100
 ```
 
-Other commands like auth/insert/update/delete are not there yet. But it's not that difficult to add them, check out [this file](https://github.com/iliabylich/handlersocket-ruby/blob/master/lib/handlersocket.rb#L37), implementation of other methods also takes ~2 lines of code.
+Other commands like `auth`/`insert`/`update`/`delete` are not there yet. But it's not that difficult to add them, check out [this file](https://github.com/iliabylich/handlersocket-ruby/blob/master/lib/handlersocket.rb#L37), implementation of other methods also takes ~2 lines of code.
 
 # Benchmarks
 
-The most interesting part. To run benchmarks locally, clone the gem repository on [github](https://github.com/iliabylich/handlersocket-ruby) and run `rake benchmark`. It compares Mysql2 gem to Ruby-based and C-based implementations. Here are my results:
+The most interesting part. To run benchmarks locally, clone the gem repository on [GitHub](https://github.com/iliabylich/handlersocket-ruby) and run `rake benchmark`. It compares `mysql2` gem to Ruby-based and C-based implementations. Here are my results:
 
 ```
 Calculating -------------------------------------
@@ -148,11 +148,11 @@ Comparison:
              pure HS:       50.0 i/s - 2208314.91x slower
 ```
 
-I've run these benchmarks on 4 cores server with 4GB ram on Percona server 5.6. On both small and huge (30 millions records) datasets, with enabled and disabled query cache, with a small and a big value of `innodb_buffer_pool_size`.
+I have run these benchmarks on 4 cores server with 4 GB ram on Percona server 5.6. On both small and huge (30 millions records) datasets, with enabled and disabled query cache, with a small and a big value of `innodb_buffer_pool_size`.
 
-There's a 20-30x performance difference between Mysql2 and a C-based version of HandlerSocket because:
+There's a `20-30x` performance difference between `mysql2` and a C-based version of HandlerSocket because:
 + almost no time is taken for request parsing
-+ mysql2 is just a way more complex than my gem
++ `mysql2` is just a way more complex than my gem
 
 And I was really disappointed by performance of Ruby-based implementation. It's 2 millions times slower than C-based. Why? There's a magical number `50.0 i/s`, but I cannot find what does it mean. If you have an answer, please, ping me on Twitter.
 
@@ -163,7 +163,7 @@ The gem *mostly* works, but there are some points that should be refined. Curren
 
 # Conclusion
 
-Once again, HandlerSocket saves your time on query parsing, buliding a query plan, it's more compact, but is very limited. If you don't have too many requests, don't even think about using it.
+Once again, HandlerSocket saves your time on query parsing, building a query plan, it's more compact, but is very limited. If you don't have too many requests, don't even think about using it.
 
 # Links
 

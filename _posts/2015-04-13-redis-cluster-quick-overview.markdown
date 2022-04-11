@@ -2,23 +2,23 @@
 layout: post
 title:  "Redis cluster. Quick overview"
 date:   2015-04-13 00:00:00 +0300
-categories: redis databases
+categories: Redis databases
 toc: true
 comments: true
 ---
-Today I've tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.
+Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.
 
 # Setup
 
 Here are my servers:
-``` bash
+```sh
 # 212.71.252.54  / 192.168.171.141 / node1
 # 176.58.103.254 / 192.168.171.142 / node2
 # 178.79.153.89  / 192.168.173.227 / node3
 ```
 
 Local hosts (on each server):
-``` bash
+```sh
 # local hosts
 192.168.171.141 node1
 192.168.171.142 node2
@@ -26,7 +26,7 @@ Local hosts (on each server):
 ```
 
 And remote (on my PC):
-``` bash
+```sh
 # remote hosts
 212.71.252.54  node1
 176.58.103.254 node2
@@ -35,7 +35,7 @@ And remote (on my PC):
 
 First of all, let's download and extract it (on each node).
 
-``` bash
+```sh
 mkdir build && cd build
 wget http://download.redis.io/releases/redis-3.0.0.tar.gz
 tar -xvzf redis-3.0.0.tar.gz
@@ -43,26 +43,26 @@ cd redis-3.0.0/
 ```
 
 Now we can build it
-``` bash
+```sh
 apt-get install -y make gcc build-essential
 make MALLOC=libc # also jemalloc can be used
 ```
 
 Let's run tests
-``` bash
+```sh
 apt-get install -y tk8.5 tcl8.5
 make test
 # a lot of output, should be green
 ```
 
 Then we can start Redis
-``` bash
+```sh
 src/redis-server ./redis.conf
 ```
 
 # Cluster configuration
 
-We need to update our configs for each node
+We need to update our configuration file for each node
 
 ```
 # redis.conf
@@ -104,7 +104,7 @@ Quite a lot of noisy debug information, but here is one line that is extremely i
 No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
 ```
 
-So, our redis server is running in cluster mode (... repeating same steps on other nodes ...)
+So, our Redis server is running in cluster mode (... repeating same steps on other nodes ...)
 
 # Connecting nodes
 
@@ -143,9 +143,9 @@ Usage: redis-trib <command> <options> <arguments ...>
 For check, fix, reshard, del-node, set-timeout you can specify the host and port of any working node in the cluster.
 ```
 
-For some reason, this tool doesn't support hostnames, we have to pass IPs manually.
+For some reason, this tool does not support host names, we have to pass IP addresses manually.
 
-``` bash
+```sh
 ➜  redis-3.0.0 src/redis-trib.rb create 192.168.171.141:6379 192.168.171.142:6379 192.168.173.227:6379
 
 >>> Creating cluster
@@ -232,11 +232,11 @@ Another example is more interesting.
 15785 R (0 err) | 15785 W (0 err) |
 ```
 
-This tool writes a huge amount of data to redis and check whether previously written data is still there.
+This tool writes a huge amount of data to Redis and check whether previously written data is still there.
 
 # Testing the failover
 
-This chapter is something that I still don't understand. I've tried to reproduce it many times and every time I have the same result.
+This chapter is something that I still don't understand. I have tried to reproduce it many times and every time I have the same result.
 
 Run `consistency-test.rb` again and kill any other node.
 
@@ -344,7 +344,7 @@ I hope this will be fixed soon.
 
 # Conclusion
 
-According to [the repo](https://github.com/antirez/redis-rb-cluster#redis-rb-cluster) there are still a lot of things that need to be done before using Redis Cluster in production, but I would like to say Thanks to all contributors of Redis, redis-rb and redis-rb-cluster. Good job and looking forward to use in the real-world!
+According to [the repository](https://github.com/antirez/redis-rb-cluster#redis-rb-cluster) there are still a lot of things that need to be done before using Redis Cluster in production, but I would like to say Thanks to all contributors of Redis, `redis-rb` and `redis-rb-cluster`. Good job and looking forward to use in the real-world!
 
 # Links
 

@@ -8,23 +8,24 @@ comments: true
 ---
 ## Intro
 
-So, I'm ready to announce that I've finished working on a new Ruby parser. It's called `lib-ruby-parser`.
+So, I'm ready to announce that I have finished working on a new Ruby parser. It's called `lib-ruby-parser`.
 
 Key features:
 
 1. It's fast. It's written in Rust and it's slightly faster than Ripper. The difference is about 1-2% on my machine.
-2. It has a beautiful interface. Every single node has its own type that is documented. For example, take a look at [CSend node](https://docs.rs/lib-ruby-parser/0.7.0/lib_ruby_parser/nodes/struct.CSend.html) that represents "conditional send" like `foo&.bar`. [Here's a list of all defined nodes](https://docs.rs/lib-ruby-parser/0.7.0/lib_ruby_parser/nodes/index.html). Both Ripper and RubyVM::AST have no documentation of their AST format. `whitequark/parser` [has a great documentation](https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md), but its AST is not "static".
-3. What's "static AST"? By saying that I mean that if documentation says that "N is not-nullable" then it's true no matter what. `whitequark/parser` does a great job, but the nature of dynamic language doesn't allow it to provide such guarantees. I'll show a few examples later.
-4. It's precise. Unlike `whitequark/parser`, its lexer (or tokenizer if it sounds better for you) is based on MRI's `parse.y`. What does it mean? It means that I wasn't able to find any difference in lexing on 3 million lines of code that I've got by pulling sources of top 300 gems (by total downloads). I'll mention how I track it soon.
-5. It doesn't depend on Ruby. In fact, it has absolutely no "required" dependencies (only a few optional ones). So, it's possible to write bindings for any other language, and I've made them for C/C++/Node.js. Of course, it's possible to have bindings for Ruby (because there are bindings for C and it's easy to reuse them)
+2. It has a beautiful interface. Every single node has its own type that is documented. For example, take a look at [`CSend` node](https://docs.rs/lib-ruby-parser/0.7.0/lib_ruby_parser/nodes/struct.CSend.html) that represents "conditional send" like `foo&.bar`. [Here's a list of all defined nodes](https://docs.rs/lib-ruby-parser/0.7.0/lib_ruby_parser/nodes/index.html). Both Ripper and `RubyVM::AST` have no documentation of their AST format. `whitequark/parser` [has a great documentation](https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md), but its AST is not "static".
+3. What's "static AST"? By saying that I mean that if documentation says that "N is not-nullable" then it's true no matter what. `whitequark/parser` does a great job, but the nature of dynamic language does not allow it to provide such guarantees. I'll show a few examples later.
+4. It's precise. Unlike `whitequark/parser`, its lexer (or tokenizer if it sounds better for you) is based on MRI's `parse.y`. What does it mean? It means that I was not able to find any difference in tokenizing on 3 million lines of code that I have got by pulling sources of top 300 gems (by total downloads). I'll mention how I track it soon.
+5. It does not depend on Ruby. In fact, it has absolutely no "required" dependencies (only a few optional ones). So, it's possible to write bindings for any other language, and I have made them for C/C++/Node.js. Of course, it's possible to have bindings for Ruby (because there are bindings for C and it's easy to reuse them)
 
 ## Implementation
 
-Current performance (in release mode, with jemalloc) is ~200K LOC/s. I think it can even be used for syntax highlighting (and in the browser, too, haha).
+Current performance (in release mode, with `jemalloc`) is ~200000 LOC/s. I think it can even be used for syntax highlighting (and in the browser, too, haha).
+
 
 I don't want to dig too far, but some notes could be interesting.
 
-Rust is a general purpose language that is based on LLVM (<3) and can be compiled directly into machine code. It doesn't need any VMs and it can be compiled to a ton of targets (or platforms). The code doesn't use pointers, and there are no `unsafe` calls that you might hear about.
+Rust is a general purpose language that is based on LLVM (<3) and can be compiled directly into machine code. It does not need any VMs and it can be compiled to a ton of targets (or platforms). The code does not use pointers, and there are no `unsafe` calls that you might hear about.
 
 Rust does support ADT (algebraic data type) and it has generics, so you can build data structures like
 
@@ -103,7 +104,7 @@ Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
 
 Plus, it's written in Rust, so to compile a grammar that is based on it you don't anything except Rust (that you need anyway to compile something written in Rust, right?).
 
-Unfortunately, I've got a few reasons to abandon this idea:
+Unfortunately, I have got a few reasons to abandon this idea:
 
 1. No mid-rules (that are used A LOT in MRI) like
 
@@ -117,7 +118,7 @@ Unfortunately, I've got a few reasons to abandon this idea:
     ```
     but then I have no idea how such grammar can be maintained.
 
-2. Compilation speed. I've got ~20% of Ruby grammar backported and noticed a huge performance degradation.
+2. Compilation speed. I have got ~20% of Ruby grammar backported and noticed a huge performance degradation.
 3. No stack introspection (and IIRC no "debug" mode at all). By saying "stack" here I mean parser stack, that's a feature of LR parsers. You can check how it looks like by running `ruby -ye '42'` locally
 4. The grammar written with `lalrpop` has a different format comparing to bison, and so maintaining it (like backporting new changed from MRI) seems to be a nightmare.
 
@@ -175,7 +176,7 @@ impl Stack {
 
 `Value::Stolen` is just a placeholder value that indicates (when you see it) that your code previously has accessed the same stack entry. It's necessary to have it (or in general some kind of a default value that is set by `std::mem::take/replace`) to "fix" ownership model.
 
-So then it was done and I started profiling it. At the very beginning it was incredibly slow, but I knew it, I had way too many `.clone()` calls in my code (in Rust that's a deep clone that is quite expensive in some cases). I added jemalloc and started profiling (`pprof-rs` <3), I removed most clones and got ~160-170K LOC/s.
+So then it was done and I started profiling it. At the very beginning it was incredibly slow, but I knew it, I had way too many `.clone()` calls in my code (in Rust that's a deep clone that is quite expensive in some cases). I added `jemalloc` and started profiling (`pprof-rs` <3), I removed most clones and got ~160-170 thousand LOC/s.
 
 Great, but I wanted more. ~20% of time in my benchmark was spent on this `std::mem::replace` call that swaps non-overlapping bytes. Initially I thought that I can't improve it (that's the fastest way to take the value AND to put a placeholder instead of it). At some point when I was writing C++ bindings I noticed that `sizeof(Node)` is 120 bytes (`Node` here is a C++ `Node` class) and it literally opened my eyes.
 
@@ -260,7 +261,7 @@ struct IfTernary {
 // other variants
 ```
 
-I've got the same performance as Ripper.
+I have got the same performance as Ripper.
 
 ## Future improvements
 
@@ -278,7 +279,7 @@ nodes:
     Int { value: "42", expression_l: 0..2 }
 ```
 
-`lib-ruby-parser` constructs these `"42"` strings twice by copying a part of the input. Of course, for this particular case it's possible to store only ranges like `start...end`, but there are exceptions where values of tokens and AST nodes are not equal to input substrings (like escape sequences, `"\n"` or `"\u1234"`).
+`lib-ruby-parser` constructs these `"42"` strings twice by copying a part of the input. Of course, for this particular case it's possible to store only ranges like `start...end`, but there are exceptions where values of tokens and AST nodes are not equal to input sub-strings (like escape sequences, `"\n"` or `"\u1234"`).
 
 Even this way it's possible to introduce the following type system:
 
@@ -305,11 +306,11 @@ tokens:
 
 However, then `input` must live as long as tokens and AST, and it sounds a bit problematic.
 
-One option that I see is adding `Rc<Input>` to such values and store a range in `SubstringOfInput` enum variant. That's basicaly a `shared_ptr` from C++ world that wraps a raw pointer (like `T*`) + (pointer to) a number of existing "clones" of this pointer. Every time you copy it the shared number is incremented, destructor decreases it and once it's zero it also deletes `T`. It's quite cheap in terms of performance (something like `*n += 1` in constructor, `*n -= 1; drop(ptr) if n == 0;` in destructor)
+One option that I see is adding `Rc<Input>` to such values and store a range in `SubstringOfInput` enum variant. That's basically a `shared_ptr` from C++ world that wraps a raw pointer (like `T*`) + (pointer to) a number of existing "clones" of this pointer. Every time you copy it the shared number is incremented, destructor decreases it and once it's zero it also deletes `T`. It's quite cheap in terms of performance (something like `*n += 1` in constructor, `*n -= 1; drop(ptr) if n == 0;` in destructor)
 
 ## C bindings
 
-GitHub repo - [https://github.com/lib-ruby-parser/c-bindings](https://github.com/lib-ruby-parser/c-bindings)
+GitHub repository - [https://github.com/lib-ruby-parser/c-bindings](https://github.com/lib-ruby-parser/c-bindings)
 
 It took me a while to fix all segfaults, memory leaks and invalid memory access patterns (I'm not a C developer). `Valgrind` and `asan` are incredibly useful tools, I can't even imagine how much time it would take to write bindings without these guys.
 
@@ -317,7 +318,7 @@ The API is very similar, there's an additional layer between C and Rust that con
 
 It uses a combination of `enum` and `union` to represent a `Node`.
 
-## Cpp bindings
+## C++ bindings
 
 [https://github.com/lib-ruby-parser/cpp-bindings](https://github.com/lib-ruby-parser/cpp-bindings)
 
@@ -325,7 +326,7 @@ I personally like C++ much more than C. Smart pointers, containers, generics, bu
 
 The same story again, `valgrind`/`asan`, an extra layer that converts `Rust` objects to `C++` classes.
 
-Also, my `valgrind` on Mac couldn't detect calling `free` on `C++` object (that's invalid, should be `delete` from C++), and so I had to setup a docker container locally to find and fix it.
+Also, my `valgrind` on Mac could not detect calling `free` on `C++` object (that's invalid, should be `delete` from C++), and so I had to setup a docker container locally to find and fix it.
 
 It uses modern `std::variant<Nodes...>` to represent a `Node`.
 
@@ -350,7 +351,7 @@ I personally think that this class abuses constructors/destructors in C++:
 + constructor of `TryCatch` registers `this` in some global context  (like `GetCurrentHandleScope().SetThrowHandler(this)`
 + any code that throws a JavaScript error sets it on this `TryCatch` handler
 + it's possible to access an exception object from any place
-+ destructor of `TryCatch` un-registers it
++ destructor of `TryCatch` drops it
 
 I admit that it's smart, but it sounds way too implicit to me. I'd like this interface to perform a register in a more explicit way (by calling `register/unregsiter` for example).
 
@@ -366,7 +367,7 @@ It worked out of the box with one minor change. I had to mark `onigurama` depend
 
 ## Final thoughts
 
-This is one of the biggest open-source projects that I've ever made. It can be used from Rust/C/C++/Node.js/browser. It's fast (but remember, it can get even faster), it's precise and it's very strongly typed.
+This is one of the biggest open-source projects that I have ever made. It can be used from Rust/C/C++/Node.js/browser. It's fast (but remember, it can get even faster), it's precise and it's very strongly typed.
 
 Also, if you need a custom setup (like custom C++ classes or maybe a completely different API) there's a [meta-repository](https://github.com/lib-ruby-parser/nodes) with all nodes information. You can use it to build your own bindings (or maybe new bindings for other languages), it has a `nodes` function that returns a `Vec<Node>` (`Node` here is just a "configuration" of a single `Node` variant from Rust - [source](https://github.com/lib-ruby-parser/nodes/blob/master/src/node.rs#L6))
 

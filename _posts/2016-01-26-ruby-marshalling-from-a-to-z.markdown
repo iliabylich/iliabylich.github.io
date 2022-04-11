@@ -2,7 +2,7 @@
 layout: post
 title:  "Ruby Marshalling from A to Z"
 date:   2016-01-26 00:00:00 +0300
-categories: ruby marshalling serialization tlv
+categories: ruby marshalling serialization TLV
 toc: true
 comments: true
 ---
@@ -10,7 +10,7 @@ Marshalling is a serialization process when you convert an object to a binary st
 Ruby has a standard class `Marshal` that does all the job for serialization and deserialization.
 To serialize an object, use `Marshal.dump`, to deserialize - `Marshal.load` or `Marshal.restore`.
 
-``` ruby
+```ruby
 marshalled = Marshal.dump([1, 2, 'string', Object.new])
 # => "\x04\b[\ti\x06i\aI\"\vstring\x06:\x06ETo:\vObject\x00"
 
@@ -25,7 +25,7 @@ compatible with the standard Ruby implementation.
 
 Let's try to make a pure Ruby gem that is compatible with standard `Marshal` class.
 
-``` bash
+```bash
 $ bundle gem pure_ruby_marshal
 $ tree pure_ruby_marshal
 pure_ruby_marshal
@@ -46,7 +46,7 @@ pure_ruby_marshal
 
 Our main module `PureRubyMarshal` has the following interface:
 
-``` ruby
+```ruby
 module PureRubyMarshal
   extend self
 
@@ -63,7 +63,7 @@ end
 Also I'd like to extract all logic related into reading/writing encoded data
 to separate classes - `ReadBuffer` for reading, `WriteBuffer` for writing.
 
-``` ruby
+```ruby
 module PureRubyMarshal
   extend self
 
@@ -86,7 +86,7 @@ end
 As we decided before, `ReadBuffer` is our class responsible for reading an object from marshalled data.
 Here is how it should look:
 
-``` ruby
+```ruby
 class PureRubyMarshal::ReadBuffer
   attr_reader :data
 
@@ -105,7 +105,7 @@ end
 
 First let's take a look at `Marshal.dump`.
 
-``` ruby
+```ruby
 marshalled = Marshal.dump([1, 2, 'string', Object.new])
 data = marshalled.chars
 # => [a long array of characters]
@@ -113,7 +113,7 @@ data = marshalled.chars
 
 The first two characters represent a version of library that was used for marshalling:
 
-``` ruby
+```ruby
 data[0].ord
 # => 4
 data[1].ord
@@ -124,7 +124,7 @@ Which represents a current version of Marshal library - `4.8`
 ([link to the source](https://github.com/ruby/ruby/blob/trunk/marshal.c#L54-L55)).
 This values are constants for any marshalled data and they are stored in `Marshal::MAJOR_VERSION` and `Marshal::MINOR_VERSION`:
 
-``` ruby
+```ruby
  :001 > Marshal::MAJOR_VERSION
  => 4
  :002 > Marshal::MINOR_VERSION
@@ -132,7 +132,8 @@ This values are constants for any marshalled data and they are stored in `Marsha
 ```
 
 Our `PureRubyMarshal` should have same constants:
-``` ruby
+
+```ruby
 module PureRubyMarshal
   MAJOR_VERSION = 4
   MINOR_VERSION = 8
@@ -144,7 +145,7 @@ So, for now marshalled data looks like `['4.8', some unknown characters]`
 
 To read the version of `Marshal` library we can modify `ReadBuffer#initialize`:
 
-``` ruby
+```ruby
 attr_reader :minor_version, :major_version
 
 def initialize(data)
@@ -173,22 +174,24 @@ read_buffer.minor_version
 ## Getting objects from the raw data
 
 When `Marshal` converts your object to a string, it uses very simple rules:
+
 + All primitives like `Fixnum`, `Hash` or `Array` always use the same format of serialization,
 prepended by a special character (each character for each unique type)
-+ If an object has instance variables, these ivars are always dumped in the same way (`Iobject{hash:of,instance:variables}`)
++ If an object has instance variables, these instance variables are always dumped in the same way (`Iobject{hash:of,instance:variables}`)
 + You can't dump multiple objects in a single operation,
 so there's always a root object in marshalled string (which is actually placed in the beginning of the string)
-+ This object is followed by all other data, like ivars, string encodings etc.
++ This object is followed by all other data, like instance variables, string encoding etc.
 
-## NilClass, TrueClass, FalseClass
+## `NilClass`, `TrueClass`, `FalseClass`
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump(nil)).data
  => ["0"]
 ```
 
 Character `0` means that encoded object is `nil`. To handle it, we can write something like:
-``` ruby
+
+```ruby
 class PureRubyMarshal::ReadBuffer
   # ...
 
@@ -206,16 +209,17 @@ end
  => nil
 ```
 
-``` ruby
+```ruby
  :001 > ReadBuffer.new(Marshal.dump(true)).data
  => ["T"]
  :002 > ReadBuffer.new(Marshal.dump(false)).data
  => ["F"]
 ```
+
 `true` converts to `T`, `false` converts to `F`, nothing complex for now.
 
 Let's extend our `case` statement:
-``` ruby
+```ruby
 when 'T' then true
 when 'F' then false
 ```
@@ -224,7 +228,7 @@ when 'F' then false
 
 Of course, we can't develop without tests,
 
-``` ruby
+```ruby
 # fixtures.rb
 
 FIXTURES = {
@@ -263,7 +267,7 @@ PureRubyMarshal
 
 All encoded integers are prepended with an `"i"` symbol. Added one more `when` to our `case`:
 
-``` ruby
+```ruby
 when 'i' then read_integer
 ```
 
@@ -280,7 +284,7 @@ There are 5 different cases depending on the byte value:
 
 Let's write a utility lambda to simplify examples:
 
-``` ruby
+```ruby
 get_sequence = lambda do |n|
   buffer = ReadBuffer.new(Marshal.dump(n))
   buffer.read_char
@@ -289,6 +293,7 @@ end
 ```
 
 It:
+
 + marshalls passed number with native `Marshal`
 + loads it through our pure ruby `ReadBuffer`
 + reads one char (`"i"`)
@@ -297,15 +302,16 @@ It:
 
 **The first case** is the simplest one:
 
-``` ruby
+```ruby
 get_sequence[0]
  => [0]
 ```
+
 Zero is actually encoded as zero.
 
 **The second case**:
 
-``` ruby
+```ruby
 get_sequence[7]
  => [12]
 get_sequence[8]
@@ -317,13 +323,14 @@ In this case `result = byte - 5` and it covers small positive numbers.
 
 **The third case**:
 
-``` ruby
+```ruby
 get_sequence[99999]
  => [3, 159, 134, 1]
 ```
 
 3 means three numbers representing a single number, they should be merged with binary `OR` and byte shifting:
-``` ruby
+
+```ruby
 (159 << (8*0)) | (134 << (8*1)) | (1 << (8*2))
  => 99999
 ```
@@ -332,7 +339,7 @@ get_sequence[99999]
 
 Let's implement our `read_integer` method!
 
-``` ruby
+```ruby
 def read_integer
     # c is our first byte
     c = (read_byte ^ 128) - 128
@@ -380,7 +387,7 @@ and others include numbers into their encoded structure to represent their lengt
 
 ## Symbol
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump(:a_symbol)).data
  => [":", "\r", "a", "_", "s", "y", "m", "b", "o", "l"]
 ```
@@ -390,7 +397,7 @@ Symbols are encoded using:
 + Symbol length (`"\r".ord - 5 = 8`) as Integer (we can fetch it using `read_integer` method)
 + The Symbol itself, character by character
 
-``` ruby
+```ruby
 # one more "when" statement
 when ':' then read_symbol
 
@@ -402,7 +409,7 @@ end
 
 ## String
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump("a string")).data
  => ["\"", "\r", "a", " ", "s", "t", "r", "i", "n", "g"]
 ```
@@ -413,7 +420,7 @@ Where:
 + `n` following symbols are the string itself.
 
 To support loading marshalled string, we can use the following code:
-``` ruby
+```ruby
 # ...
 when '"' then read_string
 # ...
@@ -424,7 +431,7 @@ end
 
 ## Array
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump([1,2,3])).data
  => ["[", "\b", "i", "\x06", "i", "\a", "i", "\b"]
 ```
@@ -437,7 +444,7 @@ ReadBuffer.new(Marshal.dump([1,2,3])).data
 
 Array items are encoded as separate objects, every item is prepended by its own service character:
 
-``` ruby
+```ruby
 # ...
 when '[' then read_array
 # ...
@@ -450,7 +457,7 @@ end
 
 `Hash` is encoded as an array of key-value pairs:
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump({ 15 => 5 })).data
  => ["{", "\x06", "i", "\x14", "i", "\n"]
 ```
@@ -461,7 +468,7 @@ ReadBuffer.new(Marshal.dump({ 15 => 5 })).data
 + `"i" 5` is an `Integer 5`
 
 
-``` ruby
+```ruby
 # ...
 when '{' then read_hash
 # ...
@@ -475,7 +482,7 @@ end
 
 `Float` is encoded as its string representation
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump(1.5)).data
  => ["f", "\b", "1", ".", "5"]
 ```
@@ -487,7 +494,7 @@ Floats are encoded using `#to_s` method:
 
 To get it back, we can use `String#to_f` method:
 
-``` ruby
+```ruby
 # ...
 when 'f' then read_float
 # ...
@@ -498,7 +505,7 @@ end
 
 ## Class
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump(Array)).data
  => ["c", "\n", "A", "r", "r", "a", "y"]
 ```
@@ -509,13 +516,13 @@ Classes are represented by their names:
 + next 5 characters are the name itself
 
 After reading the name we can do `Object.const_get(const_name)` to retrieve the actual class.
-The only remark here is that when the class doesn't exist anymore,
+The only remark here is that when the class does not exist anymore,
 `Marshal` re-raises `ArgumentError, "undefined class/module #{const_name}"` instead of a `NameError`.
 Moreover, if the constant returned by `Object.const_get` is not a class,
 `Marshal` raises `ArgumentError, "#{const_name} does not refer to a Class"`.
 So, the constant **must** exist and it **must** be a `Class`
 
-``` ruby
+```ruby
 # ...
 when 'c' then read_class
 # ...
@@ -535,7 +542,7 @@ def read_class
 end
 ```
 
-I've extracted `marshal_const_get` to a separate method to use it later for
+I have extracted `marshal_const_get` to a separate method to use it later for
 reading a `Module` from the marshalled data.
 
 ## Module
@@ -543,7 +550,7 @@ reading a `Module` from the marshalled data.
 Modules are similar to Classes, but the "magical" character is `"m"` instead of `"c"`
 (and, of course, messages of exceptions are about modules).
 
-``` ruby
+```ruby
 # ...
 when 'm' then read_module
 # ...
@@ -557,11 +564,11 @@ def read_module
 end
 ```
 
-## Struct
+## `Struct`
 
-Struct are encoded by their class names + their data:
+`Struct` classes are encoded by their class names + their data:
 
-``` ruby
+```ruby
 Point = Struct.new(:x, :y)
 a = Point.new(3, 7)
 ReadBuffer.new(Marshal.dump(a)).data
@@ -571,15 +578,15 @@ ReadBuffer.new(Marshal.dump(a)).data
 This output can be split to:
 + `"S"` means a beginning of encoded `Struct`
 + `":", 5, "P", "o", "i", "n", "t"` is a Symbol `:Point`
-+ `2, ":", 1, "x", "i", 2, ":", 1, "y", "i", 3` is a visually unmarked Hash (i.e. no `{` symbol) with 2 pairs:
++ `2, ":", 1, "x", "i", 2, ":", 1, "y", "i", 3` is a visually unmarked Hash (i.e. no `{` header) with 2 pairs:
   + `":", 1, "x"` is a Symbol `:x`
   + `"i", 2` is an Integer `2`
   + `":", 1, "y"` is a Symbol `:y`
   + `"i", 3` is an Integer `3`
 
-So, we have a Struct defined with its class name and the Hash containing object's data
+So, we have a `Struct` defined with its class name and the Hash containing object's data
 
-``` ruby
+```ruby
 # ...
 when 'S' then read_struct
 # ...
@@ -595,7 +602,7 @@ Why is class name encoded as a `Symbol`, not a `String`? See section 'Symbol lin
 
 ## Regexp
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump(/a_regexp/)).data
  => ["/", "\r", "a", "_", "r", "e", "g", "e", "x", "p", "\x00"]
 ```
@@ -604,9 +611,9 @@ Alright, there are:
 + `"/"` - a beginning of a regexp
 + `8` - length of its string representation
 + `"a_regexp"` - string representation
-+ 0 - a [kcode](http://ruby-doc.org/core-2.1.1/Regexp.html#method-c-new) that was passed to a constructor
++ 0 - a [`kcode`](http://ruby-doc.org/core-2.1.1/Regexp.html#method-c-new) that was passed to a constructor
 
-``` ruby
+```ruby
 # ...
 when '/' then read_regexp
 # ...
@@ -619,7 +626,7 @@ end
 
 ## Abstract object
 
-``` ruby
+```ruby
 class Point2
   attr_reader :x, :y
 
@@ -647,7 +654,7 @@ ReadBuffer.new(Marshal.dump(point)).data
   + key `":", 2, "@", "y"` is a Symbol `@y`
   + value `"i", 10` is an Integer `5`
 
-``` ruby
+```ruby
 # ...
 when 'o' then read_object
 # ...
@@ -666,7 +673,7 @@ end
 
 User classes are classes inherited from default classes:
 
-``` ruby
+```ruby
 class MyArray < Array
 end
 my_array = MyArray[1,2,3]
@@ -680,7 +687,7 @@ Objects of these classes are encoded in the following way:
 + `":", 7, "M", "y", "A", "r", "r", "a", "y"` - a symbol `:MyArray` - the name of the user class
 + the rest of the data that should be passed to constructor (array `[1, 2, 3]` for this example)
 
-``` ruby
+```ruby
 # ...
 when 'C' then read_userclass
 # ...
@@ -695,7 +702,7 @@ end
 
 Sometimes your object is very, very complex. Like an object extended with some modules:
 
-``` ruby
+```ruby
 MyModule = Module.new
 obj = []
 obj.extend(MyModule)
@@ -703,7 +710,7 @@ obj.extend(MyModule)
 
 In this case `Marshal` prepends you object structure with the list of extended modules:
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump(obj)).data
  => ["e", ":", "\r", "M", "y", "M", "o", "d", "u", "l", "e", "[", "\x00"]
 ```
@@ -713,7 +720,7 @@ Where:
   + a `Symbol` that represents a name of a Ruby module (`:MyModule`)
   + an abstract dumped object that was extended with this module and should be retrieved
 
-``` ruby
+```ruby
 # ...
 when 'e' then read_extended_object
 # ...
@@ -735,7 +742,7 @@ Symbol links save you from writing the same `class.name` again and again to the 
 Instead, it remembers all symbols that have been written, and when the symbol appears twice in the sequence,
 it writes its sequence number.
 
-``` ruby
+```ruby
 a1 = [:symbol1, :symbol2]
 a2 = [:symbol1, :symbol1]
 
@@ -752,7 +759,7 @@ dumped2.length
 
 For this example it saves us 31% of the initial size. Let's see how it works:
 
-``` ruby
+```ruby
 ReadBuffer.new(Marshal.dump(a2)).data
  => ["[", "\a", ":", "\f", "s", "y", "m", "b", "o", "l", "1", ";", "\x00"]
 ```
@@ -764,7 +771,7 @@ So we have an array of two items:
 The algorithm for parsing `Symbol` should be changed a little bit
 to save all symbols to an internal array.
 
-``` ruby
+```ruby
 def initialize
   # ...
   @symbols_cache = []
@@ -797,7 +804,7 @@ in "Optimizations" section.
 
 Same story here, when you have an object that appears multiple times in your data, `Marshal` will serialize it only once:
 
-``` ruby
+```ruby
 obj1 = Object.new
 obj2 = Object.new
 
@@ -818,20 +825,20 @@ dumping an object link instead of an object itself is objects equality (`equal?`
 Here's the problem: if you dump an array `[{}, {}]`, `Marshal` will dump
 both objects without any object links, because these objects are not equal.
 
-Also `Marshal` doesn't cache:
+Also `Marshal` does not cache:
   + `true`/`false`/`nil`
   + `Integer`
   + `String` when it's a part of float/regexp
-  + `Hash` when it's a hash of instance variables/struct members
+  + `Hash` when it's a hash of instance variables/`struct` members
 
 Which is mostly correct.
   + `true`/`false`/`nil`/integers/floats always point to the same object in the memory
   + If we dump `[s, Regexp.new(s)]` it will not create an object link. Why? `Regexp.new` always creates a copy of the string inside, so there's no way to save any memory using object links, `regexp.source` is always a unique object in the memory.
   + If we dump two objects with the same hash of instance variables there are two cases:
-    + If these objects have the same class, then it's almost 100% gurantee
+    + If these objects have the same class, then it's almost 100% guarantee
       that these objects are the same. Then the output stream looks like `[Object, ObjectLink]`.
-    + If these objects have a different class but the same hash of ivars -
-      then we shouldn't create an object link and that's correct.
+    + If these objects have a different class but the same hash of instance variables -
+      then we should not create an object link and that's correct.
 
 The code for object links is quite big to paste it here, you can find it
 [here](https://github.com/iliabylich/pure_ruby_marshal/commit/a26aa1aecec20cee1c2a908673fe79275dcdfa58)
@@ -842,13 +849,13 @@ To be honest, there are a few more cases, but they are too complex
 for implementing and pasting it here. I'm not going to cover here:
 + Encoding
 + User marshalled objects (i.e. with `marshal_dump/load`)
-+ Bignum
++ `Bignum`
 + Edge cases of `Float` like infinity
-+ Some stuff that I just don't know from marshalling like UserDef/Hashdef/ModuleOld
++ Some stuff that I just don't know from marshalling like `UserDef`/`Hashdef`/`ModuleOld`
 
 # Writing
 
-If you've read the previous part, I suppose it should be clear for you how to write it youself :)
+If you have read the previous part, I suppose it should be clear for you how to write it yourself :)
 
 # Optimizations
 
@@ -860,13 +867,13 @@ Imagine I have a model `User` with the following columns:
   + `email`
   + `created_at`/`updated_at`
 
-``` ruby
+```ruby
 Marshal.dump(User.first).length
  => 891
 ```
 
 That's a lot... The easiest solution is to dump only `attributes` hash:
-``` ruby
+```ruby
 class User < ActiveRecord::Base
   def marshal_dump(*)
     attributes
@@ -890,14 +897,14 @@ By default `ActiveRecord::Base#attributes` returns a hash where keys are `String
 it can be optimized by calling `attributes.symbolize_keys` in `marshal_dump` to use symbol links
 when we dump a collection. **But that's not true!**
 
-``` ruby
+```ruby
 User.all.map(&:attributes).map(&:keys).flatten.map(&:object_id).uniq.length
  => 4 (for 4 columns)
 ```
 
 This is an amazing example of optimization!
 
-``` ruby
+```ruby
 User::AttrNames.constants
  => [:ATTR_9646, :ATTR_56d61696c6, :ATTR_36275616475646f51647, :ATTR_57074616475646f51647]
 
@@ -911,22 +918,22 @@ Keys in the `attributes` hash are from these constants, so they are always the s
 objects, so `Marshal` cashes them using object links.
 
 By the way, why does ActiveRecord save attribute names as `String`? The answer is simple,
-`Symbol` doesn't support encodings.
+`Symbol` has no encoding.
 
 Well, currently our record is represented by:
-  + class name as a symbol (so it's cacheable)
+  + class name as a symbol (so it can be cached)
   + hash of attributes:
     1. `String` "id" / object link
     2. `Integer` id - can't do anything here
     3. `String` "email" / object link
     4. `String` email - nothing to optimize
     5. `String` "created_at" / object link
-    6. `ActiveSupport::TimeWithZone` created_at - probably optimizable
+    6. `ActiveSupport::TimeWithZone` created_at - probably can be optimized
     7. `String` "updated_at" / object link
-    8. `ActiveSupport::TimeWithZone` udpated_at - see #6
+    8. `ActiveSupport::TimeWithZone` updated_at - probably can be optimized
 
 Let's see what happens when we serialize `AS::TimeWithZone`:
-``` ruby
+```ruby
 Marshal.dump(Time.zone.now).length
  => 120
 ```
@@ -936,7 +943,7 @@ its custom implementation of `marshal_load` that converts it to `[utc, zone, tim
 If you always use your application time zone,
 then you can store it as epoch time:
 
-``` ruby
+```ruby
 class ActiveSupport::TimeWithZone
   def marshal_dump(*)
     to_i
@@ -951,7 +958,7 @@ class ActiveSupport::TimeWithZone
 end
 ```
 
-``` ruby
+```ruby
 Marshal.dump(User.first).length
  => 139
 Marshal.dump(User.first(3)).length
@@ -960,7 +967,7 @@ Marshal.dump(User.first(3)).length
 
 Personally I'm not sure that the next optimization is a good idea, but you can try:
 
-``` ruby
+```ruby
 class User < ActiveRecord::Base
   def self.marshallable_attributes
     @marshallable_attributes ||= %w(
@@ -999,7 +1006,7 @@ You can extend this solution to something similar to `ActiveModel::Serializer`
 where you have a separate serializer class for every model class.
 
 Let's see what this optimization gives us:
-``` ruby
+```ruby
 Marshal.dump(User.first).length
  => 84
 Marshal.dump(User.first(3).to_a).length
@@ -1009,18 +1016,18 @@ Marshal.dump(User.first(3).to_a).length
 That's 10 times less then initial size, good job!
 
 Of course, if you have columns with type `text` there's nothing to
-optimize, this is my example and my expirience.
+optimize, this is my example and my experience.
 
 # What is it for?
 
-I've been working for about 3 weeks on implementing `Marshal` module for [opal](https://github.com/opal/opal).
+I have been working for about 3 weeks on implementing `Marshal` module for [opal](https://github.com/opal/opal).
 It's almost compatible with MRI implementation. I believe `Marshal` is the thing
-that can bring real isomorphism to opal applications. If you have a dumpable object
+that can bring real isomorphism to opal applications. If you have an object that can be dumped
 on the server and its class was compiled on the client, you can pass it **directly**
 from the server without any serialization on the client/server.
 
 # Links
 
-[Github repo with PureRubyMarshal](https://github.com/iliabylich/pure_ruby_marshal)
+[GitHub repository with `PureRubyMarshal`](https://github.com/iliabylich/pure_ruby_marshal)
 
 [Possible Opal implementation of Marshal](https://github.com/opal/opal/pull/1191)

@@ -1,0 +1,27 @@
+spellchecker: hunspell
+
+matrix:
+
+
+- name: posts
+  sources:
+  - _posts/*.markdown
+  hunspell:
+    d: en_US
+  dictionary:
+    wordlists:
+    - wordlist.txt
+    output: build/dictionary/mkdocs.dic
+  pipeline:
+  - pyspelling.filters.markdown:
+      markdown_extensions:
+      - pymdownx.superfences:
+      - pymdownx.highlight:
+  - pyspelling.filters.html:
+      comments: false
+      attributes:
+      - title
+      - alt
+      ignores:
+      - :is(code, pre)
+  - pyspelling.filters.url:

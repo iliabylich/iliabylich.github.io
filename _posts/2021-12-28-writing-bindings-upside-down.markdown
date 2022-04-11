@@ -2,11 +2,11 @@
 layout: post
 title:  "Writing bindings upside down"
 date:   2021-12-28 00:00:00 +0300
-categories: rust c c++ ruby js node bindings llvm lto
+categories: Rust C C++ Ruby JavaScript Node bindings LLVM LTO
 toc: true
 comments: true
 ---
-Quite a long time ago I started writing C/C++/Ruby/Node.JS/WASM bindings so I could call [my Rust project](https://github.com/lib-ruby-parser/lib-ruby-parser) from those languages. It is a Ruby language parser.
+Quite a long time ago I started writing C/C++/Ruby/Node.js/WASM bindings so I could call [my Rust project](https://github.com/lib-ruby-parser/lib-ruby-parser) from those languages. It is a Ruby language parser.
 
 I tried multiple ways and found one that is very (VERY) controversial, but I think it deserves it's own article.
 
@@ -36,11 +36,11 @@ then change your includes to be slightly more compatible with C++ (`stdio.h` -> 
 + Pros: very simple.
 + Cons: your API has raw pointers, raw array/string structures that expose everything and are error-prone when used.
 
-How can you use it in Ruby/Node.JS? Again, let's start with "traditional" solution. For Ruby take your C library, for Node.JS take C++ library and "wrap" it using a "native" extension.
+How can you use it in Ruby/Node.js? Again, let's start with "traditional" solution. For Ruby take your C library, for Node.js take C++ library and "wrap" it using a "native" extension.
 
-It is possible to "attach" any arbitrary data to Ruby/Node.JS objects
+It is possible to "attach" any arbitrary data to Ruby/Node.js objects
 + Ruby has [`TypedData_Wrap_Struct` function](https://docs.ruby-lang.org/en/2.4.0/extension_rdoc.html#label-C+struct+to+Ruby+object)
-+ Node.JS has [`Napi::External`](https://github.com/nodejs/node-addon-api/blob/main/doc/external.md)
++ Node.js has [`Napi::External`](https://github.com/nodejs/node-addon-api/blob/main/doc/external.md)
 
 In both cases it's possible to get pointer to attached data at any moment, both require you to specify a function that GC calls to free attached data.
 
@@ -55,7 +55,7 @@ Of course it'd be unfair to not mention that it's always possible to type-cast s
 
 1. C -> C++ - by converting C structs to pretty C++ classes with smart pointers and collections
 2. C -> Ruby - by creating Ruby objects from C structs
-3. C++ -> Node.JS - by creating JavaScript objects from C++ classes
+3. C++ -> Node.js - by creating JavaScript objects from C++ classes
 
 + Pros: this way it's actually less dangerous. You can cover it with unit-tests and check with ASAN/Valgrind/LSAN that you have no segfaults, memory leaks or incorrect memory access.
 + Cons: you have to copy a bunch of data and it will hurt performance. Many of your methods have to be rewritten to target language OR you have convert C++/Ruby/JS objects back to C to call original C functions.
@@ -63,12 +63,12 @@ Of course it'd be unfair to not mention that it's always possible to type-cast s
 A small note on copying: it is possible to "move" some data in certain cases and languages:
 
 + Ruby has a family of `rb_str_new_*` functions, but literally all of them take `const char *ptr, size_t len`, however, it's possible to create a "dummy" heap-allocated Ruby `String` and set `ptr` and `len` on it. It is possible only (and only) because internals of all Ruby objects (including `String`) are fully exposed on C layer.
-+ Node.JS has a [`Napi::String`](https://github.com/nodejs/node-addon-api/blob/main/doc/string.md) class for that but it takes either a C++ `const std::string&` or `const char *`. From what I know internals are not available, so copying is necessary.
-+ C++ has a `std::string` that doesn't have a "take-and-store-what's-given" constructor that takes a `char *` (I would call it a "move" constructor, but this name has a different meaning in C++ :D). There's a `const char *` constructor that performs copying. Of course it's possible to create a compiler-dependent type-casting to a class with the same set of fields, move pointer + len + capacity there and convert it back to `std::string`. It's ugly, but definitely doable.
++ Node.js has a [`Napi::String`](https://github.com/nodejs/node-addon-api/blob/main/doc/string.md) class for that but it takes either a C++ `const std::string&` or `const char *`. From what I know internals are not available, so copying is necessary.
++ C++ has a `std::string` that does not have a "take-and-store-what's-given" constructor that takes a `char *` (I would call it a "move" constructor, but this name has a different meaning in C++ :D). There's a `const char *` constructor that performs copying. Of course it's possible to create a compiler-dependent type-casting to a class with the same set of fields, move pointer + `len` + capacity there and convert it back to `std::string`. It's ugly, but definitely doable.
 
 ## A demo, small but representative
 
-Let's start. I'd like to demonstrate a different solution on a tiny example. Let's write a micro-library that has several Rust structs, something like a function that, let's say, takes a `String` and returns a `Vec` of all non-ascii chars. It's called `foo`.
+Let's start. I'd like to demonstrate a different solution on a tiny example. Let's write a micro-library that has several Rust structs, something like a function that, let's say, takes a `String` and returns a `Vec` of all non-ASCII chars. It's called `foo`.
 
 ```
 pub fn foo(s: &str) -> Vec<char> {
@@ -93,11 +93,11 @@ We could define our own `repr(C)` structs together with `impl From<RustType> for
 Let's think for a moment about C++, Ruby and Node:
 
 + In C++ I'd really like to use `std::vector` for `Vec` and `std::string` for `char`.
-+ For both Ruby and Node.JS I want `Array` for `Vec` and `String` for `char`.
++ For both Ruby and Node.js I want `Array` for `Vec` and `String` for `char`.
 
 What if our library could depend on some contract that requires bindings to provide primitives? The contract will be the same for all bindings, but implementation will be different.
 
-Rust doesn't know what is C++ `std::vector` or Ruby `String`, but we know it, our bindings know it and by providing a set of foreign utility functions (implemented on the bindings side) we could work with it just like with native `std::Vec<T>`.
+Rust does not know what is C++ `std::vector` or Ruby `String`, but we know it, our bindings know it and by providing a set of foreign utility functions (implemented on the bindings side) we could work with it just like with native `std::Vec<T>`.
 
 ![library-with-external-primitives.png](https://raw.githubusercontent.com/iliabylich/writing-bindings-upside-down/master/images/library-with-external-primitives.png?v1)
 
@@ -137,7 +137,7 @@ typedef struct CharList
 #endif // STRUCTS_H
 ```
 
-Now the question is: how can we return this `CharList` from our Rust code? We could use bindgen and something-something. No, no and no.
+Now the question is: how can we return this `CharList` from our Rust code? We could use `bindgen` and something-something. No, no and no.
 
 Instead, let's make Rust think that `CharList` on its side is some struct of some (AOT-known) size without any meaningful fields. To do that we need to dump sizes of our structs and make them available in C:
 
@@ -262,10 +262,10 @@ Now if we try to return `CharList` from our `foo` function we get compilation er
 How can we implement it? Let's take a look again at used APIs.
 
 1. we iterate over given string (it'll be a `const *u8` in C API) - we have it
-2. we check `c.is_ascii()` - that's also ok
+2. we check `c.is_ascii()` - that's also OK
 3. we need to map `char` to foreign `Char` - **this requires a constructor**
 4. we need a way to construct `CharList` from chars - **this requires methods like `CharList::new()` and `CharList::push()`**
-5. we have a unit-test that needs `CharList::len()`, `CharList::at()`, `impl PartialEq for Char` (to compare individual chars) and `impl std::fmt::Debug for Char` (to print LHS/RHS if assertions fails)
+5. we have a unit-test that needs `CharList::len()`, `CharList::at()`, `impl PartialEq for Char` (to compare individual chars) and `impl std::fmt::Debug for Char` (to print left/right-hand side if assertions fails)
 
 So, here's a list of "external" (i.e. in the `mod external {}` block) methods we want to have:
 
@@ -391,9 +391,9 @@ impl CharList {
 }
 ```
 
-Ok, now we have a contract. Rust relies on it, but C so far doesn't provide anything. If we try to run tests with `--features=external` we get a bunch of linkage errors, which is 100% expected. Time to implement in on C side.
+OK, now we have a contract. Rust relies on it, but C so far does not provide anything. If we try to run tests with `--features=external` we get a bunch of linkage errors, which is 100% expected. Time to implement in on C side.
 
-This is a "shared" version that we'll use for C++/Ruby/Node.JS bindings
+This is a "shared" version that we'll use for C++/Ruby/Node.js bindings
 
 ```c
 #ifndef BINDINGS_H
@@ -482,7 +482,7 @@ $ clang c-bindings/bindings.c -g -c -o c-bindings/all.o
 $ ar rc c-bindings/libbindings.a c-bindings/all.o
 ```
 
-And change our `build.rs` script to link with it (the purpose of these env variables is to make external primitives implementation "pluggable"):
+And change our `build.rs` script to link with it (the purpose of these environment variables is to make external primitives implementation "pluggable"):
 
 ```rust
 let external_lib_path = env!("EXTERNAL_LIB_PATH");
@@ -547,7 +547,7 @@ using CharList = std::vector<Char>;
 #endif // STRUCTS_HPP
 ```
 
-C functions are the same, but these classes are incompatible with C FFI, so we need to define our BLOBs:
+C functions are the same, but these classes are incompatible with C FFI, so we need to define our blob structs:
 
 ```cpp
 #ifndef BINDINGS_SUPPORT_HPP
@@ -602,7 +602,7 @@ Here `DECLARE_BLOB` macro for given `Type` defines:
 
 This conversion with `union` is an equivalent of `std::mem::transmute` from Rust (C++20 has `std::bit_cast` for that, but `union` shows better what happens under the hood). Also we `std::move` the value to and from `union` on conversion, this is important (otherwise, copyable types are copied).
 
-However, it has a requirement for `T` to be both movable and constructible with no args. We could do `std::memset(this, 0, sizeof(T))`, but some move constructors/assignment operators swap fields of `this` and given `other`, and so sometimes it's invalid to call a destructor on an object full of zeroes (of course it totally depends on the structure of the object).
+However, it has a requirement for `T` to be both movable and constructible with no arguments. We could do `std::memset(this, 0, sizeof(T))`, but some move constructors/assignment operators swap fields of `this` and given `other`, and so sometimes it's invalid to call a destructor on an object full of zeroes (of course it totally depends on the structure of the object).
 
 With these blobs implementing binding functions is trivial:
 
@@ -750,7 +750,7 @@ Char_BLOB char_list__at(const CharList_BLOB *self, size_t idx)
 }
 ```
 
-Looks similar to C++ bindings, right? Ok, can we run Rust tests with Ruby primitives? Unfortunately, no. These methods expect Ruby VM to be up and running and embedding Ruby is not something many Ruby developers do.
+Looks similar to C++ bindings, right? OK, can we run Rust tests with Ruby primitives? Unfortunately, no. These methods expect Ruby VM to be up and running and embedding Ruby is not something many Ruby developers do.
 
 Instead, we need to re-compile it to a dynamically-loaded library that (once loaded) registers a `foo` method that takes a string, passes its `const char *` pointer to our `foo` function defined in Rust and returns `CharList` back to Ruby space.
 
@@ -813,7 +813,7 @@ $ ruby -r./ruby-bindings/foo -e 'p foo("abc😋中国")'
 ["😋", "中", "国"]
 ```
 
-In fact there are many more options that are passed to `clang` above, check out [the repo](https://github.com/iliabylich/writing-bindings-upside-down) if you want to try it yourself.
+In fact there are many more options that are passed to `clang` above, check out [the repository](https://github.com/iliabylich/writing-bindings-upside-down) if you want to try it yourself.
 
 ## Memory leaks
 
@@ -829,7 +829,7 @@ or (to track it when running Rust tests)
 RUSTFLAGS="-Z sanitizer=address" ... cargo test
 ```
 
-(On Mac make sure to use `clang` from Homebrew, version that ships with OS doesn't support ASAN)
+(On Mac make sure to use `clang` from Homebrew, version that ships with OS does not support ASAN)
 
 Running tests with this options shows that we have a leak somewhere in
 
@@ -929,7 +929,7 @@ void char_list__drop(CharList_BLOB *self)
 
 How about performance? When we compile with Rust primitives we use LTO and so things from Rust standard library can be optimized together with our code. Luckily, there's a way to do that for external primitives too.
 
-I'd like to demonstrate it on the low level, first let's compile everything to LLVM IR:
+I would like to demonstrate it on the low level, first let's compile everything to LLVM IR:
 
 ```sh
 $ clang-13 -S -emit-llvm c-bindings/bindings.c -o c-bindings/bindings.ll
@@ -1021,11 +1021,11 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
 
 Rust standard library is compiled directly to object files, but our code is `LLVM IR bitcode`. **This way we can get zero-cost bindings defined externally**.
 
-Of course, it's not gonna work with Ruby or NodeJS, both of them have a giant `libruby.so` (or `libnode.so`) that defines all functions and constants that your extension relies on. The extension itself is compiled with `-Wl,-undefined,dynamic_lookup` and symbol lookup is performed at runtime. I feel like technically it's possible, the entire Ruby/NodeJS runtime could be compiled to a static `libruby.a`/`libnode.a` that defines all VM objects as external (because that's a singleton that we need to hook into), but all functions can provide their implementation (of course, in LLVM IR format), and so they can be inlined into our bindings implementation. I haven't experimented with it yet, and honestly I'm not going to :) If you know anything about existing discussions around it, please, ping me on Twitter.
+Of course, it's not gonna work with Ruby or Node.js, both of them have a giant `libruby.so` (or `libnode.so`) that defines all functions and constants that your extension relies on. The extension itself is compiled with `-Wl,-undefined,dynamic_lookup` and symbol lookup is performed at runtime. I feel like technically it's possible, the entire Ruby/Node.js runtime could be compiled to a static `libruby.a`/`libnode.a` that defines all VM objects as external (because that's a singleton that we need to hook into), but all functions can provide their implementation (of course, in LLVM IR format), and so they can be inlined into our bindings implementation. I haven't experimented with it yet, and honestly I'm not going to :) If you know anything about existing discussions around it, please, ping me on Twitter.
 
 ## The whole picture, again
 
-Demo repo is available [here](https://github.com/iliabylich/writing-bindings-upside-down)
+Demo repository is available [here](https://github.com/iliabylich/writing-bindings-upside-down)
 
 To sum up:
 
@@ -1045,4 +1045,4 @@ Cons:
 
 + The library needs quite a lot of changes to support "external" primitives. That's not an easy task.
 + The library needs to ship with a "reference implementation", to verify that existing external functions are enough to build everything.
-+ There are minor differences between standard types in languages, for example C++ has a small string optimization, and small strings are not "containers". On the other side Rust strings are true containers, and library developers may expect "external" string to be a container, too, but on the bindings side `std::string` from C++ doesn't fully match the contract (i.e. you can't borrow a `char *` from `std::string` and expect it to live as long as the string lives). In some cases it can become really hard to track and fix.
++ There are minor differences between standard types in languages, for example C++ has a small string optimization, and small strings are not "containers". On the other side Rust strings are true containers, and library developers may expect "external" string to be a container, too, but on the bindings side `std::string` from C++ does not fully match the contract (i.e. you can't borrow a `char *` from `std::string` and expect it to live as long as the string lives). In some cases it can become really hard to track and fix.

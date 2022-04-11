@@ -6,14 +6,14 @@ categories: ruby binding closure debugging
 toc: true
 comments: true
 ---
-Consider the following situation: you've got an exception in production. Of course, all of us are good developers, but you know, sometimes \*it just happens. What do you usually do to get some information about the error? You just grab the request parameters to test it locally, right? Then I might have a better solution for you: dump your memory once an error happens and restore the dump later to debug it.
+Consider the following situation: you have got an exception in production. Of course, all of us are good developers, but you know, sometimes \*it just happens. What do you usually do to get some information about the error? You just grab the request parameters to test it locally, right? Then I might have a better solution for you: dump your memory once an error happens and restore the dump later to debug it.
 
 ## Binding
 
 In Ruby the best candidate for doing this is `Binding` class. If you have a binding, your can easily do some debug using well-known `pry` gem. But the binding itself cannot be dumped (at least not, using default Ruby tools).
 
 How to get a local binding? Just use `binding`. How to get a binding from an object? Just add a method to you class:
-``` ruby
+```ruby
 class MyClass
   def local_binding
     binding
@@ -32,8 +32,8 @@ In fact, that's all you need to restore your binding.
 
 ## Marshaling
 
-How can we dump an arbitrary structure? Ruby has a class in stdlib called `Marshal`. The two core methods of this class are `dump` and `load`:
-``` ruby
+How can we dump an arbitrary structure? Ruby has a class in the standard library called `Marshal`. The two core methods of this class are `dump` and `load`:
+```ruby
 Point = Struct.new(:x, :y)
 a = Point.new(34, 65)
 marshaled = Marshal.dump(a)
@@ -56,22 +56,22 @@ That sound really sad, but in most cases we can ignore these limitations. When w
 
 Well, we can patch every single class in Ruby and add `marshal_load` and `marshal_dump` hooks to them, but that's just horrible. It would be much, much better to write a set of classes that are each responsible for converting a specific group of objects.
 
-With that in mind I’ve implemented:
+With that in mind I have implemented:
 1. `PrimitiveDumper` - for dumping primitive objects, like numbers, booleans.
 2. `ArrayDumper` - for arrays.
 3. `HashDumper` - for hashes.
 4. `ObjectDumper` - for custom objects.
 5. `ClassDumper` - for classes.
-6. `ProcDumper` - for proc/method objects
+6. `ProcDumper` - for `proc`/method objects
 7. `MagicDumper` - for "magical objects" (see 'dumping magical objects' section)
 8. `ExistingObjectDumper` - for existing objects (see 'dumping recurring objects' section)
 
-Every dumper takes an object that we need to dump and returns its marshalable representation. Later you can use the same dumper to deconvert representation back and get the original object.
+Every dumper takes an object that we need to dump and returns its marshalable representation. Later you can use the same dumper to restore representation back and get the original object.
 
 You can find the implementation of these dumpers [here](https://github.com/iliabylich/binding_dumper/tree/master/lib/binding_dumper/dumpers) and the specs for them [here](https://github.com/iliabylich/binding_dumper/tree/master/spec/binding_dumper/dumpers).
 
 Here is, probably, the most complicated example:
-``` ruby
+```ruby
 def undumpable_recursive_object
   @undumpable_recursive ||= begin
     p = Point.allocate
@@ -83,7 +83,7 @@ end
 ```
 
 After converting this object using a system of dumpers result looks like this:
-``` ruby
+```ruby
 {
   _klass: Point,
   _ivars: {
@@ -103,8 +103,8 @@ This hash can be easily marshaled and restored back. But yes, we lose our `Strin
 
 ## Dumping Magical objects
 
-After writing the first version of the library, I've tested it with a blank Rails application. The testing code was:
-``` ruby
+After writing the first version of the library, I have tested it with a blank Rails application. The testing code was:
+```ruby
 class UsersController < ApplicationController
   def index
     @users = User.all.to_a # 5 records
@@ -115,10 +115,10 @@ class UsersController < ApplicationController
 end
 ```
 
-The length of the dump was  ~30 screens and it took ~20 seconds to generate it. Most of the data was coming from objects related to Rails itself. Things like Rails configs, backtrace cleaners, arrays of middlewares, and so on. Do we need them? No. These objects are the same for every request, so we can ignore them.
+The length of the dump was  ~30 screens and it took ~20 seconds to generate it. Most of the data was coming from objects related to Rails itself. Things like Rails configuration, backtrace cleaners, arrays of middlewares, and so on. Do we need them? No. These objects are the same for every request, so we can ignore them.
 
-But at the same time, we need to save and restore all references from 'dumpable' objects to 'magic' objects, we can't just omit them. This logic is implemented in [BindingDumper::MagicObjects](https://github.com/iliabylich/binding_dumper/blob/master/lib/binding_dumper/magic_objects.rb) module and here’s how you can use it:
-``` ruby
+But at the same time, we need to save and restore all references from 'serializable' objects to 'magic' objects, we can't just omit them. This logic is implemented in [`BindingDumper::MagicObjects`](https://github.com/iliabylich/binding_dumper/blob/master/lib/binding_dumper/magic_objects.rb) module and here’s how you can use it:
+```ruby
 class A
   @config = :config
 end
@@ -128,24 +128,24 @@ p BindingDumper::MagicObjects.pool
 => {10633360=>"A", 600668=>"A.instance_variable_get(:@config)"}
 ```
 
-So, it builds a mapping between `object_id` and the way how to get this object. Using this functionality we can easily get whether existing object is 'magical', and if yes - dump its string representation (to eval it on loading phase). Let's say, we need to dump `Rails.application.config`, one of the 'magical' objects. We need to get its `object_id`, find it in the pool and remember the string that returns rails config after evaluation, i.e.:
-``` ruby
+So, it builds a mapping between `object_id` and the way how to get this object. Using this functionality we can easily get whether existing object is 'magical', and if yes - dump its string representation (to `eval` it on loading phase). Let's say, we need to dump `Rails.application.config`, one of the 'magical' objects. We need to get its `object_id`, find it in the pool and remember the string that returns rails configuration after evaluation, i.e.:
+```ruby
 "Rails.
   instance_variable_get(:@app_class).
   instance_variable_get(:@instance).
   instance_variable_get(:@config)"
 ```
 
-After this optimization we have to spend ~20ms to build an object pool and ~200ms to dump a binding.
+After this optimization we have to spend ~20 ms to build an object pool and ~200 ms to dump a binding.
 
 ## Dumping recurring objects
 
 We can optimize it even more. A lot of things like `request`, `response` are shared as instance variables across ~10 objects. We can dump our `request` object only once, remember its `object_id` and use a reference while dumping other objects that use it.
 
-Let's say, we are in the initial memory (MEM1). We dump a binding, open another console with separated memory (MEM2) and restore a binding. In the example above (about recursive structure) there was a key `:_existing_object_id` that returns an `object_id` from MEM1.
+Let's say, we are in the initial memory (`MEM1`). We dump a binding, open another console with separated memory (`MEM2`) and restore a binding. In the example above (about recursive structure) there was a key `:_existing_object_id` that returns an `object_id` from `MEM1`.
 
-In MEM2 we restore a binding and create a mapping
-``` ruby
+In `MEM2` we restore a binding and create a mapping
+```ruby
 {
   object_id_from_MEM1 =>
   restored_object_in_MEM2
@@ -172,7 +172,7 @@ To load it back:
 
 Steps 1-4 and 1-3 are already implemented. The last step – making the context pretty – means that we need to inject local_binding method into the context and make it look like the “real” binding (inject local variables to the binding).
 
-``` ruby
+```ruby
 # we just have it,
 # it's a `self` from the place where `binding.dump` was called
 context
@@ -188,7 +188,7 @@ subject.local_binding.eval('local_variables') == local_variables
 ```
 
 The pseudo-code for loading and patching the context looks like:
-``` ruby
+```ruby
 marshaled = StoredBinding.last.data
 converted = Marshal.load(marshaled)
 restored = Dumpers.load(converted)
@@ -213,10 +213,10 @@ The actual implementation can be found [here](https://github.com/iliabylich/bind
 
 ## Compatibility with old versions of Ruby
 
-Currently the gem supports Ruby versions from 1.9.3 to 2.2.3. I had a few issues with porting the code from 2.0.0 to 1.9.3, like the lack of kwargs and `Module#prepend`. The funniest one was that in versions before 2.1.0 there is no `binding.local_variable_set` - there is only `binding.eval` that takes a string, not a block.
+Currently the gem supports Ruby versions from 1.9.3 to 2.2.3. I had a few issues with porting the code from 2.0.0 to 1.9.3, like the lack of keyword arguments and `Module#prepend`. The funniest one was that in versions before 2.1.0 there is no `binding.local_variable_set` - there is only `binding.eval` that takes a string, not a block.
 
 How can we pass a complex object to `eval`? The solution is not so difficult, because we have the object right here and right now, and the binding uses the same memory as the main thread. This means that we can pass the `object_id` of our object to `eval` string and get it there using `ObjectSpace._id2ref`:
-``` ruby
+```ruby
 undumped[:lvars].each do |lvar_name, lvar|
   result.eval("#{lvar_name} = ObjectSpace._id2ref(#{lvar.object_id})")
 end
@@ -224,7 +224,7 @@ end
 
 ## Known issues
 
-I've tested the gem locally with a few projects. Everything was fine, but:
+I have tested the gem locally with a few projects. Everything was fine, but:
 1. Encoding. The data that the gem produces should be stored in UTF-8
 2. The difference between Rails server and Rails console. There are some classes that are loaded only when the server is started (like `Rails::BacktraceCleaner` and some others from `NewRelic` gem). You have to require corresponding files manually before loading the binding in the console.
 
@@ -236,8 +236,8 @@ To try it out, clone the [GitHub repository](https://github.com/iliabylich/bindi
 
 The gem is fully tested with its specs running on [Travis CI](https://travis-ci.org/iliabylich/binding_dumper/). There's also a [script](https://github.com/iliabylich/binding_dumper/blob/master/bin/multitest) that can be used to run the whole test suite locally on **every** supported version of Ruby. But that's definitely not enough for a gem to become completely production-ready.
 
-That's why I ask everyone who read this article: if you think that the idea of this gem should stay alive, that this method of debugging can be useful, and you would like to use it yourself, please, try it out locally and share your finding with me (via Twitter or Github).
+That's why I ask everyone who read this article: if you think that the idea of this gem should stay alive, that this method of debugging can be useful, and you would like to use it yourself, please, try it out locally and share your finding with me (via Twitter or GitHub).
 
 ## Links
 
-[Github repo](https://github.com/iliabylich/binding_dumper)
+[GitHub repository](https://github.com/iliabylich/binding_dumper)

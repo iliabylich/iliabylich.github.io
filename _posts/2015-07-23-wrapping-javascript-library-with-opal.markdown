@@ -8,7 +8,7 @@ comments: true
 ---
 # Introduction
 
-The task that is solved here is not real, but it's still a good example of (probably?) real work with Opal. I could choose some complex enough JavaScript library and write a simple wrapper using Opal, but there's no fun. Instead, let's write a wrapper for existing rich client-side application (it may show you how to wrap your existing application logic). Well, wrapper for something like a client-side scheduler may sound boring, so I've chosen a JS-based browser game called [BrowserQuest](http://browserquest.mozilla.org) [written](https://github.com/mozilla/BrowserQuest) by Mozilla, and I'll show you how to write a bot for it using Opal.
+The task that is solved here is not real, but it's still a good example of (probably?) real work with Opal. I could choose some complex enough JavaScript library and write a simple wrapper using Opal, but there's no fun. Instead, let's write a wrapper for existing rich client-side application (it may show you how to wrap your existing application logic). Well, wrapper for something like a client-side scheduler may sound boring, so I have chosen a JavaScript-based browser game called [`BrowserQuest`](http://browserquest.mozilla.org) [written](https://github.com/mozilla/BrowserQuest) by Mozilla, and I'll show you how to write a bot for it using Opal.
 
 # Opal
 
@@ -17,7 +17,7 @@ There are so many posts about [Opal](https://github.com/opal/opal), so I'm just 
 # Environment
 
 First of all, we need something that runs the game and injects a bot into the page. I, personally, while writing integration tests (this is the place, where we usually face to web drivers), prefer PhantomJS, but it's headless, so you can't enjoy watching how your bot works. We have to use something like Capybara + Selenium:
-``` ruby
+```ruby
 # Gemfile
 gem 'capybara'
 gem 'selenium-webdriver'
@@ -40,7 +40,7 @@ So, the script registers a driver, specifies its browser (Firefox), makes it def
 
 Dead simple:
 
-``` ruby
+```ruby
 Capybara.current_session.visit('http://browserquest.mozilla.org')
 # or in object-oriented style
 class Game
@@ -65,18 +65,18 @@ Now it runs a Firefox and opens the page with the game.
 
 # Compiling Opal
 
-So, there are two ways to compile Ruby into Javascript:
-+ compiling Ruby code as a string to JS string
-+ compiling specified Ruby file to JS string
+So, there are two ways to compile Ruby into JavaScript:
++ compiling Ruby code as a string to JavaScript string
++ compiling specified Ruby file to JavaScript string
 
 To compile a file with Ruby, run:
-``` ruby
+```ruby
 Opal.append_path('some/path/to/dir/with/your/files')
 Opal::Builder.build('relative/path/from/that/dir/to/you/file')
 ```
 
 To compile a string with ruby:
-``` ruby
+```ruby
 Opal.compile("plain ruby code")
 ```
 
@@ -91,14 +91,14 @@ The first way is what we really need:
 
 [This](https://github.com/mozilla/BrowserQuest/blob/master/client/js/main.js#L7) is the place where the main `App` class is created. But! It's defined in anonymous function, so this variable is not available outside the context.
 
-This game uses CommonJS for loading files. This library caches(?) all previously required files and instantly returns cached result on the seconds `require`.
+This game uses `CommonJS` to load files. This library caches all previously required files and instantly returns cached result on the seconds `require`.
 
 We can use it:
 1. require `app` file.
 2. wrap any of its methods with some logic that stores current app instance globally and then call `super`
 
-I've chosen a method called `start`:
-``` ruby
+I have chosen a method called `start`:
+```ruby
 # opal/bot.rb
 module Patch
   def self.apply
@@ -117,7 +117,7 @@ Patch.apply
 ```
 
 Some explanations:
-+ `%x{js code}` just passes provided JS into compiled version (i.e. runs it without any translation)
++ `%x{js code}` just passes provided JavaScript into compiled version (i.e. runs it without any translation)
 + After compiling this file we have access to a variable `currentApplication` that contains an instance of `App` class
 
 # Starting the game
@@ -135,23 +135,23 @@ This is the place where promises shine. Opal has its own standard library that
 + ships with Opal's code, so it's already in the page
 + has a class called `Promise` that acts pretty much like a `jQuery.Deferred()`
 
-``` ruby
+```ruby
 require 'promise'
 
 promise = Promise.new
 promise.then { puts 'Done' }
 promise.fail { puts 'Fail' }
 promise.resolve
-# => 'Done' (in JS console)
+# => 'Done' (in JavaScript console)
 # or
 promise.reject
 # => 'Fail'
 ```
 
-(`Promise` is like an object that is a combination of `callback`-s and `errback`-s, but you don't invoke callbacks manually, instead you just switch the state of your promise-object and it automatically triggers callbacks/errobacks)
+(`Promise` is like an object that is a combination of `callback`-s and `errback`-s, but you don't invoke callbacks manually, instead you just switch the state of your promise-object and it automatically triggers `callbacks`/`errbacks`)
 
 Here is a little helper module that saves our time:
-``` ruby
+```ruby
 module Utils
   def wait_for(promise = Promise.new, &waiting)
     result = waiting.call
@@ -180,12 +180,12 @@ class MyClass
 end
 ```
 
-`wait_for` method takes a promise (which is a blank promise object by default) and a block (which will be converted to JS function). It calls the block and `resolve`-s the promise if it is returned true. If not, it calls itself again after 100ms (`after` = `setTimeout`) with **the same promise object**
+`wait_for` method takes a promise (which is a blank promise object by default) and a block (which will be converted to JavaScript function). It calls the block and `resolve`-s the promise if it is returned true. If not, it calls itself again after 100 ms (`after` = `setTimeout`) with **the same promise object**
 
 To type player's name we should run:
-``` ruby
+```ruby
 # I'm using opal-jquery here
-# I think it doesn't require any explanation
+# I think it does not require any explanation
 input = Element.find('#nameinput')
 input.value = @player_name
 wait_for do
@@ -196,7 +196,7 @@ end
 ```
 
 To click the button, run:
-``` ruby
+```ruby
 button = Element.find('#createcharacter .play.button div')
 button.trigger(:click)
 wait_for do
@@ -209,14 +209,14 @@ end
 ```
 
 To close instructions, run:
-``` ruby
+```ruby
 Element.find('#instructions').trigger(:click)
 ```
 
 [And put everything together](https://github.com/iliabylich/opal-browserquest-bot/blob/master/bot/opal/commands/start_game.rb)
 
 To run this command, call
-``` ruby
+```ruby
 StartGame.new('Bot player').invoke.then do
   alert("I'm in the game")
 end
@@ -224,7 +224,7 @@ end
 
 # Time to wrap the code of the game
 
-As an enter point we are going to use global JS variable `currentApplication`. It has a property `game` (that, unexpectedly, returns instance of `Game` class). `game` has a `player` property (instance of `Player`) and `entities` property which is an object containing all entities on the map, their types and coordinates. You can easily find their JS implementations in the GitHub repository of the game.
+As an enter point we are going to use global JavaScript variable `currentApplication`. It has a property `game` (that, unexpectedly, returns instance of `Game` class). `game` has a `player` property (instance of `Player`) and `entities` property which is an object containing all entities on the map, their types and coordinates. You can easily find their JavaScript implementations in the GitHub repository of the game.
 
 So, our main objects are:
 + `currentApplication`
@@ -233,7 +233,7 @@ So, our main objects are:
 + `currentApplication.game.entities`
 
 First class for wrapping is definitely an `App`:
-``` ruby
+```ruby
 class Application
   include Native
 
@@ -252,10 +252,10 @@ class Application
   end
 end
 ```
-So, we have a class called `Application` that wraps some native JS object and has a ruby-method `game` that calls JS-method `game` and wraps it using `Game` class (see below). As a bonus, we have a class-method `current` that returns wrapped `currentApplication`.
+So, we have a class called `Application` that wraps some native JavaScript object and has a ruby-method `game` that calls JavaScript-method `game` and wraps it using `Game` class (see below). As a bonus, we have a class-method `current` that returns wrapped `currentApplication`.
 
 The next class is a `Game`:
-``` ruby
+```ruby
 class Game
   include Native
 
@@ -285,18 +285,18 @@ class Game
 end
 ```
 
-And again, this class can wrap any JS game object, has methods `player`, `say` and `entities` (`EntityCollection` is our next class to implement).
+And again, this class can wrap any JavaScript game object, has methods `player`, `say` and `entities` (`EntityCollection` is our next class to implement).
 
 (we can test method `say` write now, just put `Game.current.say('Hello')` to the block where the game is ready and start chatting with other players)
 
 # Entities
 
-The game provides a global JS object `Types` with all mobs/items/armors/weapons information, it allows to identify unknown entity, compare armors and weapons by rank. Basically, it provides everything for writing a bot logic.
+The game provides a global JavaScript object `Types` with all mobs/items/armors/weapons information, it allows to identify unknown entity, compare armors and weapons by rank. Basically, it provides everything for writing a bot logic.
 
-To convert it to Ruby, use ```Types = Native(`Types`)``` and use this object in the Ruby world!
+To convert it to Ruby, use ```Types = Native(`Types`)```and use this object in the Ruby world!
 
 Here is my definition of `Entity` class:
-``` ruby
+```ruby
 class Entity
   include Native
 
@@ -330,7 +330,7 @@ end
 
 Well, this class can wrap player/mob/armor/weapon/healing, but this is only a value-object, we still need to implement our collection-object `EntityCollection`:
 
-``` ruby
+```ruby
 class EntityCollection
   def initialize(native_entities)
     @entities = native_entities.map do |native_entity|
@@ -353,7 +353,7 @@ end
 
 (quickly and without any explanation):
 
-``` ruby
+```ruby
 class Player
   include Utils
   include Native
@@ -388,12 +388,12 @@ It's not as difficult once we have all these classes prepared. The algorithm of 
 2. Find a closest weapon (and pick up if it's enough close)
 3. Find a closest armor (and pick up if it's enough close)
 4. Find a closest healing (and pick up if it's enough close)
-5. GOTO 1
+5. `GOTO` 1
 
 All of these steps will be our methods, and all of them **must** be asynchronous.
 
 Just one method is missing here (`closest`):
-``` ruby
+```ruby
 class EntityCollection
   def by_distance
     entities = @entities.sort_by do |entity|
@@ -418,7 +418,7 @@ end
 
 ## Killing a mob
 
-``` ruby
+```ruby
 def kill_mob
   closest_mob = Game.current.entities.mobs.closest
   `#{Game.current.to_n}.makePlayerAttack(#{closest_mob.to_n})`
@@ -429,7 +429,7 @@ end
 
 ## Picking up an abstract item
 
-``` ruby
+```ruby
 def pick_up
   `#{Game.current.to_n}.makePlayerGoToItem(#{item.to_n});`
 end
@@ -437,7 +437,7 @@ end
 
 ## Picking up a weapon
 
-``` ruby
+```ruby
 def get_armor
   current_weapon_name = Player.current.weapon_name
   weapons = Game.current.entities.weapons
@@ -461,7 +461,7 @@ Just like a previous snippet, but with `armors` instead of `weapons`
 ## What's missing?
 
 All of these steps should return promises, every single method written below should wait for player to stop moving and attacking. To make this we need some common method like:
-``` ruby
+```ruby
 def wait_until_inactive
   promise = Promise.new
   wait_for do
@@ -482,7 +482,7 @@ And put it to the end of each action method.
 
 We need the main method `farm`, right?
 
-``` ruby
+```ruby
 def farm
   kill_mob.then do
     get_weapon.then do
@@ -496,8 +496,8 @@ def farm
 end
 ```
 
-This, is probably the thing that I've personally learned during writing this article. Even if you think in Ruby, you still have to deal with asynchronous components like callbacks/promises. When you need to make an HTTP request in Ruby, you just get you favorite HTTP adapter (mine is `RestClient`), send a request and your interpreter waits for response. In JS you have to process response in some callback, because you can't just stop your interpreter (you know, it blocks UI).
+This, is probably the thing that I have personally learned during writing this article. Even if you think in Ruby, you still have to deal with asynchronous components like callbacks/promises. When you need to make an HTTP request in Ruby, you just get you favorite HTTP adapter (mine is `RestClient`), send a request and your interpreter waits for response. In JavaScript you have to process response in some callback, because you can't just stop your interpreter (you know, it blocks UI).
 
 # Conclusion
 
-As for me, the main thing Opal gives to you is some ability to think in terms of Ruby classes/modules/inheritance system. But it doesn't let you completely escape from JS ecosystem (no callbacks? - block is a callback). I would say, most of Opal functionality related to Ruby classes can be replaced with, for example, [JsClass](http://jsclass.jcoglan.com/) library (which is really wonderful). Opal allows you to compile **existing** Ruby libraries to JavaScript and use them on the client - this is probably the main feature. Some day significant amount of Ruby libraries will be ported to client-side and probably some day we will think in terms of Ruby even on the client.
+As for me, the main thing Opal gives to you is some ability to think in terms of Ruby classes/modules/inheritance system. But it does not let you completely escape from JavaScript ecosystem (no callbacks? - block is a callback). I would say, most of Opal functionality related to Ruby classes can be replaced with, for example, [`JsClass`](http://jsclass.jcoglan.com/) library (which is really wonderful). Opal allows you to compile **existing** Ruby libraries to JavaScript and use them on the client - this is probably the main feature. Some day significant amount of Ruby libraries will be ported to client-side and probably some day we will think in terms of Ruby even on the client.
