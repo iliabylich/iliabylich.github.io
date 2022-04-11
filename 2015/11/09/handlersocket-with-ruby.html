@@ -123,7 +123,7 @@
   <li>a plugin for MySQL</li>
   <li>which allows you to read/write to MySQL</li>
   <li>and gives you a separate connection to MySQL</li>
-  <li>and doesn’t allow you to run SQL queries</li>
+  <li>and does not allow you to run SQL queries</li>
   <li>but allows to run simple CRUD queries <em>only</em> using indexes</li>
 </ul>
 
@@ -185,11 +185,11 @@ Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
 
 <p>Type <code class="language-plaintext highlighter-rouge">P -&gt; 0 -&gt; your_database -&gt; your_table -&gt; PRIMARY -&gt; id,some_column</code> (where <code class="language-plaintext highlighter-rouge">-&gt;</code> is Tab). And press Enter. It should return <code class="language-plaintext highlighter-rouge">0 -&gt; 1</code>.</p>
 
-<p>This protocol looks ugly, but it may save you a lot of network usage. It’s very compact, and parsing doesn’t require any CPU usage.</p>
+<p>This protocol looks ugly, but it may save you a lot of network usage. It’s very compact, and parsing does not require any CPU usage.</p>
 
 <h1 id="use-cases">Use cases</h1>
 
-<p>If you don’t have too much queries per second, probably you don’t need HS. It doesn’t optimize queries, but you may save some time on request parsing + some network. You may find it interesting if you have a lot of simple queries, like simple <code class="language-plaintext highlighter-rouge">SELECT</code>’s by primary key.</p>
+<p>If you don’t have too much queries per second, probably you don’t need HS. It does not optimize queries, but you may save some time on request parsing + some network. You may find it interesting if you have a lot of simple queries, like simple <code class="language-plaintext highlighter-rouge">SELECT</code>’s by primary key.</p>
 
 <h1 id="ruby-adapter">Ruby adapter</h1>
 
@@ -232,11 +232,11 @@ Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
 <span class="c1"># SELECT id, name FROM hs_test.users WHERE id = 12 LIMIT 100</span>
 </code></pre></div></div>
 
-<p>Other commands like auth/insert/update/delete are not there yet. But it’s not that difficult to add them, check out <a href="https://github.com/iliabylich/handlersocket-ruby/blob/master/lib/handlersocket.rb#L37">this file</a>, implementation of other methods also takes ~2 lines of code.</p>
+<p>Other commands like <code class="language-plaintext highlighter-rouge">auth</code>/<code class="language-plaintext highlighter-rouge">insert</code>/<code class="language-plaintext highlighter-rouge">update</code>/<code class="language-plaintext highlighter-rouge">delete</code> are not there yet. But it’s not that difficult to add them, check out <a href="https://github.com/iliabylich/handlersocket-ruby/blob/master/lib/handlersocket.rb#L37">this file</a>, implementation of other methods also takes ~2 lines of code.</p>
 
 <h1 id="benchmarks">Benchmarks</h1>
 
-<p>The most interesting part. To run benchmarks locally, clone the gem repository on <a href="https://github.com/iliabylich/handlersocket-ruby">github</a> and run <code class="language-plaintext highlighter-rouge">rake benchmark</code>. It compares Mysql2 gem to Ruby-based and C-based implementations. Here are my results:</p>
+<p>The most interesting part. To run benchmarks locally, clone the gem repository on <a href="https://github.com/iliabylich/handlersocket-ruby">GitHub</a> and run <code class="language-plaintext highlighter-rouge">rake benchmark</code>. It compares <code class="language-plaintext highlighter-rouge">mysql2</code> gem to Ruby-based and C-based implementations. Here are my results:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Calculating -------------------------------------
              pure HS     2.000  i/100ms
@@ -253,12 +253,12 @@ Comparison:
              pure HS:       50.0 i/s - 2208314.91x slower
 </code></pre></div></div>
 
-<p>I’ve run these benchmarks on 4 cores server with 4GB ram on Percona server 5.6. On both small and huge (30 millions records) datasets, with enabled and disabled query cache, with a small and a big value of <code class="language-plaintext highlighter-rouge">innodb_buffer_pool_size</code>.</p>
+<p>I have run these benchmarks on 4 cores server with 4 GB ram on Percona server 5.6. On both small and huge (30 millions records) datasets, with enabled and disabled query cache, with a small and a big value of <code class="language-plaintext highlighter-rouge">innodb_buffer_pool_size</code>.</p>
 
-<p>There’s a 20-30x performance difference between Mysql2 and a C-based version of HandlerSocket because:</p>
+<p>There’s a <code class="language-plaintext highlighter-rouge">20-30x</code> performance difference between <code class="language-plaintext highlighter-rouge">mysql2</code> and a C-based version of HandlerSocket because:</p>
 <ul>
   <li>almost no time is taken for request parsing</li>
-  <li>mysql2 is just a way more complex than my gem</li>
+  <li><code class="language-plaintext highlighter-rouge">mysql2</code> is just a way more complex than my gem</li>
 </ul>
 
 <p>And I was really disappointed by performance of Ruby-based implementation. It’s 2 millions times slower than C-based. Why? There’s a magical number <code class="language-plaintext highlighter-rouge">50.0 i/s</code>, but I cannot find what does it mean. If you have an answer, please, ping me on Twitter.</p>
@@ -269,7 +269,7 @@ Comparison:
 
 <h1 id="conclusion">Conclusion</h1>
 
-<p>Once again, HandlerSocket saves your time on query parsing, buliding a query plan, it’s more compact, but is very limited. If you don’t have too many requests, don’t even think about using it.</p>
+<p>Once again, HandlerSocket saves your time on query parsing, building a query plan, it’s more compact, but is very limited. If you don’t have too many requests, don’t even think about using it.</p>
 
 <h1 id="links">Links</h1>
 

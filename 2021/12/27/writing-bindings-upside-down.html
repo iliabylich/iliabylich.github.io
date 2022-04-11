@@ -117,7 +117,7 @@
 </ul>
   </div>
 
-  <p>Quite a long time ago I started writing C/C++/Ruby/Node.JS/WASM bindings so I could call <a href="https://github.com/lib-ruby-parser/lib-ruby-parser">my Rust project</a> from those languages. It is a Ruby language parser.</p>
+  <p>Quite a long time ago I started writing C/C++/Ruby/Node.js/WASM bindings so I could call <a href="https://github.com/lib-ruby-parser/lib-ruby-parser">my Rust project</a> from those languages. It is a Ruby language parser.</p>
 
 <p>I tried multiple ways and found one that is very (VERY) controversial, but I think it deserves it’s own article.</p>
 
@@ -148,12 +148,12 @@
   <li>Cons: your API has raw pointers, raw array/string structures that expose everything and are error-prone when used.</li>
 </ul>
 
-<p>How can you use it in Ruby/Node.JS? Again, let’s start with “traditional” solution. For Ruby take your C library, for Node.JS take C++ library and “wrap” it using a “native” extension.</p>
+<p>How can you use it in Ruby/Node.js? Again, let’s start with “traditional” solution. For Ruby take your C library, for Node.js take C++ library and “wrap” it using a “native” extension.</p>
 
-<p>It is possible to “attach” any arbitrary data to Ruby/Node.JS objects</p>
+<p>It is possible to “attach” any arbitrary data to Ruby/Node.js objects</p>
 <ul>
   <li>Ruby has <a href="https://docs.ruby-lang.org/en/2.4.0/extension_rdoc.html#label-C+struct+to+Ruby+object"><code class="language-plaintext highlighter-rouge">TypedData_Wrap_Struct</code> function</a></li>
-  <li>Node.JS has <a href="https://github.com/nodejs/node-addon-api/blob/main/doc/external.md"><code class="language-plaintext highlighter-rouge">Napi::External</code></a></li>
+  <li>Node.js has <a href="https://github.com/nodejs/node-addon-api/blob/main/doc/external.md"><code class="language-plaintext highlighter-rouge">Napi::External</code></a></li>
 </ul>
 
 <p>In both cases it’s possible to get pointer to attached data at any moment, both require you to specify a function that GC calls to free attached data.</p>
@@ -170,7 +170,7 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
 <ol>
   <li>C -&gt; C++ - by converting C structs to pretty C++ classes with smart pointers and collections</li>
   <li>C -&gt; Ruby - by creating Ruby objects from C structs</li>
-  <li>C++ -&gt; Node.JS - by creating JavaScript objects from C++ classes</li>
+  <li>C++ -&gt; Node.js - by creating JavaScript objects from C++ classes</li>
 </ol>
 
 <ul>
@@ -182,13 +182,13 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
 
 <ul>
   <li>Ruby has a family of <code class="language-plaintext highlighter-rouge">rb_str_new_*</code> functions, but literally all of them take <code class="language-plaintext highlighter-rouge">const char *ptr, size_t len</code>, however, it’s possible to create a “dummy” heap-allocated Ruby <code class="language-plaintext highlighter-rouge">String</code> and set <code class="language-plaintext highlighter-rouge">ptr</code> and <code class="language-plaintext highlighter-rouge">len</code> on it. It is possible only (and only) because internals of all Ruby objects (including <code class="language-plaintext highlighter-rouge">String</code>) are fully exposed on C layer.</li>
-  <li>Node.JS has a <a href="https://github.com/nodejs/node-addon-api/blob/main/doc/string.md"><code class="language-plaintext highlighter-rouge">Napi::String</code></a> class for that but it takes either a C++ <code class="language-plaintext highlighter-rouge">const std::string&amp;</code> or <code class="language-plaintext highlighter-rouge">const char *</code>. From what I know internals are not available, so copying is necessary.</li>
-  <li>C++ has a <code class="language-plaintext highlighter-rouge">std::string</code> that doesn’t have a “take-and-store-what’s-given” constructor that takes a <code class="language-plaintext highlighter-rouge">char *</code> (I would call it a “move” constructor, but this name has a different meaning in C++ :D). There’s a <code class="language-plaintext highlighter-rouge">const char *</code> constructor that performs copying. Of course it’s possible to create a compiler-dependent type-casting to a class with the same set of fields, move pointer + len + capacity there and convert it back to <code class="language-plaintext highlighter-rouge">std::string</code>. It’s ugly, but definitely doable.</li>
+  <li>Node.js has a <a href="https://github.com/nodejs/node-addon-api/blob/main/doc/string.md"><code class="language-plaintext highlighter-rouge">Napi::String</code></a> class for that but it takes either a C++ <code class="language-plaintext highlighter-rouge">const std::string&amp;</code> or <code class="language-plaintext highlighter-rouge">const char *</code>. From what I know internals are not available, so copying is necessary.</li>
+  <li>C++ has a <code class="language-plaintext highlighter-rouge">std::string</code> that does not have a “take-and-store-what’s-given” constructor that takes a <code class="language-plaintext highlighter-rouge">char *</code> (I would call it a “move” constructor, but this name has a different meaning in C++ :D). There’s a <code class="language-plaintext highlighter-rouge">const char *</code> constructor that performs copying. Of course it’s possible to create a compiler-dependent type-casting to a class with the same set of fields, move pointer + <code class="language-plaintext highlighter-rouge">len</code> + capacity there and convert it back to <code class="language-plaintext highlighter-rouge">std::string</code>. It’s ugly, but definitely doable.</li>
 </ul>
 
 <h2 id="a-demo-small-but-representative">A demo, small but representative</h2>
 
-<p>Let’s start. I’d like to demonstrate a different solution on a tiny example. Let’s write a micro-library that has several Rust structs, something like a function that, let’s say, takes a <code class="language-plaintext highlighter-rouge">String</code> and returns a <code class="language-plaintext highlighter-rouge">Vec</code> of all non-ascii chars. It’s called <code class="language-plaintext highlighter-rouge">foo</code>.</p>
+<p>Let’s start. I’d like to demonstrate a different solution on a tiny example. Let’s write a micro-library that has several Rust structs, something like a function that, let’s say, takes a <code class="language-plaintext highlighter-rouge">String</code> and returns a <code class="language-plaintext highlighter-rouge">Vec</code> of all non-ASCII chars. It’s called <code class="language-plaintext highlighter-rouge">foo</code>.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pub fn foo(s: &amp;str) -&gt; Vec&lt;char&gt; {
     s.chars().filter(|c| !c.is_ascii()).collect()
@@ -213,12 +213,12 @@ fn test_foo() {
 
 <ul>
   <li>In C++ I’d really like to use <code class="language-plaintext highlighter-rouge">std::vector</code> for <code class="language-plaintext highlighter-rouge">Vec</code> and <code class="language-plaintext highlighter-rouge">std::string</code> for <code class="language-plaintext highlighter-rouge">char</code>.</li>
-  <li>For both Ruby and Node.JS I want <code class="language-plaintext highlighter-rouge">Array</code> for <code class="language-plaintext highlighter-rouge">Vec</code> and <code class="language-plaintext highlighter-rouge">String</code> for <code class="language-plaintext highlighter-rouge">char</code>.</li>
+  <li>For both Ruby and Node.js I want <code class="language-plaintext highlighter-rouge">Array</code> for <code class="language-plaintext highlighter-rouge">Vec</code> and <code class="language-plaintext highlighter-rouge">String</code> for <code class="language-plaintext highlighter-rouge">char</code>.</li>
 </ul>
 
 <p>What if our library could depend on some contract that requires bindings to provide primitives? The contract will be the same for all bindings, but implementation will be different.</p>
 
-<p>Rust doesn’t know what is C++ <code class="language-plaintext highlighter-rouge">std::vector</code> or Ruby <code class="language-plaintext highlighter-rouge">String</code>, but we know it, our bindings know it and by providing a set of foreign utility functions (implemented on the bindings side) we could work with it just like with native <code class="language-plaintext highlighter-rouge">std::Vec&lt;T&gt;</code>.</p>
+<p>Rust does not know what is C++ <code class="language-plaintext highlighter-rouge">std::vector</code> or Ruby <code class="language-plaintext highlighter-rouge">String</code>, but we know it, our bindings know it and by providing a set of foreign utility functions (implemented on the bindings side) we could work with it just like with native <code class="language-plaintext highlighter-rouge">std::Vec&lt;T&gt;</code>.</p>
 
 <p><img src="https://raw.githubusercontent.com/iliabylich/writing-bindings-upside-down/master/images/library-with-external-primitives.png?v1" alt="library-with-external-primitives.png" /></p>
 
@@ -259,7 +259,7 @@ typedef struct CharList
 #endif // STRUCTS_H
 </code></pre></div></div>
 
-<p>Now the question is: how can we return this <code class="language-plaintext highlighter-rouge">CharList</code> from our Rust code? We could use bindgen and something-something. No, no and no.</p>
+<p>Now the question is: how can we return this <code class="language-plaintext highlighter-rouge">CharList</code> from our Rust code? We could use <code class="language-plaintext highlighter-rouge">bindgen</code> and something-something. No, no and no.</p>
 
 <p>Instead, let’s make Rust think that <code class="language-plaintext highlighter-rouge">CharList</code> on its side is some struct of some (AOT-known) size without any meaningful fields. To do that we need to dump sizes of our structs and make them available in C:</p>
 
@@ -381,10 +381,10 @@ fn main() {
 
 <ol>
   <li>we iterate over given string (it’ll be a <code class="language-plaintext highlighter-rouge">const *u8</code> in C API) - we have it</li>
-  <li>we check <code class="language-plaintext highlighter-rouge">c.is_ascii()</code> - that’s also ok</li>
+  <li>we check <code class="language-plaintext highlighter-rouge">c.is_ascii()</code> - that’s also OK</li>
   <li>we need to map <code class="language-plaintext highlighter-rouge">char</code> to foreign <code class="language-plaintext highlighter-rouge">Char</code> - <strong>this requires a constructor</strong></li>
   <li>we need a way to construct <code class="language-plaintext highlighter-rouge">CharList</code> from chars - <strong>this requires methods like <code class="language-plaintext highlighter-rouge">CharList::new()</code> and <code class="language-plaintext highlighter-rouge">CharList::push()</code></strong></li>
-  <li>we have a unit-test that needs <code class="language-plaintext highlighter-rouge">CharList::len()</code>, <code class="language-plaintext highlighter-rouge">CharList::at()</code>, <code class="language-plaintext highlighter-rouge">impl PartialEq for Char</code> (to compare individual chars) and <code class="language-plaintext highlighter-rouge">impl std::fmt::Debug for Char</code> (to print LHS/RHS if assertions fails)</li>
+  <li>we have a unit-test that needs <code class="language-plaintext highlighter-rouge">CharList::len()</code>, <code class="language-plaintext highlighter-rouge">CharList::at()</code>, <code class="language-plaintext highlighter-rouge">impl PartialEq for Char</code> (to compare individual chars) and <code class="language-plaintext highlighter-rouge">impl std::fmt::Debug for Char</code> (to print left/right-hand side if assertions fails)</li>
 </ol>
 
 <p>So, here’s a list of “external” (i.e. in the <code class="language-plaintext highlighter-rouge">mod external {}</code> block) methods we want to have:</p>
@@ -507,9 +507,9 @@ fn main() {
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Ok, now we have a contract. Rust relies on it, but C so far doesn’t provide anything. If we try to run tests with <code class="language-plaintext highlighter-rouge">--features=external</code> we get a bunch of linkage errors, which is 100% expected. Time to implement in on C side.</p>
+<p>OK, now we have a contract. Rust relies on it, but C so far does not provide anything. If we try to run tests with <code class="language-plaintext highlighter-rouge">--features=external</code> we get a bunch of linkage errors, which is 100% expected. Time to implement in on C side.</p>
 
-<p>This is a “shared” version that we’ll use for C++/Ruby/Node.JS bindings</p>
+<p>This is a “shared” version that we’ll use for C++/Ruby/Node.js bindings</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifndef BINDINGS_H
 #define BINDINGS_H
@@ -594,7 +594,7 @@ fn main() {
 <span class="nv">$ </span>ar rc c-bindings/libbindings.a c-bindings/all.o
 </code></pre></div></div>
 
-<p>And change our <code class="language-plaintext highlighter-rouge">build.rs</code> script to link with it (the purpose of these env variables is to make external primitives implementation “pluggable”):</p>
+<p>And change our <code class="language-plaintext highlighter-rouge">build.rs</code> script to link with it (the purpose of these environment variables is to make external primitives implementation “pluggable”):</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="n">external_lib_path</span> <span class="o">=</span> <span class="nd">env!</span><span class="p">(</span><span class="s">"EXTERNAL_LIB_PATH"</span><span class="p">);</span>
 <span class="nd">println!</span><span class="p">(</span><span class="s">"cargo:rustc-link-search={}"</span><span class="p">,</span> <span class="n">external_lib_path</span><span class="p">);</span>
@@ -656,7 +656,7 @@ fn main() {
 <span class="cp">#endif // STRUCTS_HPP
 </span></code></pre></div></div>
 
-<p>C functions are the same, but these classes are incompatible with C FFI, so we need to define our BLOBs:</p>
+<p>C functions are the same, but these classes are incompatible with C FFI, so we need to define our blob structs:</p>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifndef BINDINGS_SUPPORT_HPP
 #define BINDINGS_SUPPORT_HPP
@@ -712,7 +712,7 @@ fn main() {
 
 <p>This conversion with <code class="language-plaintext highlighter-rouge">union</code> is an equivalent of <code class="language-plaintext highlighter-rouge">std::mem::transmute</code> from Rust (C++20 has <code class="language-plaintext highlighter-rouge">std::bit_cast</code> for that, but <code class="language-plaintext highlighter-rouge">union</code> shows better what happens under the hood). Also we <code class="language-plaintext highlighter-rouge">std::move</code> the value to and from <code class="language-plaintext highlighter-rouge">union</code> on conversion, this is important (otherwise, copyable types are copied).</p>
 
-<p>However, it has a requirement for <code class="language-plaintext highlighter-rouge">T</code> to be both movable and constructible with no args. We could do <code class="language-plaintext highlighter-rouge">std::memset(this, 0, sizeof(T))</code>, but some move constructors/assignment operators swap fields of <code class="language-plaintext highlighter-rouge">this</code> and given <code class="language-plaintext highlighter-rouge">other</code>, and so sometimes it’s invalid to call a destructor on an object full of zeroes (of course it totally depends on the structure of the object).</p>
+<p>However, it has a requirement for <code class="language-plaintext highlighter-rouge">T</code> to be both movable and constructible with no arguments. We could do <code class="language-plaintext highlighter-rouge">std::memset(this, 0, sizeof(T))</code>, but some move constructors/assignment operators swap fields of <code class="language-plaintext highlighter-rouge">this</code> and given <code class="language-plaintext highlighter-rouge">other</code>, and so sometimes it’s invalid to call a destructor on an object full of zeroes (of course it totally depends on the structure of the object).</p>
 
 <p>With these blobs implementing binding functions is trivial:</p>
 
@@ -851,7 +851,7 @@ CHAR_LIST_SIZE=8
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>Looks similar to C++ bindings, right? Ok, can we run Rust tests with Ruby primitives? Unfortunately, no. These methods expect Ruby VM to be up and running and embedding Ruby is not something many Ruby developers do.</p>
+<p>Looks similar to C++ bindings, right? OK, can we run Rust tests with Ruby primitives? Unfortunately, no. These methods expect Ruby VM to be up and running and embedding Ruby is not something many Ruby developers do.</p>
 
 <p>Instead, we need to re-compile it to a dynamically-loaded library that (once loaded) registers a <code class="language-plaintext highlighter-rouge">foo</code> method that takes a string, passes its <code class="language-plaintext highlighter-rouge">const char *</code> pointer to our <code class="language-plaintext highlighter-rouge">foo</code> function defined in Rust and returns <code class="language-plaintext highlighter-rouge">CharList</code> back to Ruby space.</p>
 
@@ -910,7 +910,7 @@ CHAR_LIST_SIZE=8
 <span class="o">[</span><span class="s2">"😋"</span>, <span class="s2">"中"</span>, <span class="s2">"国"</span><span class="o">]</span>
 </code></pre></div></div>
 
-<p>In fact there are many more options that are passed to <code class="language-plaintext highlighter-rouge">clang</code> above, check out <a href="https://github.com/iliabylich/writing-bindings-upside-down">the repo</a> if you want to try it yourself.</p>
+<p>In fact there are many more options that are passed to <code class="language-plaintext highlighter-rouge">clang</code> above, check out <a href="https://github.com/iliabylich/writing-bindings-upside-down">the repository</a> if you want to try it yourself.</p>
 
 <h2 id="memory-leaks">Memory leaks</h2>
 
@@ -924,7 +924,7 @@ CHAR_LIST_SIZE=8
 <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">RUSTFLAGS</span><span class="o">=</span><span class="s2">"-Z sanitizer=address"</span> ... cargo <span class="nb">test</span>
 </code></pre></div></div>
 
-<p>(On Mac make sure to use <code class="language-plaintext highlighter-rouge">clang</code> from Homebrew, version that ships with OS doesn’t support ASAN)</p>
+<p>(On Mac make sure to use <code class="language-plaintext highlighter-rouge">clang</code> from Homebrew, version that ships with OS does not support ASAN)</p>
 
 <p>Running tests with this options shows that we have a leak somewhere in</p>
 
@@ -1017,7 +1017,7 @@ extern "C"
 
 <p>How about performance? When we compile with Rust primitives we use LTO and so things from Rust standard library can be optimized together with our code. Luckily, there’s a way to do that for external primitives too.</p>
 
-<p>I’d like to demonstrate it on the low level, first let’s compile everything to LLVM IR:</p>
+<p>I would like to demonstrate it on the low level, first let’s compile everything to LLVM IR:</p>
 
 <div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>clang-13 <span class="nt">-S</span> <span class="nt">-emit-llvm</span> c-bindings/bindings.c <span class="nt">-o</span> c-bindings/bindings.ll
 <span class="nv">$ </span><span class="nb">grep</span> <span class="nt">-F</span> <span class="s2">"char__"</span> c-bindings/bindings.ll
@@ -1102,11 +1102,11 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
 
 <p>Rust standard library is compiled directly to object files, but our code is <code class="language-plaintext highlighter-rouge">LLVM IR bitcode</code>. <strong>This way we can get zero-cost bindings defined externally</strong>.</p>
 
-<p>Of course, it’s not gonna work with Ruby or NodeJS, both of them have a giant <code class="language-plaintext highlighter-rouge">libruby.so</code> (or <code class="language-plaintext highlighter-rouge">libnode.so</code>) that defines all functions and constants that your extension relies on. The extension itself is compiled with <code class="language-plaintext highlighter-rouge">-Wl,-undefined,dynamic_lookup</code> and symbol lookup is performed at runtime. I feel like technically it’s possible, the entire Ruby/NodeJS runtime could be compiled to a static <code class="language-plaintext highlighter-rouge">libruby.a</code>/<code class="language-plaintext highlighter-rouge">libnode.a</code> that defines all VM objects as external (because that’s a singleton that we need to hook into), but all functions can provide their implementation (of course, in LLVM IR format), and so they can be inlined into our bindings implementation. I haven’t experimented with it yet, and honestly I’m not going to :) If you know anything about existing discussions around it, please, ping me on Twitter.</p>
+<p>Of course, it’s not gonna work with Ruby or Node.js, both of them have a giant <code class="language-plaintext highlighter-rouge">libruby.so</code> (or <code class="language-plaintext highlighter-rouge">libnode.so</code>) that defines all functions and constants that your extension relies on. The extension itself is compiled with <code class="language-plaintext highlighter-rouge">-Wl,-undefined,dynamic_lookup</code> and symbol lookup is performed at runtime. I feel like technically it’s possible, the entire Ruby/Node.js runtime could be compiled to a static <code class="language-plaintext highlighter-rouge">libruby.a</code>/<code class="language-plaintext highlighter-rouge">libnode.a</code> that defines all VM objects as external (because that’s a singleton that we need to hook into), but all functions can provide their implementation (of course, in LLVM IR format), and so they can be inlined into our bindings implementation. I haven’t experimented with it yet, and honestly I’m not going to :) If you know anything about existing discussions around it, please, ping me on Twitter.</p>
 
 <h2 id="the-whole-picture-again">The whole picture, again</h2>
 
-<p>Demo repo is available <a href="https://github.com/iliabylich/writing-bindings-upside-down">here</a></p>
+<p>Demo repository is available <a href="https://github.com/iliabylich/writing-bindings-upside-down">here</a></p>
 
 <p>To sum up:</p>
 
@@ -1131,7 +1131,7 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
 <ul>
   <li>The library needs quite a lot of changes to support “external” primitives. That’s not an easy task.</li>
   <li>The library needs to ship with a “reference implementation”, to verify that existing external functions are enough to build everything.</li>
-  <li>There are minor differences between standard types in languages, for example C++ has a small string optimization, and small strings are not “containers”. On the other side Rust strings are true containers, and library developers may expect “external” string to be a container, too, but on the bindings side <code class="language-plaintext highlighter-rouge">std::string</code> from C++ doesn’t fully match the contract (i.e. you can’t borrow a <code class="language-plaintext highlighter-rouge">char *</code> from <code class="language-plaintext highlighter-rouge">std::string</code> and expect it to live as long as the string lives). In some cases it can become really hard to track and fix.</li>
+  <li>There are minor differences between standard types in languages, for example C++ has a small string optimization, and small strings are not “containers”. On the other side Rust strings are true containers, and library developers may expect “external” string to be a container, too, but on the bindings side <code class="language-plaintext highlighter-rouge">std::string</code> from C++ does not fully match the contract (i.e. you can’t borrow a <code class="language-plaintext highlighter-rouge">char *</code> from <code class="language-plaintext highlighter-rouge">std::string</code> and expect it to live as long as the string lives). In some cases it can become really hard to track and fix.</li>
 </ul>
 
 </div>

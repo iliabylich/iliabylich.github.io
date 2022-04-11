@@ -114,6 +114,7 @@
   </div>
 
   <p>As you already know, DSL means domain-specific language. It’s like a language in a language. Here are some examples that we use every day:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
   <span class="nb">attr_reader</span> <span class="ss">:name</span>
 <span class="k">end</span>
@@ -128,6 +129,7 @@
 </code></pre></div></div>
 
 <p>But all these examples use rails-provided DSL, how about your own? First of all, you should know that all these methods (<code class="language-plaintext highlighter-rouge">attr_reader</code>, <code class="language-plaintext highlighter-rouge">has_many</code> and <code class="language-plaintext highlighter-rouge">before_action</code>) are actually class-methods of <code class="language-plaintext highlighter-rouge">Module</code>, <code class="language-plaintext highlighter-rouge">ActiveRecord::Base</code> and <code class="language-plaintext highlighter-rouge">ActionController::Base</code>. So you can write something like:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TestClass</span>
   <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">my_dsl_method</span><span class="p">(</span><span class="n">dsl_method_arg</span><span class="p">)</span>
     <span class="nb">puts</span> <span class="s2">"dsl method called with </span><span class="si">#{</span><span class="n">dsl_method_arg</span><span class="si">}</span><span class="s2">"</span>
@@ -139,6 +141,7 @@
 <p>And the body of <code class="language-plaintext highlighter-rouge">my_dsl_method</code> can be more dynamic then just printing a string. It can define methods, execute some calculations, etc. Less words, more code!</p>
 
 <p>For example, we want a DSL like this:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">survey</span> <span class="s1">'Survey title'</span> <span class="k">do</span>
   <span class="n">question</span> <span class="s1">'Question 1 title'</span> <span class="k">do</span>
     <span class="n">answer</span> <span class="s1">'Option 1'</span>
@@ -154,7 +157,8 @@
 
 <h2 id="blocks-and-context">Blocks and context</h2>
 
-<p>Ruby blocks are the heart of DSL in ruby. Blocks can be <code class="language-plaintext highlighter-rouge">call</code>-ed, <code class="language-plaintext highlighter-rouge">instance_eval</code>-ed and <code class="language-plaintext highlighter-rouge">instance_exec</code>-ed. The difference between <code class="language-plaintext highlighter-rouge">call</code>-ing and <code class="language-plaintext highlighter-rouge">instance_eval</code>-ing is the context of block execution:</p>
+<p>Ruby blocks are the heart of DSL in ruby. Blocks can be <code class="language-plaintext highlighter-rouge">call</code>-ed, <code class="language-plaintext highlighter-rouge">instance_eval</code>-ed and <code class="language-plaintext highlighter-rouge">instance_exec</code>-ed. The difference between <code class="language-plaintext highlighter-rouge">call</code> and <code class="language-plaintext highlighter-rouge">instance_eval</code> is the context of block execution:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'ostruct'</span>
 
 <span class="n">proc1</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span> <span class="nb">puts</span> <span class="nb">self</span><span class="p">.</span><span class="nf">name</span> <span class="p">}</span>
@@ -172,6 +176,7 @@
 <h2 id="so">So?</h2>
 
 <p>Here is the draft of the code that simulates a survey:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Survey</span>
   <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
     <span class="vi">@title</span> <span class="o">=</span> <span class="n">title</span>
@@ -236,6 +241,7 @@
 </code></pre></div></div>
 
 <p>Let’s put all together:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">survey</span> <span class="s1">'Survey title'</span> <span class="k">do</span>
   <span class="c1"># here `self` is an instance of Survey class</span>
   <span class="c1"># so we can call ANY instance methods of Survey</span>
@@ -248,6 +254,7 @@
 </code></pre></div></div>
 
 <p>The only missing method is <code class="language-plaintext highlighter-rouge">Survey#run</code>:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Survey</span>
   <span class="c1"># ...</span>
   <span class="k">def</span> <span class="nf">run</span>
@@ -270,17 +277,14 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>Full code is available on gist:
-https://gist.github.com/iliabylich/9ea5dd31ee92571f8d59</p>
-
-<p>Or a bit more complex example with tests on github:
-https://github.com/iliabylich/multi-level-dsl</p>
+<p><a href="https://gist.github.com/iliabylich/9ea5dd31ee92571f8d59">Full code is available on gist</a> or <a href="https://github.com/iliabylich/multi-level-dsl">a bit more complex example with tests on GitHub</a>.</p>
 
 <h2 id="advanced-dsl-example">Advanced DSL example</h2>
 
-<p>DSL that we’ve made before allows us to write some code using shortcuts, but usually we create DSL to define new methods (or change existing ones).</p>
+<p>DSL that we have made before allows us to write some code using shortcuts, but usually we create DSL to define new methods (or change existing ones).</p>
 
 <p>Let’s build something like:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
   <span class="kp">extend</span> <span class="no">MyModuleWithDSL</span>
 
@@ -310,6 +314,7 @@ https://github.com/iliabylich/multi-level-dsl</p>
 </code></pre></div></div>
 
 <p>A huge difference between defining method with <code class="language-plaintext highlighter-rouge">define_method</code> and <code class="language-plaintext highlighter-rouge">def method_name</code> is that <code class="language-plaintext highlighter-rouge">define_method</code> does not lose current context:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">local_var</span> <span class="o">=</span> <span class="s1">'test'</span>
 <span class="n">define_method</span> <span class="ss">:method1</span> <span class="k">do</span>
   <span class="nb">puts</span> <span class="n">local_var</span> <span class="c1"># Works here</span>
@@ -362,11 +367,13 @@ https://github.com/iliabylich/multi-level-dsl</p>
 <h2 id="whats-wrong-in-the-previous-example">What’s wrong in the previous example?</h2>
 
 <p>What I personally don’t like here is that there is no way to override defined method using <code class="language-plaintext highlighter-rouge">super</code> (I don’t like <code class="language-plaintext highlighter-rouge">alias_method_chain</code>, we really can make it work using super method). Why super does not work? Because the method is defined directly on the class:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">instance_method</span><span class="p">(</span><span class="ss">:full_name</span><span class="p">)</span>
 <span class="c1"># =&gt; #&lt;UnboundMethod: User#full_name&gt;</span>
 </code></pre></div></div>
 
 <p>The following example is quite complex, but still:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">ModuleWithDSL</span>
   <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">extended</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
     <span class="n">mod</span> <span class="o">=</span> <span class="n">base</span><span class="p">.</span><span class="nf">const_set</span><span class="p">(</span><span class="ss">:AccessorsWithDefaultValues</span><span class="p">,</span> <span class="no">Module</span><span class="p">.</span><span class="nf">new</span><span class="p">)</span>
@@ -394,6 +401,7 @@ https://github.com/iliabylich/multi-level-dsl</p>
 </code></pre></div></div>
 
 <p>So now we can override our <code class="language-plaintext highlighter-rouge">accessor</code>-s on <code class="language-plaintext highlighter-rouge">User</code>:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
   <span class="kp">extend</span> <span class="no">ModuleWithDSL</span>
   <span class="n">accessor_with_default_value</span> <span class="ss">:counter</span><span class="p">,</span> <span class="mi">123</span>
@@ -412,6 +420,7 @@ https://github.com/iliabylich/multi-level-dsl</p>
 </code></pre></div></div>
 
 <p>ActiveRecord does the same job, you can override any column-method:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">User</span><span class="p">.</span><span class="nf">instance_method</span><span class="p">(</span><span class="ss">:email</span><span class="p">)</span>
 <span class="c1"># =&gt; #&lt;UnboundMethod: User(#&lt;#&lt;Class:0x00000008c44ac0&gt;:0x00000008c44b38&gt;)#email(__temp__56d61696c6)&gt;</span>
 <span class="c1"># This module is anonymous, but it doesn't matter, it wasn't defined _directly_ on User:</span>
@@ -424,7 +433,7 @@ https://github.com/iliabylich/multi-level-dsl</p>
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>A lot of developers build a DSL in their libraries to simplify the code, and this allows us to write our code in a more declarative fashion. But they forgot (quite often) about allowing us to override the code generated with this DSL. When the library doesn’t support overriding generated code, use <code class="language-plaintext highlighter-rouge">alias_method</code>:</p>
+<p>A lot of developers build a DSL in their libraries to simplify the code, and this allows us to write our code in a more declarative fashion. But they forgot (quite often) about allowing us to override the code generated with this DSL. When the library does not support overriding generated code, use <code class="language-plaintext highlighter-rouge">alias_method</code>:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span>
   <span class="kp">include</span> <span class="no">SomeModule</span>
@@ -455,7 +464,7 @@ https://github.com/iliabylich/multi-level-dsl</p>
   <li>The effort to maintain your DSL grows with its complexity. Yes, it’s very easy to make DSL implementation look ugly</li>
 </ol>
 
-<p>I really love to use DSL from third-party libraries (AR, RSpec, Capybara, FactoryGirl). But as I said before, I don’t write it in enterprise and usually I ask people to avoid it.</p>
+<p>I really love to use DSL from third-party libraries (AR, RSpec, Capybara, FactoryBot). But as I said before, I don’t write it in enterprise and usually I ask people to avoid it.</p>
 
 <p>But if you write DSL, please wrap generated stuff into module to let developers override your code and be happy, this is what DSL is made for :)</p>
 

@@ -118,7 +118,7 @@
 </ul>
   </div>
 
-  <p>Consider the following situation: you’ve got an exception in production. Of course, all of us are good developers, but you know, sometimes *it just happens. What do you usually do to get some information about the error? You just grab the request parameters to test it locally, right? Then I might have a better solution for you: dump your memory once an error happens and restore the dump later to debug it.</p>
+  <p>Consider the following situation: you have got an exception in production. Of course, all of us are good developers, but you know, sometimes *it just happens. What do you usually do to get some information about the error? You just grab the request parameters to test it locally, right? Then I might have a better solution for you: dump your memory once an error happens and restore the dump later to debug it.</p>
 
 <h2 id="binding">Binding</h2>
 
@@ -145,7 +145,7 @@
 
 <h2 id="marshaling">Marshaling</h2>
 
-<p>How can we dump an arbitrary structure? Ruby has a class in stdlib called <code class="language-plaintext highlighter-rouge">Marshal</code>. The two core methods of this class are <code class="language-plaintext highlighter-rouge">dump</code> and <code class="language-plaintext highlighter-rouge">load</code>:</p>
+<p>How can we dump an arbitrary structure? Ruby has a class in the standard library called <code class="language-plaintext highlighter-rouge">Marshal</code>. The two core methods of this class are <code class="language-plaintext highlighter-rouge">dump</code> and <code class="language-plaintext highlighter-rouge">load</code>:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Point</span> <span class="o">=</span> <span class="no">Struct</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="ss">:x</span><span class="p">,</span> <span class="ss">:y</span><span class="p">)</span>
 <span class="n">a</span> <span class="o">=</span> <span class="no">Point</span><span class="p">.</span><span class="nf">new</span><span class="p">(</span><span class="mi">34</span><span class="p">,</span> <span class="mi">65</span><span class="p">)</span>
 <span class="n">marshaled</span> <span class="o">=</span> <span class="no">Marshal</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
@@ -170,19 +170,19 @@
 
 <p>Well, we can patch every single class in Ruby and add <code class="language-plaintext highlighter-rouge">marshal_load</code> and <code class="language-plaintext highlighter-rouge">marshal_dump</code> hooks to them, but that’s just horrible. It would be much, much better to write a set of classes that are each responsible for converting a specific group of objects.</p>
 
-<p>With that in mind I’ve implemented:</p>
+<p>With that in mind I have implemented:</p>
 <ol>
   <li><code class="language-plaintext highlighter-rouge">PrimitiveDumper</code> - for dumping primitive objects, like numbers, booleans.</li>
   <li><code class="language-plaintext highlighter-rouge">ArrayDumper</code> - for arrays.</li>
   <li><code class="language-plaintext highlighter-rouge">HashDumper</code> - for hashes.</li>
   <li><code class="language-plaintext highlighter-rouge">ObjectDumper</code> - for custom objects.</li>
   <li><code class="language-plaintext highlighter-rouge">ClassDumper</code> - for classes.</li>
-  <li><code class="language-plaintext highlighter-rouge">ProcDumper</code> - for proc/method objects</li>
+  <li><code class="language-plaintext highlighter-rouge">ProcDumper</code> - for <code class="language-plaintext highlighter-rouge">proc</code>/method objects</li>
   <li><code class="language-plaintext highlighter-rouge">MagicDumper</code> - for “magical objects” (see ‘dumping magical objects’ section)</li>
   <li><code class="language-plaintext highlighter-rouge">ExistingObjectDumper</code> - for existing objects (see ‘dumping recurring objects’ section)</li>
 </ol>
 
-<p>Every dumper takes an object that we need to dump and returns its marshalable representation. Later you can use the same dumper to deconvert representation back and get the original object.</p>
+<p>Every dumper takes an object that we need to dump and returns its marshalable representation. Later you can use the same dumper to restore representation back and get the original object.</p>
 
 <p>You can find the implementation of these dumpers <a href="https://github.com/iliabylich/binding_dumper/tree/master/lib/binding_dumper/dumpers">here</a> and the specs for them <a href="https://github.com/iliabylich/binding_dumper/tree/master/spec/binding_dumper/dumpers">here</a>.</p>
 
@@ -217,7 +217,7 @@
 
 <h2 id="dumping-magical-objects">Dumping Magical objects</h2>
 
-<p>After writing the first version of the library, I’ve tested it with a blank Rails application. The testing code was:</p>
+<p>After writing the first version of the library, I have tested it with a blank Rails application. The testing code was:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
   <span class="k">def</span> <span class="nf">index</span>
     <span class="vi">@users</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">all</span><span class="p">.</span><span class="nf">to_a</span> <span class="c1"># 5 records</span>
@@ -228,9 +228,9 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>The length of the dump was  ~30 screens and it took ~20 seconds to generate it. Most of the data was coming from objects related to Rails itself. Things like Rails configs, backtrace cleaners, arrays of middlewares, and so on. Do we need them? No. These objects are the same for every request, so we can ignore them.</p>
+<p>The length of the dump was  ~30 screens and it took ~20 seconds to generate it. Most of the data was coming from objects related to Rails itself. Things like Rails configuration, backtrace cleaners, arrays of middlewares, and so on. Do we need them? No. These objects are the same for every request, so we can ignore them.</p>
 
-<p>But at the same time, we need to save and restore all references from ‘dumpable’ objects to ‘magic’ objects, we can’t just omit them. This logic is implemented in <a href="https://github.com/iliabylich/binding_dumper/blob/master/lib/binding_dumper/magic_objects.rb">BindingDumper::MagicObjects</a> module and here’s how you can use it:</p>
+<p>But at the same time, we need to save and restore all references from ‘serializable’ objects to ‘magic’ objects, we can’t just omit them. This logic is implemented in <a href="https://github.com/iliabylich/binding_dumper/blob/master/lib/binding_dumper/magic_objects.rb"><code class="language-plaintext highlighter-rouge">BindingDumper::MagicObjects</code></a> module and here’s how you can use it:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">A</span>
   <span class="vi">@config</span> <span class="o">=</span> <span class="ss">:config</span>
 <span class="k">end</span>
@@ -240,22 +240,22 @@
 <span class="o">=&gt;</span> <span class="p">{</span><span class="mi">10633360</span><span class="o">=&gt;</span><span class="s2">"A"</span><span class="p">,</span> <span class="mi">600668</span><span class="o">=&gt;</span><span class="s2">"A.instance_variable_get(:@config)"</span><span class="p">}</span>
 </code></pre></div></div>
 
-<p>So, it builds a mapping between <code class="language-plaintext highlighter-rouge">object_id</code> and the way how to get this object. Using this functionality we can easily get whether existing object is ‘magical’, and if yes - dump its string representation (to eval it on loading phase). Let’s say, we need to dump <code class="language-plaintext highlighter-rouge">Rails.application.config</code>, one of the ‘magical’ objects. We need to get its <code class="language-plaintext highlighter-rouge">object_id</code>, find it in the pool and remember the string that returns rails config after evaluation, i.e.:</p>
+<p>So, it builds a mapping between <code class="language-plaintext highlighter-rouge">object_id</code> and the way how to get this object. Using this functionality we can easily get whether existing object is ‘magical’, and if yes - dump its string representation (to <code class="language-plaintext highlighter-rouge">eval</code> it on loading phase). Let’s say, we need to dump <code class="language-plaintext highlighter-rouge">Rails.application.config</code>, one of the ‘magical’ objects. We need to get its <code class="language-plaintext highlighter-rouge">object_id</code>, find it in the pool and remember the string that returns rails configuration after evaluation, i.e.:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s2">"Rails.
   instance_variable_get(:@app_class).
   instance_variable_get(:@instance).
   instance_variable_get(:@config)"</span>
 </code></pre></div></div>
 
-<p>After this optimization we have to spend ~20ms to build an object pool and ~200ms to dump a binding.</p>
+<p>After this optimization we have to spend ~20 ms to build an object pool and ~200 ms to dump a binding.</p>
 
 <h2 id="dumping-recurring-objects">Dumping recurring objects</h2>
 
 <p>We can optimize it even more. A lot of things like <code class="language-plaintext highlighter-rouge">request</code>, <code class="language-plaintext highlighter-rouge">response</code> are shared as instance variables across ~10 objects. We can dump our <code class="language-plaintext highlighter-rouge">request</code> object only once, remember its <code class="language-plaintext highlighter-rouge">object_id</code> and use a reference while dumping other objects that use it.</p>
 
-<p>Let’s say, we are in the initial memory (MEM1). We dump a binding, open another console with separated memory (MEM2) and restore a binding. In the example above (about recursive structure) there was a key <code class="language-plaintext highlighter-rouge">:_existing_object_id</code> that returns an <code class="language-plaintext highlighter-rouge">object_id</code> from MEM1.</p>
+<p>Let’s say, we are in the initial memory (<code class="language-plaintext highlighter-rouge">MEM1</code>). We dump a binding, open another console with separated memory (<code class="language-plaintext highlighter-rouge">MEM2</code>) and restore a binding. In the example above (about recursive structure) there was a key <code class="language-plaintext highlighter-rouge">:_existing_object_id</code> that returns an <code class="language-plaintext highlighter-rouge">object_id</code> from <code class="language-plaintext highlighter-rouge">MEM1</code>.</p>
 
-<p>In MEM2 we restore a binding and create a mapping</p>
+<p>In <code class="language-plaintext highlighter-rouge">MEM2</code> we restore a binding and create a mapping</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span>
   <span class="n">object_id_from_MEM1</span> <span class="o">=&gt;</span>
   <span class="n">restored_object_in_MEM2</span>
@@ -325,7 +325,7 @@
 
 <h2 id="compatibility-with-old-versions-of-ruby">Compatibility with old versions of Ruby</h2>
 
-<p>Currently the gem supports Ruby versions from 1.9.3 to 2.2.3. I had a few issues with porting the code from 2.0.0 to 1.9.3, like the lack of kwargs and <code class="language-plaintext highlighter-rouge">Module#prepend</code>. The funniest one was that in versions before 2.1.0 there is no <code class="language-plaintext highlighter-rouge">binding.local_variable_set</code> - there is only <code class="language-plaintext highlighter-rouge">binding.eval</code> that takes a string, not a block.</p>
+<p>Currently the gem supports Ruby versions from 1.9.3 to 2.2.3. I had a few issues with porting the code from 2.0.0 to 1.9.3, like the lack of keyword arguments and <code class="language-plaintext highlighter-rouge">Module#prepend</code>. The funniest one was that in versions before 2.1.0 there is no <code class="language-plaintext highlighter-rouge">binding.local_variable_set</code> - there is only <code class="language-plaintext highlighter-rouge">binding.eval</code> that takes a string, not a block.</p>
 
 <p>How can we pass a complex object to <code class="language-plaintext highlighter-rouge">eval</code>? The solution is not so difficult, because we have the object right here and right now, and the binding uses the same memory as the main thread. This means that we can pass the <code class="language-plaintext highlighter-rouge">object_id</code> of our object to <code class="language-plaintext highlighter-rouge">eval</code> string and get it there using <code class="language-plaintext highlighter-rouge">ObjectSpace._id2ref</code>:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">undumped</span><span class="p">[</span><span class="ss">:lvars</span><span class="p">].</span><span class="nf">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">lvar_name</span><span class="p">,</span> <span class="n">lvar</span><span class="o">|</span>
@@ -335,7 +335,7 @@
 
 <h2 id="known-issues">Known issues</h2>
 
-<p>I’ve tested the gem locally with a few projects. Everything was fine, but:</p>
+<p>I have tested the gem locally with a few projects. Everything was fine, but:</p>
 <ol>
   <li>Encoding. The data that the gem produces should be stored in UTF-8</li>
   <li>The difference between Rails server and Rails console. There are some classes that are loaded only when the server is started (like <code class="language-plaintext highlighter-rouge">Rails::BacktraceCleaner</code> and some others from <code class="language-plaintext highlighter-rouge">NewRelic</code> gem). You have to require corresponding files manually before loading the binding in the console.</li>
@@ -349,11 +349,11 @@
 
 <p>The gem is fully tested with its specs running on <a href="https://travis-ci.org/iliabylich/binding_dumper/">Travis CI</a>. There’s also a <a href="https://github.com/iliabylich/binding_dumper/blob/master/bin/multitest">script</a> that can be used to run the whole test suite locally on <strong>every</strong> supported version of Ruby. But that’s definitely not enough for a gem to become completely production-ready.</p>
 
-<p>That’s why I ask everyone who read this article: if you think that the idea of this gem should stay alive, that this method of debugging can be useful, and you would like to use it yourself, please, try it out locally and share your finding with me (via Twitter or Github).</p>
+<p>That’s why I ask everyone who read this article: if you think that the idea of this gem should stay alive, that this method of debugging can be useful, and you would like to use it yourself, please, try it out locally and share your finding with me (via Twitter or GitHub).</p>
 
 <h2 id="links">Links</h2>
 
-<p><a href="https://github.com/iliabylich/binding_dumper">Github repo</a></p>
+<p><a href="https://github.com/iliabylich/binding_dumper">GitHub repository</a></p>
 
 </div>
 

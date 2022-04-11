@@ -104,10 +104,10 @@
   <div id="table-of-contents">
     <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h3"><a href="#regexp-o-flag">Regexp ‘o’ flag</a></li>
-<li class="toc-entry toc-h3"><a href="#invalid-encodings">Invalid encodings</a></li>
-<li class="toc-entry toc-h3"><a href="#nested-heredocs">Nested heredocs</a></li>
+<li class="toc-entry toc-h3"><a href="#invalid-encoding">Invalid encoding</a></li>
+<li class="toc-entry toc-h3"><a href="#nested-heredocs">Nested HEREdocs</a></li>
 <li class="toc-entry toc-h3"><a href="#setters-and-return-values">Setters and return values</a></li>
-<li class="toc-entry toc-h3"><a href="#passing-blocks-to-the--method-aref">Passing blocks to the [] method (aref)</a></li>
+<li class="toc-entry toc-h3"><a href="#passing-blocks-to-the--method">Passing blocks to the [] method</a></li>
 <li class="toc-entry toc-h3"><a href="#global-variables">Global variables</a></li>
 <li class="toc-entry toc-h3"><a href="#instance-variables-without--prefix">Instance variables without @ prefix</a></li>
 <li class="toc-entry toc-h3"><a href="#implicit-coercing">Implicit coercing</a></li>
@@ -118,7 +118,7 @@
 <li class="toc-entry toc-h3"><a href="#return-in-the-classmodule-body">return in the class/module body</a></li>
 <li class="toc-entry toc-h3"><a href="#meta-characters">Meta-characters</a></li>
 <li class="toc-entry toc-h3"><a href="#invisible-rest-argument">Invisible rest argument</a></li>
-<li class="toc-entry toc-h3"><a href="#dynamicity-of-optarg-defauls">Dynamicity of optarg defauls</a></li>
+<li class="toc-entry toc-h3"><a href="#dynamicity-of-optarg-default-values">Dynamicity of optarg default values</a></li>
 <li class="toc-entry toc-h3"><a href="#shadow-arguments">Shadow arguments</a></li>
 <li class="toc-entry toc-h3"><a href="#dynamicity-of-rescue">Dynamicity of rescue</a></li>
 <li class="toc-entry toc-h3"><a href="#positionalkeyword-arguments">Positional/keyword arguments</a></li>
@@ -146,9 +146,9 @@
 <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">70135960411140</span><span class="p">,</span> <span class="mi">70135960411140</span><span class="p">,</span> <span class="mi">70135960411140</span><span class="p">]</span>
 </code></pre></div></div>
 
-<p>That’s a hacky way to define an inline regexp as a constant. It is a constant because its value is constant (<code class="language-plaintext highlighter-rouge">object_id</code> returns the same value). I think the main purpose of such flag is to reduce objects allocation, and I believe it wasn’t initially designed for such cases. If you are too lazy to extract a static regexp to a constant, simply add an <code class="language-plaintext highlighter-rouge">o</code> flag.</p>
+<p>That’s a special syntax to define an inline regexp as a constant. It is a constant because its value is constant (<code class="language-plaintext highlighter-rouge">object_id</code> returns the same value). I think the main purpose of such flag is to reduce objects allocation, and I believe it was not initially designed for such cases. If you are too lazy to extract a static regexp to a constant, simply add an <code class="language-plaintext highlighter-rouge">o</code> flag.</p>
 
-<h3 id="invalid-encodings">Invalid encodings</h3>
+<h3 id="invalid-encoding">Invalid encoding</h3>
 
 <p>Well, I have to confess, sometimes I hate Ruby for various reasons, this feature is one of them.</p>
 
@@ -167,15 +167,15 @@ false
 255
 </code></pre></div></div>
 
-<p>In this case string is not a “real” string. This bytes sequence is simply invalid for UTF-8 (in UTF-8 any codepoint &gt; 127 works as a flag that indicates that the char is multibyte and the next char (or chars) defines a real value), but Ruby allows it. It’s not even a String, it’s just a container of bytes. And for some reason Ruby allows you to pack an arbitrary sequence of bytes into a string, and if you want to ask “Is it valid?” you have a (I think) conceptually wrong <code class="language-plaintext highlighter-rouge">String#valid_encoding?</code> method. Maybe the right way to solve it would be to:</p>
+<p>In this case string is not a “real” string. This bytes sequence is simply invalid for UTF-8 (in UTF-8 any codepoint &gt; 127 works as a flag that indicates that the char is multi-byte and the next char (or chars) defines a real value), but Ruby allows it. It’s not even a String, it’s just a container of bytes. And for some reason Ruby allows you to pack an arbitrary sequence of bytes into a string, and if you want to ask “Is it valid?” you have a (I think) conceptually wrong <code class="language-plaintext highlighter-rouge">String#valid_encoding?</code> method. Maybe the right way to solve it would be to:</p>
 
 <ol>
-  <li>reject such strings during parsing (and throw SyntaxError)</li>
+  <li>reject such strings during parsing (and throw <code class="language-plaintext highlighter-rouge">SyntaxError</code>)</li>
   <li>raise an error when someone tries to put wrong bytes sequence to the string</li>
   <li>remove <code class="language-plaintext highlighter-rouge">String#valid_encoding?</code> method</li>
 </ol>
 
-<h3 id="nested-heredocs">Nested heredocs</h3>
+<h3 id="nested-heredocs">Nested HEREdocs</h3>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">p</span> <span class="o">&lt;&lt;</span><span class="s2">"A</span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2">C"</span>
 <span class="c1">#{</span>
@@ -186,7 +186,7 @@ false
 <span class="no">A</span><span class="c1">#{b}C</span>
 </code></pre></div></div>
 
-<p>Nuff said, I’m quite sure that there are no syntax highlighters that can handle this code. GitHub can’t and Svbtle can’t as well. Try evaluating this code in IRB.</p>
+<p>I’m quite sure that there are no syntax highlighters that can <strong>properly</strong> handle this code. At the moment of writing GitHub is unable to do that. Try evaluating this code in IRB.</p>
 
 <h3 id="setters-and-return-values">Setters and return values</h3>
 
@@ -215,7 +215,7 @@ false
 
 <p>I can’t imagine any reason to use such syntax, most probably it should be deprecated.</p>
 
-<h3 id="passing-blocks-to-the--method-aref">Passing blocks to the [] method (aref)</h3>
+<h3 id="passing-blocks-to-the--method">Passing blocks to the [] method</h3>
 
 <p>Imagine the following piece of code:</p>
 
@@ -233,7 +233,7 @@ false
 3
 </code></pre></div></div>
 
-<p><code class="language-plaintext highlighter-rouge">1 + 2 == 3</code>, everything is ok. Let’s try 2.4:</p>
+<p><code class="language-plaintext highlighter-rouge">1 + 2 == 3</code>, everything is fine. Let’s try 2.4:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ruby -v test.rb
 ruby 2.4.4p296 (2018-03-28 revision 63013) [x86_64-darwin17]
@@ -244,7 +244,7 @@ self[1] { 2 }
 
 <p>Yes, this syntax was introduced in Ruby 2.5. Did you hear any announcements about it?</p>
 
-<p><strong>Spoiler: there are no tests for this syntax in ruby/ruby repo. Guess why?</strong></p>
+<p><strong>Spoiler: there are no tests for this syntax in ruby/ruby repository. Guess why?</strong></p>
 
 <h3 id="global-variables">Global variables</h3>
 
@@ -274,7 +274,7 @@ self[1] { 2 }
 
 <h3 id="instance-variables-without--prefix">Instance variables without @ prefix</h3>
 
-<p>Spoiler: you may think that it’s impossible because the parser rejects such code. But in fact, Ruby allows it and there are even some specs for this - <a href="https://github.com/ruby/spec/blob/master/optional/capi/object_spec.rb#L803">RubySpec</a>. I don’t know much about Ruby internals, but at least one class uses ivars without <code class="language-plaintext highlighter-rouge">@</code>, it’s called <code class="language-plaintext highlighter-rouge">Range</code>. <code class="language-plaintext highlighter-rouge">(0..3)</code> has 3 instance variables:</p>
+<p>Spoiler: you may think that it’s impossible because the parser rejects such code. But in fact, Ruby allows it and there are even some specs for this - <a href="https://github.com/ruby/spec/blob/master/optional/capi/object_spec.rb#L803">RubySpec</a>. I don’t know much about Ruby internals, but at least one class uses instance variables without <code class="language-plaintext highlighter-rouge">@</code>, it’s called <code class="language-plaintext highlighter-rouge">Range</code>. <code class="language-plaintext highlighter-rouge">(0..3)</code> has 3 instance variables:</p>
 
 <ul>
   <li><code class="language-plaintext highlighter-rouge">excl</code> = false</li>
@@ -310,7 +310,7 @@ self[1] { 2 }
 
 <p>The conclusion is simple: <code class="language-plaintext highlighter-rouge">excl</code> is an instance variable, but <code class="language-plaintext highlighter-rouge">Kernel#instance_variables</code> hides it.</p>
 
-<p><code class="language-plaintext highlighter-rouge">Kernel#instance_variable_get / set</code> and Ruby Lexer are the places that validate instance variable names. Low-level C calls don’t do it and in general when you write a C extension you may easily get an ivar without <code class="language-plaintext highlighter-rouge">@</code> char.</p>
+<p><code class="language-plaintext highlighter-rouge">Kernel#instance_variable_get / set</code> and Ruby Lexer are the places that validate instance variable names. Low-level C calls don’t do it and in general when you write a C extension you may easily get an instance variable without <code class="language-plaintext highlighter-rouge">@</code> char.</p>
 
 <p>You can read my article about marshalling to get a full overview of its internals.</p>
 
@@ -322,7 +322,7 @@ self[1] { 2 }
 
 <p>Implicit is when Ruby calls methods like <code class="language-plaintext highlighter-rouge">to_ary</code>, <code class="language-plaintext highlighter-rouge">to_hash</code>, <code class="language-plaintext highlighter-rouge">to_str</code> for you. When the object <strong>acts</strong> as an Array/Hash/String and converting it to the corresponding class must happen automatically.</p>
 
-<p>There are a lot of methods in the corelib that are documented as “taking a String as an argument” but in fact they accept any objects that can be implicitly converted to a String.</p>
+<p>There are a lot of methods in the core library that are documented as “taking a String as an argument” but in fact they accept any objects that can be implicitly converted to a String.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pry</span><span class="o">&gt;</span> <span class="n">o</span> <span class="o">=</span> <span class="no">Object</span><span class="p">.</span><span class="nf">new</span>
 <span class="n">pry</span><span class="o">&gt;</span> <span class="k">def</span> <span class="nc">o</span><span class="o">.</span><span class="nf">to_str</span><span class="p">;</span> <span class="s2">"hello"</span><span class="p">;</span> <span class="k">end</span>
@@ -393,11 +393,11 @@ self[1] { 2 }
 <span class="c1"># it calls to_a !! an explicit coercing gets called by Ruby</span>
 </code></pre></div></div>
 
-<p>For some reason the concept of implicit/explicit coercing doesn’t work for this case.</p>
+<p>For some reason the concept of implicit/explicit coercing does not work for this case.</p>
 
 <h3 id="heredoc-identifiers-and-newlines">HEREdoc identifiers and newlines</h3>
 
-<p>The section about nested heredocs shows a heredoc identifier that has an interpolation inside. Also, it’s possible to use <code class="language-plaintext highlighter-rouge">"\n"</code>:</p>
+<p>The section about nested HEREdocs shows a HEREdoc identifier that has an interpolation inside. Also, it’s possible to use <code class="language-plaintext highlighter-rouge">"\n"</code>:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">p</span> <span class="o">&lt;&lt;</span><span class="s2">"HERE
 "</span>
@@ -405,11 +405,11 @@ self[1] { 2 }
 <span class="no">HERE</span>
 </code></pre></div></div>
 
-<p>it prints <code class="language-plaintext highlighter-rouge">"content\n"</code>. For some reason newline is not allowed in the middle of the heredoc identifier (and don’t get me wrong, I think that newlines should be rejected, no matter in the middle or in the end).</p>
+<p>it prints <code class="language-plaintext highlighter-rouge">"content\n"</code>. For some reason newline is not allowed in the middle of the HEREdoc identifier (and don’t get me wrong, I think that newlines should be rejected, no matter in the middle or in the end).</p>
 
 <h3 id="1if-true"><code class="language-plaintext highlighter-rouge">1if true</code></h3>
 
-<p>Yes, that’s a valid syntax. Ruby has very special rules for whitespaces and newlines. <code class="language-plaintext highlighter-rouge">1i</code> is a special syntax for complex numbers, but <code class="language-plaintext highlighter-rouge">1if true</code> is <code class="language-plaintext highlighter-rouge">1 if true</code>. There’s also a <code class="language-plaintext highlighter-rouge">1r</code> syntax for rational numbers, and yes, <code class="language-plaintext highlighter-rouge">1rescue nil</code> is <code class="language-plaintext highlighter-rouge">1 rescue nil</code>.</p>
+<p>Yes, that’s a valid syntax. Ruby has very special rules for white-spaces and newlines. <code class="language-plaintext highlighter-rouge">1i</code> is a special syntax for complex numbers, but <code class="language-plaintext highlighter-rouge">1if true</code> is <code class="language-plaintext highlighter-rouge">1 if true</code>. There’s also a <code class="language-plaintext highlighter-rouge">1r</code> syntax for rational numbers, and yes, <code class="language-plaintext highlighter-rouge">1rescue nil</code> is <code class="language-plaintext highlighter-rouge">1 rescue nil</code>.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pry</span><span class="o">&gt;</span> <span class="mi">1</span><span class="k">if</span> <span class="kp">true</span>
 <span class="mi">1</span>
@@ -534,7 +534,7 @@ self[1] { 2 }
 
 <p>Again, this is something that probably could be removed from Ruby, I don’t know anyone using it.</p>
 
-<p>Metacharacter is a special sequence of characters that gets interpreted as a single character. Most probably you know one of them - <code class="language-plaintext highlighter-rouge">\uDDDD</code>. But there are more:</p>
+<p>Meta-character is a special sequence of characters that gets interpreted as a single character. Most probably you know one of them - <code class="language-plaintext highlighter-rouge">\uDDDD</code>. But there are more:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pry</span><span class="o">&gt;</span> <span class="s2">"</span><span class="se">\u</span><span class="s2">1234"</span>
  <span class="o">=&gt;</span> <span class="s2">"ሴ"</span>
@@ -610,7 +610,7 @@ self[1] { 2 }
 
 <p>Do you see the difference?</p>
 
-<h3 id="dynamicity-of-optarg-defauls">Dynamicity of optarg defauls</h3>
+<h3 id="dynamicity-of-optarg-default-values">Dynamicity of <code class="language-plaintext highlighter-rouge">optarg</code> default values</h3>
 
 <p>In Ruby optional arguments are very, very powerful. You can pass pretty much anything as a default value of the argument in the method signature:</p>
 
@@ -631,7 +631,7 @@ self[1] { 2 }
 
 <p>What does this method return when you call it without any arguments? Yep, it returns <code class="language-plaintext highlighter-rouge">1</code>.</p>
 
-<p>The reason why it works this way is that MRI inlines optional arguments initialization to the method body, so in VM this code actually looks like:</p>
+<p>The reason why it works this way is that MRI inlines optional arguments initialization to the method body, so for VM this code actually looks like:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="n">a</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">)</span>
   <span class="n">a</span> <span class="o">||=</span> <span class="p">(</span><span class="k">return</span> <span class="mi">1</span><span class="p">;</span> <span class="kp">nil</span><span class="p">)</span>
@@ -661,9 +661,11 @@ self[1] { 2 }
 <span class="nb">p</span> <span class="n">factorial</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </code></pre></div></div>
 
+<p>Yes, this method has no body but is still capable of calculating factorial.</p>
+
 <h3 id="shadow-arguments">Shadow arguments</h3>
 
-<p>I think only people that work with parsing/unparsing tools are aware of this feature. That’s a special kind of argument that “shadows” outer variable. The syntax is <code class="language-plaintext highlighter-rouge">|;shadowarg|</code>:</p>
+<p>I think only people that work with parsing tools are aware of this feature. That’s a special kind of argument that “shadows” outer variable. The syntax is <code class="language-plaintext highlighter-rouge">|;shadowarg|</code>:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pry</span><span class="o">&gt;</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="nb">proc</span> <span class="p">{</span> <span class="n">n</span> <span class="p">}.</span><span class="nf">call</span>
  <span class="o">=&gt;</span> <span class="mi">1</span>
@@ -700,19 +702,19 @@ self[1] { 2 }
 
 <p>That’s definitely very, very flexible but does anyone need it? I’d better reject all cases above except local variables.</p>
 
-<p>I’ve seen the first snippet in the real codebase and it was quite difficult to understand why the spec that asserts something like <code class="language-plaintext highlighter-rouge">expect { code construction }.to raise_error(RuntimeError)</code> doesn’t work.</p>
+<p>I have seen the first snippet in the real codebase and it was quite difficult to understand why the spec that asserts something like <code class="language-plaintext highlighter-rouge">expect { code construction }.to raise_error(RuntimeError)</code> does not work.</p>
 
 <h3 id="positionalkeyword-arguments">Positional/keyword arguments</h3>
 
 <p>I used to think that positional and keyword arguments act like two completely separate groups of arguments. If the last argument is a Hash and you pass it to the method call it</p>
 
 <ul>
-  <li>populates all kwargs</li>
-  <li>raises an error if some kwargs are missing</li>
-  <li>sets default values to missing optional kwargs</li>
+  <li>populates all keyword arguments</li>
+  <li>raises an error if some keyword arguments are missing</li>
+  <li>sets default values to missing optional keyword arguments</li>
 </ul>
 
-<p>But I was wrong. One argument value can populate positional <strong>and</strong> keyword argument:</p>
+<p>But I was wrong. One argument value can populate both positional <strong>and</strong> keyword argument at the same item:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">m</span><span class="p">(</span><span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">b: </span><span class="mi">1</span><span class="p">)</span>
   <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span>
@@ -727,7 +729,7 @@ self[1] { 2 }
 <ol>
   <li>There’s only one argument provided</li>
   <li>And some of its keys are not symbols</li>
-  <li>So MRI should not use it for kwargs initialization</li>
+  <li>So MRI should not use it for keyword arguments initialization</li>
   <li>And <code class="language-plaintext highlighter-rouge">a</code> must be <code class="language-plaintext highlighter-rouge">{ b: 2, 'b' =&gt; 3 }</code></li>
   <li>And so <code class="language-plaintext highlighter-rouge">b</code> must be just <code class="language-plaintext highlighter-rouge">1</code> (default value)</li>
 </ol>

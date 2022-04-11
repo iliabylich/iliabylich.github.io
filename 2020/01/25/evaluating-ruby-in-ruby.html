@@ -105,7 +105,7 @@
     <ul id="toc" class="section-nav">
 <li class="toc-entry toc-h1"><a href="#evaluating-ruby-in-ruby">Evaluating Ruby in Ruby</a>
 <ul>
-<li class="toc-entry toc-h3"><a href="#tldr">TLDR</a></li>
+<li class="toc-entry toc-h3"><a href="#tldr">TL;DR</a></li>
 <li class="toc-entry toc-h3"><a href="#how-ruby-evaluates-your-code">How Ruby evaluates your code.</a></li>
 <li class="toc-entry toc-h3"><a href="#the-structure-of-the-instruction-sequence-iseq">The structure of the instruction sequence (ISeq)</a></li>
 <li class="toc-entry toc-h3"><a href="#building-a-poc">Building a PoC</a></li>
@@ -150,17 +150,17 @@
 
   <h1 id="evaluating-ruby-in-ruby">Evaluating Ruby in Ruby</h1>
 
-<h3 id="tldr">TLDR</h3>
+<h3 id="tldr">TL;DR</h3>
 
 <p>This article is about instruction sequences and evaluating them using pure Ruby.</p>
 
-<p>The repo is available <a href="https://github.com/iliabylich/my.rb">here</a>.</p>
+<p>The repository is available <a href="https://github.com/iliabylich/my.rb">here</a>.</p>
 
 <blockquote>
   <p>Is it a Ruby implementation?</p>
 </blockquote>
 
-<p>No. It’s just a runner of instructions. It is similar to MRI’s virtual machine, but it lacks many features and it’s 100x slower.</p>
+<p>No. It’s just a runner of instructions. It is similar to MRI’s virtual machine, but it lacks many features and it’s 100 times slower.</p>
 
 <blockquote>
   <p>Can I use it in my applications?</p>
@@ -343,7 +343,7 @@
   <li>it can be a <code class="language-plaintext highlighter-rouge">top</code> frame that wraps all the code in your file. All variables set in the global scope of your file belong to the top frame. Each parsed and evaluated file creates its own top frame.</li>
   <li>it can be a <code class="language-plaintext highlighter-rouge">method</code> frame. All methods create it. One method frame per one method call.</li>
   <li>it can be a <code class="language-plaintext highlighter-rouge">block</code> frame. All blocks and lambdas create it. One block frame per one block call.</li>
-  <li>it can be a <code class="language-plaintext highlighter-rouge">class</code> frame, however it doesn’t mean that instantiating a class creates it. The whole <code class="language-plaintext highlighter-rouge">class X; ... end</code> does it. Later when you do <code class="language-plaintext highlighter-rouge">X.new</code> Ruby doesn’t create any <code class="language-plaintext highlighter-rouge">class</code> frames. This frame represents a class definition.</li>
+  <li>it can be a <code class="language-plaintext highlighter-rouge">class</code> frame, however it does not mean that instantiating a class creates it. The whole <code class="language-plaintext highlighter-rouge">class X; ... end</code> does it. Later when you do <code class="language-plaintext highlighter-rouge">X.new</code> Ruby does not create any <code class="language-plaintext highlighter-rouge">class</code> frames. This frame represents a class definition.</li>
   <li>it can be a <code class="language-plaintext highlighter-rouge">rescue</code> frame that represents a code inside <code class="language-plaintext highlighter-rouge">rescue =&gt; e; &lt;...&gt;; end</code> block</li>
   <li>it can be an <code class="language-plaintext highlighter-rouge">ensure</code> frame (well, I’m sure you get it)</li>
   <li>there are also <code class="language-plaintext highlighter-rouge">module</code> (for a module body), <code class="language-plaintext highlighter-rouge">sclass</code> (for a singleton class) and a very unique <code class="language-plaintext highlighter-rouge">eval</code> frame.</li>
@@ -390,7 +390,7 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>I like builders and I don’t like inheritance (the fact that frames share some common attributes doesn’t mean that they should be inherited from an <code class="language-plaintext highlighter-rouge">AbstractFrame</code> class; also I don’t like abstract classes, they are dead by definition)</p>
+<p>I like builders and I don’t like inheritance (the fact that frames share some common attributes does not mean that they should be inherited from an <code class="language-plaintext highlighter-rouge">AbstractFrame</code> class; also I don’t like abstract classes, they are dead by definition)</p>
 
 <p>Here’s the first version of the <code class="language-plaintext highlighter-rouge">TopFrame</code>:</p>
 
@@ -477,7 +477,7 @@
   <li><code class="language-plaintext highlighter-rouge">file</code>/<code class="language-plaintext highlighter-rouge">line</code> return file/line where the iseq has been created</li>
   <li><code class="language-plaintext highlighter-rouge">kind</code> returns a Symbol that we will later use to distinguish frames (<code class="language-plaintext highlighter-rouge">:top</code> for a <code class="language-plaintext highlighter-rouge">TopFrame</code>)</li>
   <li><code class="language-plaintext highlighter-rouge">insns</code> returns a list of instructions</li>
-  <li><code class="language-plaintext highlighter-rouge">name</code> is an internal name of the frame that is used in backtraces (for <code class="language-plaintext highlighter-rouge">class X; end</code> it returns <code class="language-plaintext highlighter-rouge">&lt;class:X&gt;</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">name</code> is an internal name of the frame that is used in stacktraces (for <code class="language-plaintext highlighter-rouge">class X; end</code> it returns <code class="language-plaintext highlighter-rouge">&lt;class:X&gt;</code>)</li>
   <li><code class="language-plaintext highlighter-rouge">lvar_names</code> is an array of all local variable names that are used in the frame</li>
   <li><code class="language-plaintext highlighter-rouge">args_info</code> is a special Hash with a meta-information about arguments (empty for all frames except methods)</li>
 </ol>
@@ -667,7 +667,7 @@
 
 <p>Of course, we don’t have access to the Frozen Core. But we have an instruction that pushes it at the top of the stack. We can create our own <code class="language-plaintext highlighter-rouge">FrozenCore = Object.new.freeze</code> and check if <code class="language-plaintext highlighter-rouge">recv</code> is equal to this frozen core.</p>
 
-<p>As you may notice there are also <code class="language-plaintext highlighter-rouge">putobject :m</code> and <code class="language-plaintext highlighter-rouge">putiseq</code> instructions. And argc of the method call is 2. Hmmm.</p>
+<p>As you may notice there are also <code class="language-plaintext highlighter-rouge">putobject :m</code> and <code class="language-plaintext highlighter-rouge">putiseq</code> instructions. And <code class="language-plaintext highlighter-rouge">argc</code> of the method call is 2. Hmmm.</p>
 
 <p><code class="language-plaintext highlighter-rouge">core#define_method</code> takes two arguments:</p>
 
@@ -934,7 +934,7 @@
 
 <h5 id="method-arguments">method arguments</h5>
 
-<p>Every method has an arglist. Yes, sometimes it’s empty, but even in such case we do an arity check. In general arguments initialization is a part of every method call.</p>
+<p>Every method has a list of arguments. Yes, sometimes it’s empty, but even in such case we do an arity check. In general arguments initialization is a part of every method call.</p>
 
 <p>This part of Ruby is really complicated, because we have 12 argument types:</p>
 
@@ -943,12 +943,12 @@
   <li>optional positional argument - <code class="language-plaintext highlighter-rouge">def m(x = 42)</code></li>
   <li>rest argument - <code class="language-plaintext highlighter-rouge">def m(*x)</code></li>
   <li>post argument - <code class="language-plaintext highlighter-rouge">def m(*, x = 1)</code></li>
-  <li>mlhs argument (can be used as a post argument too) - <code class="language-plaintext highlighter-rouge">def m( (x, *y, z) )</code></li>
+  <li><code class="language-plaintext highlighter-rouge">mlhs</code> argument (can be used as a post argument too) - <code class="language-plaintext highlighter-rouge">def m( (x, *y, z) )</code></li>
   <li>required keyword argument - <code class="language-plaintext highlighter-rouge">def m(x:)</code></li>
   <li>optional keyword argument - <code class="language-plaintext highlighter-rouge">def m(x: 42)</code></li>
   <li>rest keyword argument - <code class="language-plaintext highlighter-rouge">def m(**x)</code></li>
   <li>block argument - <code class="language-plaintext highlighter-rouge">def m(&amp;x)</code></li>
-  <li>shadow argument - <code class="language-plaintext highlighter-rouge">proc { |;x| }</code> (I didn’t implement it because I never used it)</li>
+  <li>shadow argument - <code class="language-plaintext highlighter-rouge">proc { |;x| }</code> (I did not implement it because I never used it)</li>
   <li><code class="language-plaintext highlighter-rouge">nil</code> keyword argument (since 2.7) - <code class="language-plaintext highlighter-rouge">def m(**nil)</code></li>
   <li>arguments forwarding (also since 2.7) - <code class="language-plaintext highlighter-rouge">def m(...)</code></li>
 </ul>
@@ -1040,7 +1040,7 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>I intentionally skip keyword arguments here, but they are not that much different from other types of arguments. The only noticeable difference is that optional keyword arguments have “inlined” default values if they are simple enough (like plain strings or numbers, but not expressions like <code class="language-plaintext highlighter-rouge">2+2</code>). If you are interested you can go to the repo and check this file.</p>
+<p>I intentionally skip keyword arguments here, but they are not that much different from other types of arguments. The only noticeable difference is that optional keyword arguments have “inlined” default values if they are simple enough (like plain strings or numbers, but not expressions like <code class="language-plaintext highlighter-rouge">2+2</code>). If you are interested you can go to the repository and check this file.</p>
 
 <p>Then, we should parse arguments and assign them into local variables <strong>when we push a method frame</strong> (so they are available once we start executing instructions of a method body):</p>
 
@@ -1421,7 +1421,7 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>In fact <code class="language-plaintext highlighter-rouge">expandarray</code> is much, much more complicated, you can go to the repo and check it if you want.</p>
+<p>In fact <code class="language-plaintext highlighter-rouge">expandarray</code> is much, much more complicated, you can go to the repository and check it if you want.</p>
 
 <p>Keyword splats (like <code class="language-plaintext highlighter-rouge">{ **x, **y }</code>) are really similar to array splats, I’m not going to cover them here.</p>
 
@@ -1574,7 +1574,7 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>I blindly took it from MRI and yes, this instruction supports maaany types. I implemented only two of them, but the rest looks simple (except <code class="language-plaintext highlighter-rouge">imemo</code> and friends). Honestly I have no idea why, but about 95% of specs from the RubySpec (only language group, I didn’t check the whole test suite) are passing with these missing parts. I have no idea how to trigger MRI to use them. Maybe it uses them internally?</p>
+<p>I blindly took it from MRI and yes, this instruction supports many types. I implemented only two of them, but the rest looks simple (except <code class="language-plaintext highlighter-rouge">imemo</code> and friends). Honestly I have no idea why, but about 95% of specs from the RubySpec (only language group, I did not check the whole test suite) are passing with these missing parts. I have no idea how to trigger MRI to use them. Maybe it uses them internally?</p>
 
 <p><code class="language-plaintext highlighter-rouge">concatstrings</code> looks just like <code class="language-plaintext highlighter-rouge">newarray</code>:</p>
 
@@ -1690,11 +1690,11 @@
   <li>and then we simply call a method with a generated proc object.</li>
 </ol>
 
-<p>Implicit block like <code class="language-plaintext highlighter-rouge">b = proc {}; m(&amp;b)</code> doesn’t need any additional implementation. Method <code class="language-plaintext highlighter-rouge">proc</code> here takes a block (handled by the first <code class="language-plaintext highlighter-rouge">if</code> branch), it gets stored in a local variable and we pass it to the method as a block argument (<code class="language-plaintext highlighter-rouge">elseif</code> branch).</p>
+<p>Implicit block like <code class="language-plaintext highlighter-rouge">b = proc {}; m(&amp;b)</code> does not need any additional implementation. Method <code class="language-plaintext highlighter-rouge">proc</code> here takes a block (handled by the first <code class="language-plaintext highlighter-rouge">if</code> branch), it gets stored in a local variable and we pass it to the method as a block argument (<code class="language-plaintext highlighter-rouge">elseif</code> branch).</p>
 
 <h5 id="lambdas">Lambdas</h5>
 
-<p>It’s complicated and I don’t have a complete solution that covers all cases (I guess because MRI doesn’t expose enough APIs to do it. Or I’m just not smart enough).</p>
+<p>It’s complicated and I don’t have a complete solution that covers all cases (I guess because MRI does not expose enough APIs to do it. Or I’m just not smart enough).</p>
 
 <p>Arrow lambda (<code class="language-plaintext highlighter-rouge">-&gt;(){}</code>) is just a method call <code class="language-plaintext highlighter-rouge">FrozenCore#lambda</code>, and so we can easily determine that it’s a lambda and not a proc. But what about <code class="language-plaintext highlighter-rouge">lambda {}</code>? It can be overwritten.</p>
 
@@ -1753,7 +1753,7 @@
 
 <p>And the frame itself saves it in the <code class="language-plaintext highlighter-rouge">attr_reader</code>.</p>
 
-<p>So both explicit and implicit blocks are available in a method body via <code class="language-plaintext highlighter-rouge">current_frame.block</code>. It’s possible to invoke it by calling <code class="language-plaintext highlighter-rouge">block.call(arguments)</code> (if it’s available as an explicit block argument) or to call <code class="language-plaintext highlighter-rouge">yield(arguments)</code> (in such case it doesn’t even have to be declared in a method signature).</p>
+<p>So both explicit and implicit blocks are available in a method body via <code class="language-plaintext highlighter-rouge">current_frame.block</code>. It’s possible to invoke it by calling <code class="language-plaintext highlighter-rouge">block.call(arguments)</code> (if it’s available as an explicit block argument) or to call <code class="language-plaintext highlighter-rouge">yield(arguments)</code> (in such case it does not even have to be declared in a method signature).</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">pp</span> <span class="no">RubyVM</span><span class="o">::</span><span class="no">InstructionSequence</span><span class="p">.</span><span class="nf">compile</span><span class="p">(</span><span class="s1">'def m; yield; end'</span><span class="p">).</span><span class="nf">to_a</span><span class="p">[</span><span class="mi">13</span><span class="p">][</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">13</span><span class="p">]</span>
 <span class="p">[[</span><span class="ss">:invokeblock</span><span class="p">,</span> <span class="p">{</span><span class="ss">:mid</span><span class="o">=&gt;</span><span class="kp">nil</span><span class="p">,</span> <span class="ss">:flag</span><span class="o">=&gt;</span><span class="mi">16</span><span class="p">,</span> <span class="ss">:orig_argc</span><span class="o">=&gt;</span><span class="mi">0</span><span class="p">}],</span>
@@ -1819,7 +1819,7 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>I didn’t implement it because MSpec doesn’t rely on it and I usually try to avoid sequences of <code class="language-plaintext highlighter-rouge">super</code> calls.</p>
+<p>I did not implement it because MSpec does not rely on it and I usually try to avoid sequences of <code class="language-plaintext highlighter-rouge">super</code> calls.</p>
 
 <h5 id="global-variables">Global variables</h5>
 
@@ -1854,7 +1854,7 @@
  <span class="p">[</span><span class="ss">:leave</span><span class="p">]]</span>
 </code></pre></div></div>
 
-<p>In some simple cases it doesn’t do any computations. It’s obvious that <code class="language-plaintext highlighter-rouge">42</code> is an expression and <code class="language-plaintext highlighter-rouge">a</code> is a local variable (and there’s no way to remove it by any code between assignment and <code class="language-plaintext highlighter-rouge">defined?</code> check)</p>
+<p>In some simple cases it does not do any computations. It’s obvious that <code class="language-plaintext highlighter-rouge">42</code> is an expression and <code class="language-plaintext highlighter-rouge">a</code> is a local variable (and there’s no way to remove it by any code between assignment and <code class="language-plaintext highlighter-rouge">defined?</code> check)</p>
 
 <p>More advanced checks use a <code class="language-plaintext highlighter-rouge">defined</code> instruction:</p>
 
@@ -1866,7 +1866,7 @@
  <span class="p">[</span><span class="ss">:leave</span><span class="p">]]</span>
 </code></pre></div></div>
 
-<p>The first argument is a special enum flag that specifies what are we trying to check here:</p>
+<p>The first argument is a special <code class="language-plaintext highlighter-rouge">enum</code> flag that specifies what are we trying to check here:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">DefinedType</span>
   <span class="no">DEFINED_NOT_DEFINED</span> <span class="o">=</span> <span class="mi">0</span>
   <span class="no">DEFINED_NIL</span> <span class="o">=</span> <span class="mi">1</span>
@@ -1963,7 +1963,7 @@
 <span class="n">m</span>
 </code></pre></div></div>
 
-<p>Of course you can just find the closest frame that supports <code class="language-plaintext highlighter-rouge">return</code>-ing (i.e. a <code class="language-plaintext highlighter-rouge">MethodFrame</code>), but you also need to stop execution of two running methods and blocks. In our case it’s even more complicated because we don’t control them (they are written in C).</p>
+<p>Of course you can just find the closest frame that supports <code class="language-plaintext highlighter-rouge">return</code> (i.e. a <code class="language-plaintext highlighter-rouge">MethodFrame</code>), but you also need to stop execution of two running methods and blocks. In our case it’s even more complicated because we don’t control them (they are written in C).</p>
 
 <p>The only way I was able to find is to throw an exception. An exception destroys all frames (including YARV’s C frames) until it finds someone who can catch and handle it. If there’s no such frame the programs exits with an error.</p>
 
@@ -2000,7 +2000,7 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>Each longjmp exception wraps the value that it “returns” with (or “breaks” with, for <code class="language-plaintext highlighter-rouge">break</code> we need a separate class, but I’m going to skip it here. <code class="language-plaintext highlighter-rouge">break</code>/<code class="language-plaintext highlighter-rouge">next</code> and other friends are really similar to <code class="language-plaintext highlighter-rouge">return</code>).</p>
+<p>Each <code class="language-plaintext highlighter-rouge">longjmp</code> exception wraps the value that it “returns” with (or “breaks” with, for <code class="language-plaintext highlighter-rouge">break</code> we need a separate class, but I’m going to skip it here. <code class="language-plaintext highlighter-rouge">break</code>/<code class="language-plaintext highlighter-rouge">next</code> and other friends are really similar to <code class="language-plaintext highlighter-rouge">return</code>).</p>
 
 <p>But we need to catch them, right? Without a <code class="language-plaintext highlighter-rouge">rescue</code> handler we will have something conceptually similar to segfault:</p>
 
@@ -2020,7 +2020,7 @@
 
 <p>The only missing thing is the implementation of <code class="language-plaintext highlighter-rouge">can_return?</code> method in our frames. All frames except <code class="language-plaintext highlighter-rouge">MethodFrame</code> (and <code class="language-plaintext highlighter-rouge">BlockFrame</code> it it’s marked as <code class="language-plaintext highlighter-rouge">lambda</code>) must return <code class="language-plaintext highlighter-rouge">false</code>, <code class="language-plaintext highlighter-rouge">MethodFrame</code> must return <code class="language-plaintext highlighter-rouge">true</code>.</p>
 
-<p>MRI uses a special instruction called <code class="language-plaintext highlighter-rouge">throw</code> that has a single argument that is a <code class="language-plaintext highlighter-rouge">throw_type</code> (an enum, for <code class="language-plaintext highlighter-rouge">return</code> it’s 1, <code class="language-plaintext highlighter-rouge">break</code> is 3, <code class="language-plaintext highlighter-rouge">next</code> is 4, there are also <code class="language-plaintext highlighter-rouge">retry</code>/<code class="language-plaintext highlighter-rouge">redo</code> and a few more). The value that must be attached to the thrown exception comes from the stack (so this instruction does a single <code class="language-plaintext highlighter-rouge">pop</code>)</p>
+<p>MRI uses a special instruction called <code class="language-plaintext highlighter-rouge">throw</code> that has a single argument that is a <code class="language-plaintext highlighter-rouge">throw_type</code> (an <code class="language-plaintext highlighter-rouge">enum</code>, for <code class="language-plaintext highlighter-rouge">return</code> it’s 1, <code class="language-plaintext highlighter-rouge">break</code> is 3, <code class="language-plaintext highlighter-rouge">next</code> is 4, there are also <code class="language-plaintext highlighter-rouge">retry</code>/<code class="language-plaintext highlighter-rouge">redo</code> and a few more). The value that must be attached to the thrown exception comes from the stack (so this instruction does a single <code class="language-plaintext highlighter-rouge">pop</code>)</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">VM_THROW_STATE_MASK</span> <span class="o">=</span> <span class="mh">0xff</span>
 
@@ -2051,9 +2051,9 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<h5 id="longjmp-in-mri">longjmp in MRI</h5>
+<h5 id="longjmp-in-mri"><code class="language-plaintext highlighter-rouge">longjmp</code> in MRI</h5>
 
-<p>But does it work in the same way in MRI? C doesn’t have exceptions. And at the same time there is a bunch of places where MRI does something like</p>
+<p>But does it work in the same way in MRI? C does not have exceptions. And at the same time there is a bunch of places where MRI does something like</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="p">(</span><span class="n">len</span> <span class="o">&gt;</span> <span class="n">ARY_MAX_SIZE</span><span class="p">)</span> <span class="p">{</span>
     <span class="n">rb_raise</span><span class="p">(</span><span class="n">rb_eArgError</span><span class="p">,</span> <span class="s">"array size too big"</span><span class="p">);</span>
@@ -2063,7 +2063,7 @@
 
 <p>This <code class="language-plaintext highlighter-rouge">rb_raise</code> somehow exits a C function. Well, here’s the trick: non-local <code class="language-plaintext highlighter-rouge">goto</code>.</p>
 
-<p>There are syscalls that perform a goto to any place (that was previously marked of course, similar to labels for a local goto):</p>
+<p>There are C calls that perform a <code class="language-plaintext highlighter-rouge">goto</code> to any place (that was previously marked of course, similar to jump to labels for a local <code class="language-plaintext highlighter-rouge">goto</code>):</p>
 
 <ul>
   <li><a href="https://linux.die.net/man/3/sigsetjmp"><code class="language-plaintext highlighter-rouge">setjmp</code></a></li>
@@ -2071,12 +2071,12 @@
 </ul>
 
 <blockquote>
-  <p>setjmp() saves the stack context/environment in env for later use by <code class="language-plaintext highlighter-rouge">longjmp</code></p>
+  <p><code class="language-plaintext highlighter-rouge">setjmp()</code> saves the stack context/environment in <code class="language-plaintext highlighter-rouge">env</code> for later use by <code class="language-plaintext highlighter-rouge">longjmp</code></p>
 </blockquote>
 
 <p>… also known as “context switch”. And it’s relatively expensive.</p>
 
-<p>Even if you don’t <code class="language-plaintext highlighter-rouge">raise</code> an exception and only do <code class="language-plaintext highlighter-rouge">begin; ...; rescue; end</code> in your code you still have to save the context (to jump to it once you <code class="language-plaintext highlighter-rouge">raise</code> an error). MRI doesn’t know at compile time which methods can throw an error (and do you throw them at all), so each <code class="language-plaintext highlighter-rouge">rescue</code> produces a <code class="language-plaintext highlighter-rouge">setjmp</code> syscall (and each <code class="language-plaintext highlighter-rouge">raise</code> triggers a <code class="language-plaintext highlighter-rouge">longjmp</code> and passes <code class="language-plaintext highlighter-rouge">closest rescue</code> -&gt; <code class="language-plaintext highlighter-rouge">saved env</code> as an argument)</p>
+<p>Even if you don’t <code class="language-plaintext highlighter-rouge">raise</code> an exception and only do <code class="language-plaintext highlighter-rouge">begin; ...; rescue; end</code> in your code you still have to save the context (to jump to it once you <code class="language-plaintext highlighter-rouge">raise</code> an error). MRI does not know at compile time which methods can throw an error (and do you throw them at all), so each <code class="language-plaintext highlighter-rouge">rescue</code> produces a <code class="language-plaintext highlighter-rouge">setjmp</code> call (and each <code class="language-plaintext highlighter-rouge">raise</code> triggers a <code class="language-plaintext highlighter-rouge">longjmp</code> and passes <code class="language-plaintext highlighter-rouge">closest rescue</code> -&gt; <code class="language-plaintext highlighter-rouge">saved env</code> as an argument)</p>
 
 <h5 id="rescueensure"><code class="language-plaintext highlighter-rouge">rescue</code>/<code class="language-plaintext highlighter-rouge">ensure</code></h5>
 
@@ -2314,7 +2314,7 @@
 
 <h5 id="throwcatch-methods"><code class="language-plaintext highlighter-rouge">throw</code>/<code class="language-plaintext highlighter-rouge">catch</code> methods</h5>
 
-<p>As a side (and I personally think a very interesting) note, while I was working on this project I’ve realized that specs for <code class="language-plaintext highlighter-rouge">Kernel#throw</code> are not working for me at all. They were literally completely broken (even after I finished working on a very basic implementation of exceptions):</p>
+<p>As a side (and I personally think a very interesting) note, while I was working on this project I have realized that specs for <code class="language-plaintext highlighter-rouge">Kernel#throw</code> are not working for me at all. They were literally completely broken (even after I finished working on a very basic implementation of exceptions):</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kp">catch</span><span class="p">(</span><span class="ss">:x</span><span class="p">)</span> <span class="k">do</span>
   <span class="k">begin</span>
@@ -2325,7 +2325,7 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>This code doesn’t print anything. However, if you do just <code class="language-plaintext highlighter-rouge">throw :x</code> you get an exception:</p>
+<p>This code does not print anything. However, if you do just <code class="language-plaintext highlighter-rouge">throw :x</code> you get an exception:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kp">throw</span> <span class="ss">:x</span>
 <span class="no">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
@@ -2419,7 +2419,7 @@ UncaughtThrowError (uncaught throw :x)
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>It prints <code class="language-plaintext highlighter-rouge">1003</code>, because there’s also a <code class="language-plaintext highlighter-rouge">TopFrame</code> and a <code class="language-plaintext highlighter-rouge">BlockFrame</code> (and a small bug that does +1), but that’s absolutely ok for us.</p>
+<p>It prints <code class="language-plaintext highlighter-rouge">1003</code>, because there’s also a <code class="language-plaintext highlighter-rouge">TopFrame</code> and a <code class="language-plaintext highlighter-rouge">BlockFrame</code> (and a small bug that does +1), but that’s absolutely fine for us.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span> <span class="n">ruby</span> <span class="n">benchmark</span><span class="p">.</span><span class="nf">rb</span>
 <span class="no">Warming</span> <span class="n">up</span> <span class="o">--------------------------------------</span>
@@ -2434,7 +2434,7 @@ UncaughtThrowError (uncaught throw :x)
                <span class="ss">raise:    </span><span class="mf">10627.8</span> <span class="n">i</span><span class="o">/</span><span class="n">s</span> <span class="o">-</span> <span class="mf">1.05</span><span class="n">x</span>  <span class="n">slower</span>
 </code></pre></div></div>
 
-<p>There’s almost no difference! The reason is simple: the only thing that is different is creation of the exception object. <code class="language-plaintext highlighter-rouge">throw</code> doesn’t do it.</p>
+<p>There’s almost no difference! The reason is simple: the only thing that is different is creation of the exception object. <code class="language-plaintext highlighter-rouge">throw</code> does not do it.</p>
 
 <h5 id="utility-instructions">Utility instructions</h5>
 
@@ -2453,7 +2453,7 @@ UncaughtThrowError (uncaught throw :x)
 
 <h3 id="final-words">Final words</h3>
 
-<p>First of all, I’d like to say thank you to everyone who made YARV. I wasn’t able to find a single place where MRI behaves inefficiently (and I spent many hours looking into instructions).</p>
+<p>First of all, I’d like to say thank you to everyone who made YARV. I was not able to find a single place where MRI behaves inefficiently (and I spent many hours looking into instructions).</p>
 
 <p>Once again, the code is available <a href="https://github.com/iliabylich/my.rb">here</a>, feel free to create issues/message me in Twitter. And please, don’t use it in the real world.</p>
 

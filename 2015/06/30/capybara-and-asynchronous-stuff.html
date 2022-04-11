@@ -142,39 +142,44 @@
 <h1 id="what-is-capybara-poltergeist-and-phantomjs">What is Capybara, Poltergeist and PhantomJS?</h1>
 
 <h2 id="phantomjs">PhantomJS</h2>
+
 <p>First of all, we need to know what is PhantomJS. I would say it’s a ‘tool that acts like a browser but can be controlled from outside using simple command interface’. In more common words, it’s a web driver. It’s a full-featured WebKit (an engine of Chrome/Safari/few last versions of Opera and other browsers), but in console. You can use it for scripting, automating or testing.</p>
 
 <h2 id="poltergeist">Poltergeist</h2>
+
 <p>Poltergeist is a Ruby wrapper for PhantomJS. Usually you write the code for PhantomJS on JavaScript, with Poltergeist you can run it on Ruby.</p>
 
 <h2 id="capybara">Capybara</h2>
+
 <p>Well, I’m pretty sure you know what it is. It’s a test framework. And it supports different web drivers like:</p>
 
-<p><strong>RackTest</strong>  - web driver that doesn’t support javascript, extremely fast, but deadly primitive; best solution for tests that don’t require any JS execution</p>
+<p><code class="language-plaintext highlighter-rouge">RackTest</code>  - web driver that does not support JavaScript, extremely fast, but deadly primitive; best solution for tests that don’t require any JavaScript execution</p>
 
-<p><strong>Selenium</strong>  - the most popular web driver</p>
+<p><code class="language-plaintext highlighter-rouge">Selenium</code>  - the most popular web driver</p>
 
 <p>Advantages:</p>
+
 <ol>
   <li>Supports a lot of browsers (so you can run multiple test suites in different browsers)</li>
   <li>Super stable</li>
 </ol>
 
 <p>Disadvantages:</p>
+
 <ol>
   <li>Requires X server to be installed on the machine that runs it (some cloud CI services just don’t have it)</li>
   <li>Opens a real browser that executes your test scenario, that slows your test suite.</li>
 </ol>
 
-<p><strong>Capybara-webkit</strong> - headless WebKit (doesn’t run a browser), but still requires X server</p>
+<p><code class="language-plaintext highlighter-rouge">Capybara-webkit</code> - headless WebKit (does not run a browser), but still requires X server</p>
 
-<p><strong>Poltergeist</strong> - see above, headless WebKit, <strong>doesn’t require X server</strong>, so you can run it everywhere.</p>
+<p><code class="language-plaintext highlighter-rouge">Poltergeist</code> - see above, headless WebKit, <strong>does not require X server</strong>, so you can run it everywhere.</p>
 
 <h1 id="asynchronous-javascript-code-in-your-tests">Asynchronous JavaScript code in your tests</h1>
 
 <p>When you write integration tests sometimes you need to run asynchronous JavaScript in context of your page and get a response back to Ruby. Here is an example from my current project: the client part of our application supports offline mode, so we store the data in WebSQL and sync it with server once connection is restored. The API of WebSQL is asynchronous, so we have a result of execution in some provided callback:</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// something like</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// something like</span>
 <span class="nx">WebSQLWrapper</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="dl">'</span><span class="s1">select 1</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// result of execution becomes available after some time</span>
 <span class="p">});</span>
@@ -194,6 +199,7 @@
 </ol>
 
 <p>Require both of them in your <code class="language-plaintext highlighter-rouge">spec_helper</code> and force Capybara to use Poltergeist as a web driver:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'capybara/rails'</span>
 <span class="nb">require</span> <span class="s1">'capybara/poltergeist'</span>
 
@@ -220,12 +226,13 @@
 <span class="no">Capybara</span><span class="p">.</span><span class="nf">default_driver</span> <span class="o">=</span> <span class="ss">:poltergeist_debug</span>
 </code></pre></div></div>
 
-<p>With this configuration Poltergeist doesn’t print any noisy output, but you can enable it by passing <code class="language-plaintext highlighter-rouge">DEBUG_PHANTOMJS=true</code></p>
+<p>With this configuration Poltergeist does not print any noisy output, but you can enable it by passing <code class="language-plaintext highlighter-rouge">DEBUG_PHANTOMJS=true</code></p>
 
 <h1 id="small-example">Small example</h1>
 
 <p>Here is a simple of the code that returns it’s response asynchronously:</p>
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">Thanks for waiting 1 second</span><span class="dl">'</span><span class="p">);</span>
 <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
 </code></pre></div></div>
@@ -234,15 +241,17 @@
 <h1 id="but-capybara-waits-for-my-ajax-requests">But… Capybara waits for my AJAX requests</h1>
 
 <p>Yes, when you write something like:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">it</span> <span class="s1">'displays a message'</span> <span class="k">do</span>
   <span class="n">expect</span><span class="p">(</span><span class="n">page</span><span class="p">).</span><span class="nf">to</span> <span class="n">have_text</span><span class="p">(</span><span class="s1">'Hey'</span><span class="p">)</span>
 <span class="k">end</span>
 </code></pre></div></div>
-<p>and at the moment of running this expectation your page doesn’t have this text <strong>but receives it a second later</strong> - the test will be green. Why?</p>
+<p>and at the moment of running this expectation your page does not have this text <strong>but receives it a second later</strong> - the test will be green. Why?</p>
 
 <p>Capybara has a setting called <code class="language-plaintext highlighter-rouge">default_wait_time</code> (was changed to <code class="language-plaintext highlighter-rouge">default_max_wait_time</code>, but is still acceptable) which is 2 seconds by default. <a href="https://github.com/jnicklas/capybara/blob/master/lib/capybara/node/base.rb#L76">Here is how Capybara uses it</a>.</p>
 
 <p>It runs the code again and again, and stops if</p>
+
 <ol>
   <li>It has a result of code execution - then it simple returns it</li>
   <li>The time has come (2 seconds) - then it raises an error</li>
@@ -293,10 +302,11 @@
 </code></pre></div></div>
 
 <p>Alright, now let’s use it.</p>
+
 <ol>
-  <li>Modify JS code to set result into some global variable (JS function context, you know)</li>
+  <li>Modify JavaScript code to set result into some global variable (JavaScript function context, you know)</li>
   <li>Run the code that gets response in callback.</li>
-  <li>Run the code that polls the response from global varialbe</li>
+  <li>Run the code that polls the response from global variable</li>
   <li>Wrap this code with <code class="language-plaintext highlighter-rouge">WaitHelper.wait_until(timeout) {}</code></li>
 </ol>
 
@@ -318,7 +328,7 @@
 
 <h1 id="can-we-organize-it-as-a-common-reusable-solution">Can we organize it as a common reusable solution?</h1>
 
-<p>Why not. Here is a gem called <a href="https://github.com/iliabylich/capybara-async-runner">capybara-async-runner</a>. And here is how to use it.</p>
+<p>Why not. Here is a gem called <a href="https://github.com/iliabylich/capybara-async-runner"><code class="language-plaintext highlighter-rouge">capybara-async-runner</code></a>. And here is how to use it.</p>
 
 <p>Installation:</p>
 
@@ -328,7 +338,8 @@
 <span class="nb">require</span> <span class="s1">'capybara/async_runner'</span>
 </code></pre></div></div>
 
-<p>First of all, I don’t like to mix JS and Ruby code in a single file, so we need templates (like <code class="language-plaintext highlighter-rouge">.js.erb</code>). You need to specify the directory with templates:</p>
+<p>First of all, I don’t like to mix JavaScript and Ruby code in a single file, so we need templates (like <code class="language-plaintext highlighter-rouge">.js.erb</code>).
+You need to specify the directory with templates:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># spec/spec_helper.rb</span>
 <span class="no">Capybara</span><span class="o">::</span><span class="no">AsyncRunner</span><span class="p">.</span><span class="nf">setup</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
@@ -358,7 +369,8 @@
 </code></pre></div></div>
 
 <p>Let’s create our template for this command:</p>
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// spec/fixtures/async_commands/template.js.erb</span>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// spec/fixtures/async_commands/template.js.erb</span>
 <span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]);</span>
   <span class="o">&lt;%=</span> <span class="nx">parsed_json</span><span class="p">(</span><span class="nx">js</span><span class="p">[:</span><span class="nx">json</span><span class="p">])</span> <span class="o">%&gt;</span>
@@ -366,11 +378,12 @@
 </code></pre></div></div>
 
 <p>There are few things that I need to explain:</p>
+
 <ol>
   <li><code class="language-plaintext highlighter-rouge">parsed_json</code> - this is an output point from the script that was defined in the command class. When you call it in the template, it embeds some JavaScript that stores passed data into the global variable. <code class="language-plaintext highlighter-rouge">parsed_json(123)</code> produces something like <code class="language-plaintext highlighter-rouge">window.parsed_json_result = 123</code> (so we can can grab this response later from the second script)</li>
   <li><code class="language-plaintext highlighter-rouge">js</code> - this is a proxy method from the gem that acts like a Hash. The method <code class="language-plaintext highlighter-rouge">[]</code> on this Hash returns passed key (and the whole method <code class="language-plaintext highlighter-rouge">js</code> is kind of “JavaScript memory”). <code class="language-plaintext highlighter-rouge">&lt;%= parsed_json(js[:json]) %&gt;</code> produces <code class="language-plaintext highlighter-rouge">window.parsed_json_result = json</code> which is exactly what we need.</li>
   <li>When you call <code class="language-plaintext highlighter-rouge">Capybara::AsyncRunner.run(:test_command_name)</code>, the gem executes the script generated from your template in the context of <code class="language-plaintext highlighter-rouge">Capybara.current_session</code>. Then it subscribes to all defined responses (this is actually, the second script) and returns the first one that becomes defined (<code class="language-plaintext highlighter-rouge">window.parsed_json_result</code> in this case).</li>
-  <li>The block that we’ve specified for <code class="language-plaintext highlighter-rouge">parsed_json</code> is like a handler for transforming data which it returns (we invoke <code class="language-plaintext highlighter-rouge">parsed_json</code> method with <code class="language-plaintext highlighter-rouge">json</code> variable which contains raw JSON, our handler parses it)</li>
+  <li>The block that we have specified for <code class="language-plaintext highlighter-rouge">parsed_json</code> is like a handler for transforming data which it returns (we invoke <code class="language-plaintext highlighter-rouge">parsed_json</code> method with <code class="language-plaintext highlighter-rouge">json</code> variable which contains raw JSON, our handler parses it)</li>
 </ol>
 
 <p>If you are familiar with templates in Ruby, just quickly look at the <a href="https://github.com/iliabylich/capybara-async-runner/blob/master/lib/capybara/async_runner/env.rb">code</a>, this class is a context of rendering.</p>
@@ -379,7 +392,7 @@
 
 <p>You need to follow these steps to create a command using a gem:</p>
 <ol>
-  <li>Specify the directory with templates in the gem config</li>
+  <li>Specify the directory with templates in the gem configuration file</li>
   <li>Create a command class</li>
   <li>Specify its name</li>
   <li>Specify the name of template</li>
@@ -409,7 +422,7 @@
 
 <p>And use it template:</p>
 
-<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">someLongRunningMethod</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">someLongRunningMethod</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="c1">// 'done' is a method that generates JavaScript</span>
   <span class="c1">// 'data' returns data that we've passed to 'run'</span>
   <span class="c1">// :name is a key in that Hash</span>
@@ -421,12 +434,12 @@
 
 <p>As I mentioned before, on my current project we use WebSQL, but it’s <a href="http://www.w3.org/TR/webdatabase/">deprecated</a>, so I’m not going to use it in examples. Instead let’s write a wrapper for IndexedDB.</p>
 
-<p>First of all, we need a JavaScript wrapper, I don’t like the native IndexedDB API. First result from google = <a href="http://www.dexie.org/">Dexie.js</a>.</p>
+<p>First of all, we need a JavaScript wrapper, I don’t like the native IndexedDB API. First result from google = <a href="http://www.dexie.org/"><code class="language-plaintext highlighter-rouge">Dexie.js</code></a>.</p>
 
 <p>Let’s plan our scenario:</p>
 <ol>
   <li>Visit any page</li>
-  <li>Inject Dexie.js into the page</li>
+  <li>Inject <code class="language-plaintext highlighter-rouge">Dexie.js</code> into the page</li>
   <li>Create IndexedDB instance</li>
   <li>Write some data to the database</li>
   <li>Read them and print</li>
@@ -437,7 +450,7 @@
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Capybara</span><span class="p">.</span><span class="nf">current_session</span><span class="p">.</span><span class="nf">visit</span><span class="p">(</span><span class="s1">'http://google.com'</span><span class="p">)</span>
 </code></pre></div></div>
 
-<h2 id="injecting-dexiejs-into-the-page">Injecting Dexie.js into the page</h2>
+<h2 id="injecting-dexiejs-into-the-page">Injecting <code class="language-plaintext highlighter-rouge">Dexie.js</code> into the page</h2>
 
 <ul>
   <li><a href="https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/commands/wrapper_loader.rb">Command</a></li>
@@ -454,8 +467,9 @@
 </code></pre></div></div>
 
 <p>Explanation:</p>
+
 <ol>
-  <li>JS code detects whether the library has already been loaded</li>
+  <li>JavaScript code detects whether the library has already been loaded</li>
   <li>If not - appends <code class="language-plaintext highlighter-rouge">&lt;script&gt;</code> tag to the <code class="language-plaintext highlighter-rouge">&lt;head&gt;</code></li>
   <li>If yes - returns ‘success’</li>
   <li>If 3 seconds passed and we still have no library code - returns ‘error’</li>
@@ -480,10 +494,11 @@
 </code></pre></div></div>
 
 <p>Explanation:</p>
+
 <ol>
-  <li>JS opens the database using Dexie.js</li>
-  <li>If callback was called, returns <code class="language-plaintext highlighter-rouge">sucess</code></li>
-  <li>If errback was called, returns <code class="language-plaintext highlighter-rouge">error</code> with error message</li>
+  <li>JavaScript opens the database using <code class="language-plaintext highlighter-rouge">Dexie.js</code></li>
+  <li>If <code class="language-plaintext highlighter-rouge">callback</code> was called, returns <code class="language-plaintext highlighter-rouge">sucess</code></li>
+  <li>If <code class="language-plaintext highlighter-rouge">errback</code> was called, returns <code class="language-plaintext highlighter-rouge">error</code> with error message</li>
   <li>Ruby command raises error if <code class="language-plaintext highlighter-rouge">error</code> was returned</li>
 </ol>
 
@@ -522,7 +537,7 @@
 <span class="nb">p</span> <span class="no">Capybara</span><span class="o">::</span><span class="no">AsyncRunner</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span><span class="s1">'indexeddb:query'</span><span class="p">,</span> <span class="ss">store: </span><span class="s1">'users'</span><span class="p">,</span> <span class="ss">methods: </span><span class="nb">methods</span><span class="p">)</span>
 </code></pre></div></div>
 
-<p>Here we pass an array of methods and their arguments to template, iterate over them and build a dexie scope (just like <code class="language-plaintext highlighter-rouge">ActiveRecord::Relation</code>), and return a result back to ruby command.</p>
+<p>Here we pass an array of methods and their arguments to template, iterate over them and build a <code class="language-plaintext highlighter-rouge">Dexie.js</code> scope (just like <code class="language-plaintext highlighter-rouge">ActiveRecord::Relation</code>), and return a result back to ruby command.</p>
 
 <p>After wrapping it even more we can get interface like <a href="https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/indexdb.rb#L133">this</a></p>
 
@@ -530,7 +545,7 @@
 
 <h1 id="conclusion">Conclusion</h1>
 
-<p>I would say the topic of this article is not so popular. Single page applications that work in offline mode (and because of this, use WebSQL/IndexedDB/some other async storage, probably) are still not frequent today. Usually when you build an SPA, you just write your tests using Jasmine or something like that. You mock your requests to the server API and test your client in some isolated environment. But these tests are still functional (you verify a single component - client, in this case - but not the whole application).</p>
+<p>I would say the topic of this article is not so popular. Single page applications that work in offline mode (and because of this, use WebSQL/IndexedDB/some other asynchronous storage, probably) are still not frequent today. Usually when you build an SPA, you just write your tests using Jasmine or something like that. You mock your requests to the server API and test your client in some isolated environment. But these tests are still functional (you verify a single component - client, in this case - but not the whole application).</p>
 
 <p>Someday working on a rich client-side application, remember about the idea of this post. You can control the logical flow of your client-server communication in integration tests, and this is good. Wrap your client code, build a micro-framework on top of this gem and test every piece of your code.</p>
 

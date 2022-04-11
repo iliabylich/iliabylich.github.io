@@ -106,7 +106,20 @@
 <li class="toc-entry toc-h2"><a href="#sql-endpoint">SQL endpoint</a></li>
 <li class="toc-entry toc-h2"><a href="#crud-endpoint">CRUD endpoint</a></li>
 <li class="toc-entry toc-h2"><a href="#json-document-endpoint">JSON document endpoint</a></li>
-<li class="toc-entry toc-h1"><a href="#mysql-57-installation">MySQL 5.7 installation</a></li>
+<li class="toc-entry toc-h1"><a href="#mysql-57-installation">MySQL 5.7 installation</a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#download-package-from-mysql-site">Download package from MySQL site</a></li>
+<li class="toc-entry toc-h3"><a href="#extract-it">Extract it</a></li>
+<li class="toc-entry toc-h3"><a href="#create-mysqlmysql-usergroup">Create mysql:mysql user:group</a></li>
+<li class="toc-entry toc-h3"><a href="#link-extracted-directory">Link extracted directory</a></li>
+<li class="toc-entry toc-h3"><a href="#run-mysql_install_db">Run mysql_install_db</a></li>
+<li class="toc-entry toc-h3"><a href="#run-mysql-server">Run MySQL server</a></li>
+<li class="toc-entry toc-h3"><a href="#change-root-password">Change root password</a></li>
+<li class="toc-entry toc-h3"><a href="#create-configuration-files-and-init-script">Create configuration files and init script</a></li>
+<li class="toc-entry toc-h3"><a href="#and-change-basedir-and-datadir-in-etcinitdmysql">And change basedir and datadir in /etc/init.d/mysql</a></li>
+<li class="toc-entry toc-h3"><a href="#run-mysql-server-again-with-configuration-files">Run MySQL server again with configuration files</a></li>
+</ul>
+</li>
 <li class="toc-entry toc-h1"><a href="#http-api-plugin-installation">HTTP API plugin installation</a></li>
 <li class="toc-entry toc-h1"><a href="#http-api-plugin-configuration">HTTP API plugin configuration</a></li>
 <li class="toc-entry toc-h1"><a href="#connecting-with-ruby">Connecting with Ruby</a>
@@ -123,7 +136,7 @@
   <p>Yes, MySQL has an HTTP API which is:</p>
 <ol>
   <li>an experimental feature</li>
-  <li>it ships as a native plugin only for 5.7 version (http://labs.mysql.com/?id=3)</li>
+  <li>it ships as a native plugin <a href="http://labs.mysql.com/?id=3">only for 5.7 version</a></li>
 </ol>
 
 <p>Basically, it allows you to work with your database in the following ways:</p>
@@ -137,12 +150,12 @@
 
 <p>It gives an ability to run queries like</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET http://host:port/sql/:database/:query
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET http://host:port/sql/:database/:query
 </code></pre></div></div>
 
 <p>For example</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET http://localhost:8080/sql/testdb/SELECT+1
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET http://localhost:8080/sql/testdb/SELECT+1
 </code></pre></div></div>
 
 <p>is a synonym of SQL’s <code class="language-plaintext highlighter-rouge">SELECT 1</code>.</p>
@@ -151,119 +164,115 @@
 
 <p>Interface is:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET http://host:port/crud/:database/:table/:id
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET http://host:port/crud/:database/:table/:id
 </code></pre></div></div>
 
 <p>And</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET http://localhost:8080/crud/test_db/test_table/101'
-</code></pre></div></div>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET http://localhost:8080/crud/test_db/test_table/101<span class="s1">'
+</span></code></pre></div></div>
 
 <p>produces:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SELECT * FROM `test_db`.`test_table` WHERE `test_table`.`id` = 101
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="nv">`test_db`</span><span class="p">.</span><span class="nv">`test_table`</span> <span class="k">WHERE</span> <span class="nv">`test_table`</span><span class="p">.</span><span class="nv">`id`</span> <span class="o">=</span> <span class="mi">101</span>
 </code></pre></div></div>
 
 <h2 id="json-document-endpoint">JSON document endpoint</h2>
 
 <p>Basically, with this endpoint your table has only 3 fields:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; describe test_db.test_table;
-+--------+---------------------+------+-----+---------+-------+
-| Field  | Type                | Null | Key | Default | Extra |
-+--------+---------------------+------+-----+---------+-------+
-| _id    | varchar(36)         | NO   | PRI | NULL    |       |
-| _rev   | bigint(20) unsigned | NO   | PRI | 0       |       |
-| _extra | blob                | NO   |     | NULL    |       |
-+--------+---------------------+------+-----+---------+-------+
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">describe</span> <span class="n">test_db</span><span class="p">.</span><span class="n">test_table</span><span class="p">;</span>
+<span class="o">+</span><span class="c1">--------+---------------------+------+-----+---------+-------+</span>
+<span class="o">|</span> <span class="n">Field</span>  <span class="o">|</span> <span class="k">Type</span>                <span class="o">|</span> <span class="k">Null</span> <span class="o">|</span> <span class="k">Key</span> <span class="o">|</span> <span class="k">Default</span> <span class="o">|</span> <span class="n">Extra</span> <span class="o">|</span>
+<span class="o">+</span><span class="c1">--------+---------------------+------+-----+---------+-------+</span>
+<span class="o">|</span> <span class="n">_id</span>    <span class="o">|</span> <span class="nb">varchar</span><span class="p">(</span><span class="mi">36</span><span class="p">)</span>         <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span> <span class="n">PRI</span> <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span> <span class="n">_rev</span>   <span class="o">|</span> <span class="nb">bigint</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span> <span class="nb">unsigned</span> <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span> <span class="n">PRI</span> <span class="o">|</span> <span class="mi">0</span>       <span class="o">|</span>       <span class="o">|</span>
+<span class="o">|</span> <span class="n">_extra</span> <span class="o">|</span> <span class="nb">blob</span>                <span class="o">|</span> <span class="k">NO</span>   <span class="o">|</span>     <span class="o">|</span> <span class="k">NULL</span>    <span class="o">|</span>       <span class="o">|</span>
+<span class="o">+</span><span class="c1">--------+---------------------+------+-----+---------+-------+</span>
 </code></pre></div></div>
 
-<p>All the data is stored in <code class="language-plaintext highlighter-rouge">_extra</code> column, <code class="language-plaintext highlighter-rouge">_id</code> is a regular document id, <code class="language-plaintext highlighter-rouge">_rev</code> is a revision of your document. There is no schema for API perspective and the documents are versioned. As for me it looks prety much like CouchDB (of course, without querying the entire documents data :smile:)</p>
+<p>All the data is stored in <code class="language-plaintext highlighter-rouge">_extra</code> column, <code class="language-plaintext highlighter-rouge">_id</code> is a regular document id, <code class="language-plaintext highlighter-rouge">_rev</code> is a revision of your document. There is no schema for API perspective and the documents are versioned. As for me it looks pretty much like CouchDB (of course, without querying the entire documents data :smile:)</p>
 
 <h1 id="mysql-57-installation">MySQL 5.7 installation</h1>
 
 <p>It’s dead simple (until you want to install it from source):</p>
-<ul>
-  <li>Download package from mysql site</li>
-</ul>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget http://downloads.mysql.com/snapshots/pb/mysql-5.7.5-labs-http/mysql-5.7.5-labs-http-linux-glibc2.5-x86_64.tar.gz
-</code></pre></div></div>
-<ul>
-  <li>Extract it</li>
-</ul>
+<h3 id="download-package-from-mysql-site">Download package from MySQL site</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tar -zxvf mysql-5.7.5-labs-http-linux-glibc2.5-x86_64.tar.gz
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>wget http://downloads.mysql.com/snapshots/pb/mysql-5.7.5-labs-http/mysql-5.7.5-labs-http-linux-glibc2.5-x86_64.tar.gz
 </code></pre></div></div>
-<ul>
-  <li>Create mysql:mysql user:group</li>
-</ul>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>groupadd mysql
-useradd -r -g mysql mysql
-</code></pre></div></div>
-<ul>
-  <li>Link extracted dir</li>
-</ul>
+<h3 id="extract-it">Extract it</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ln -s /root/mysql-5.7.5-labs-http-linux-glibc2.5-x86_64 /usr/local/mysql
-cd /usr/local/mysql
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">tar</span> <span class="nt">-zxvf</span> mysql-5.7.5-labs-http-linux-glibc2.5-x86_64.tar.gz
 </code></pre></div></div>
-<ul>
-  <li>Run <code class="language-plaintext highlighter-rouge">mysql_install_db</code></li>
-</ul>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mysql_install_db --user=mysql --datadir=/var/lib/mysql
-</code></pre></div></div>
-<ul>
-  <li>Run mysql server</li>
-</ul>
+<h3 id="create-mysqlmysql-usergroup">Create <code class="language-plaintext highlighter-rouge">mysql:mysql user:group</code></h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bin/mysqld_safe --user=mysql --datadir=/var/lib/mysql &amp;
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>groupadd mysql
+<span class="nv">$ </span>useradd <span class="nt">-r</span> <span class="nt">-g</span> mysql mysql
 </code></pre></div></div>
-<ul>
-  <li>Change root password</li>
-</ul>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat ~/.mysql_secret
-# Here goes your root password!
-mysql -uroot -p
-# &lt;Paste your root password from the file&gt;
-mysql&gt; SET PASSWORD=PASSWORD('root'); # Yes, I'm mad
-mysql&gt; exit
-</code></pre></div></div>
-<ul>
-  <li>Create configs and init script</li>
-</ul>
+<h3 id="link-extracted-directory">Link extracted directory</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp support-files/my-default.cnf /etc/my.cnf
-cp support-files/mysql.server /etc/init.d/mysql
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ln</span> <span class="nt">-s</span> /root/mysql-5.7.5-labs-http-linux-glibc2.5-x86_64 /usr/local/mysql
+<span class="nv">$ </span><span class="nb">cd</span> /usr/local/mysql
 </code></pre></div></div>
-<p>And change <code class="language-plaintext highlighter-rouge">basedir</code> and <code class="language-plaintext highlighter-rouge">datadir</code> in <code class="language-plaintext highlighter-rouge">/etc/init.d/mysql</code></p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># In my case
-basedir=/usr/local/mysql
-datadir=/var/lib/mysql
-</code></pre></div></div>
-<ul>
-  <li>Run mysql server again with configs</li>
-</ul>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/etc/init.d/mysql start
+<h3 id="run-mysql_install_db">Run <code class="language-plaintext highlighter-rouge">mysql_install_db</code></h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bin/mysql_install_db <span class="nt">--user</span><span class="o">=</span>mysql <span class="nt">--datadir</span><span class="o">=</span>/var/lib/mysql
+</code></pre></div></div>
+
+<h3 id="run-mysql-server">Run MySQL server</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bin/mysqld_safe <span class="nt">--user</span><span class="o">=</span>mysql <span class="nt">--datadir</span><span class="o">=</span>/var/lib/mysql &amp;
+</code></pre></div></div>
+
+<h3 id="change-root-password">Change root password</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cat</span> ~/.mysql_secret
+<span class="c"># Here goes your root password!</span>
+mysql <span class="nt">-uroot</span> <span class="nt">-p</span>
+<span class="c"># &lt;Paste your root password from the file&gt;</span>
+mysql&gt; SET <span class="nv">PASSWORD</span><span class="o">=</span>PASSWORD<span class="o">(</span><span class="s1">'root'</span><span class="o">)</span><span class="p">;</span> <span class="c"># Yes, I'm mad</span>
+mysql&gt; <span class="nb">exit</span>
+</code></pre></div></div>
+
+<h3 id="create-configuration-files-and-init-script">Create configuration files and <code class="language-plaintext highlighter-rouge">init</code> script</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cp </span>support-files/my-default.cnf /etc/my.cnf
+<span class="nv">$ </span><span class="nb">cp </span>support-files/mysql.server /etc/init.d/mysql
+</code></pre></div></div>
+
+<h3 id="and-change-basedir-and-datadir-in-etcinitdmysql">And change <code class="language-plaintext highlighter-rouge">basedir</code> and <code class="language-plaintext highlighter-rouge">datadir</code> in <code class="language-plaintext highlighter-rouge">/etc/init.d/mysql</code></h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># In my case</span>
+<span class="nv">basedir</span><span class="o">=</span>/usr/local/mysql
+<span class="nv">datadir</span><span class="o">=</span>/var/lib/mysql
+</code></pre></div></div>
+
+<h3 id="run-mysql-server-again-with-configuration-files">Run MySQL server again with configuration files</h3>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>/etc/init.d/mysql start
 </code></pre></div></div>
 
 <h1 id="http-api-plugin-installation">HTTP API plugin installation</h1>
 
 <p>It’s already included into our MySQL installation:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ls -l /usr/local/mysql/lib/plugin/libmyhttp.so
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-l</span> /usr/local/mysql/lib/plugin/libmyhttp.so
 </code></pre></div></div>
 
 <p>But it’s disabled by default, to enable it run</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; INSTALL PLUGIN myhttp SONAME 'libmyhttp.so';
-...
-mysql&gt; SHOW PLUGINS;
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mysql</span><span class="o">&gt;</span> <span class="n">INSTALL</span> <span class="n">PLUGIN</span> <span class="n">myhttp</span> <span class="n">SONAME</span> <span class="s1">'libmyhttp.so'</span><span class="p">;</span>
+<span class="p">...</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">SHOW</span> <span class="n">PLUGINS</span><span class="p">;</span>
 </code></pre></div></div>
 
 <p>Once plugin is enabled, some MySQL variables become accessible:</p>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; show variables like 'myhttp_%';
 +----------------------------------+------------------------------+
 | Variable_name                    | Value                        |
@@ -286,19 +295,19 @@ mysql&gt; SHOW PLUGINS;
 </code></pre></div></div>
 
 <ol>
-  <li><strong>myhttp_basic_auth_user_name</strong> - username that should be used for basic http authentication</li>
-  <li><strong>myhttp_basic_auth_user_passwd</strong> - password that should be used for basic http authentication</li>
-  <li><strong>myhttp_crud_url_prefix</strong> - prefix of CRUD endpoint</li>
-  <li><strong>myhttp_default_db</strong> - database that will be used if no database specified in request</li>
-  <li><strong>myhttp_default_mysql_user_host</strong>  - MySQL user that will be used for performing query provided with HTTP request</li>
-  <li><strong>myhttp_default_mysql_user_passwd</strong> - password of this MySQL user</li>
-  <li><strong>myhttp_document_url_prefix</strong> - prefix of JSON document endpoint</li>
-  <li><strong>myhttp_http_enabled</strong> - boolean setting to enable/disable non-SSL HTTP API</li>
-  <li><strong>myhttp_http_port</strong> - port of non-SSL HTTP API</li>
-  <li><strong>myhttp_https_enabled</strong> - boolean setting to enable/disable SSL HTTP API (yes, it’s available)</li>
-  <li><strong>myhttp_https_port</strong> - port of SSL HTTP API</li>
-  <li><strong>myhttp_https_ssl_key_file</strong> - path to SSL certificate for SSL API</li>
-  <li><strong>myhttp_sql_url_prefix</strong> - prefix of SQL endpoint</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_basic_auth_user_name</code> - username that should be used for basic HTTP authentication</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_basic_auth_user_passwd</code> - password that should be used for basic HTTP authentication</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_crud_url_prefix</code> - prefix of CRUD endpoint</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_default_db</code> - database that will be used if no database specified in request</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_default_mysql_user_host</code>  - MySQL user that will be used for performing query provided with HTTP request</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_default_mysql_user_passwd</code> - password of this MySQL user</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_document_url_prefix</code> - prefix of JSON document endpoint</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_http_enabled</code> - boolean setting to enable/disable non-SSL HTTP API</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_http_port</code> - port of non-SSL HTTP API</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_https_enabled</code> - boolean setting to enable/disable SSL HTTP API (yes, it’s available)</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_https_port</code> - port of SSL HTTP API</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_https_ssl_key_file</code> - path to SSL certificate for SSL API</li>
+  <li><code class="language-plaintext highlighter-rouge">myhttp_sql_url_prefix</code> - prefix of SQL endpoint</li>
 </ol>
 
 <p>Let’s try it!</p>
@@ -324,12 +333,13 @@ mysql&gt; SHOW PLUGINS;
 
 <h1 id="http-api-plugin-configuration">HTTP API plugin configuration</h1>
 
-<p>First of all, we need to create MySQL user and use his credentials in config file.</p>
+<p>First of all, we need to create MySQL user and use his credentials in configuration file.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; CREATE USER 'username'@'%' IDENTIFIED BY 'userpass';
 mysql&gt; GRANT ALL PRIVILEGES ON * . * TO 'username'@'%';
 mysql&gt; FLUSH PRIVILEGES;
 </code></pre></div></div>
+
 <p>Then we can change plugin’s settings in <code class="language-plaintext highlighter-rouge">/etc/my.cnf</code> to something like:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[mysqld]
@@ -354,20 +364,21 @@ myhttp_basic_auth_user_passwd = basic_auth_passwd
 <h2 id="playing-with-crud-endpoint">Playing with CRUD endpoint</h2>
 
 <p>If we need to work with MySQL over HTTP API (let’s imagine for a second that this is the only available way to fetch the data)
-we need something like <a href="https://github.com/rails/activeresource">ActiveResource</a>.</p>
+we need something like <a href="https://github.com/rails/activeresource"><code class="language-plaintext highlighter-rouge">ActiveResource</code></a>.</p>
 
-<p>ActiveResourse is a gem for building ActiveRecord-like classes that actually fetch data over HTTP API.</p>
+<p><code class="language-plaintext highlighter-rouge">ActiveResource</code> is a gem for building <code class="language-plaintext highlighter-rouge">ActiveRecord</code>-like classes that actually fetch data over HTTP API.</p>
 
 <p>Install it:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem install activeresource
 </code></pre></div></div>
+
 <p>And use:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'activeresource'</span>
 
 <span class="c1"># We should have a table `users` (yes, Rails convention)</span>
-<span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveResourse</span><span class="o">::</span><span class="no">Base</span>
+<span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveResource</span><span class="o">::</span><span class="no">Base</span>
   <span class="nb">self</span><span class="p">.</span><span class="nf">site</span> <span class="o">=</span> <span class="s1">'http://localhost:8080/crud'</span>
   <span class="nb">self</span><span class="p">.</span><span class="nf">user</span> <span class="o">=</span> <span class="s1">'basic_auth_user'</span>
   <span class="nb">self</span><span class="p">.</span><span class="nf">password</span> <span class="o">=</span> <span class="s1">'basic_auth_passwd'</span>
@@ -384,13 +395,13 @@ we need something like <a href="https://github.com/rails/activeresource">ActiveR
 <span class="c1"># =&gt; ActiveResource::MethodNotAllowed: Failed.  Response code = 405.  Response message = Method Not Allowed.</span>
 </code></pre></div></div>
 
-<p>By default ActiveResource sends POST request to create a new record. However MySQL HTTP API has some other standards and it uses PUT for creating new record. Moreover, its required to specify primary key (<code class="language-plaintext highlighter-rouge">id</code>) of the record you want to insert (even if <code class="language-plaintext highlighter-rouge">id</code> has autoincrement)</p>
+<p>By default <code class="language-plaintext highlighter-rouge">ActiveResource</code> sends POST request to create a new record. However MySQL HTTP API has some other standards and it uses PUT for creating new record. Moreover, its required to specify primary key (<code class="language-plaintext highlighter-rouge">id</code>) of the record you want to insert (even if <code class="language-plaintext highlighter-rouge">id</code> has auto-increment)</p>
 
-<p>ActiveResource doesn’t allow us to specify HTTP verbs for its API calls
+<p><code class="language-plaintext highlighter-rouge">ActiveResource</code> does not allow us to specify HTTP verbs for its API calls
 <a href="https://github.com/rails/activeresource/blob/master/lib/active_resource/base.rb#L1435">source</a>
 Without this we can’t even create a single record in the database!</p>
 
-<p>Let’s check for alternatives. <a href="https://github.com/remiprev/her"><code class="language-plaintext highlighter-rouge">Her</code></a> is a popular (according to stars on GitHub it’s even more popular then ActiveResource) alternative with a nice syntax sugar. Here is an example:</p>
+<p>Let’s check for alternatives. <a href="https://github.com/remiprev/her"><code class="language-plaintext highlighter-rouge">Her</code></a> is a popular (according to stars on GitHub it’s even more popular then <code class="language-plaintext highlighter-rouge">ActiveResource</code>) alternative with a nice syntax sugar. Here is an example:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem install her
 </code></pre></div></div>
@@ -444,10 +455,12 @@ The thing is that body should be JSON-encoded, here is my middleware that encode
 <span class="n">user</span> <span class="o">=</span> <span class="no">User</span><span class="p">.</span><span class="nf">create</span><span class="p">(</span><span class="ss">first_name: </span><span class="s1">'Test'</span><span class="p">,</span> <span class="ss">last_name: </span><span class="s1">'User'</span><span class="p">,</span> <span class="ss">id: </span><span class="mi">25</span><span class="p">)</span>
 <span class="c1"># =&gt; instance of user</span>
 </code></pre></div></div>
+
 <p>And finally it works! The only thing that I personally don’t like in design of this API is that both <code class="language-plaintext highlighter-rouge">INSERT</code> and <code class="language-plaintext highlighter-rouge">UPDATE</code> have to be called using PUT because it produces query:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>REPLACE INTO db.table SET ..., pk = ...
 </code></pre></div></div>
+
 <p>That’s why we have to pass id, <code class="language-plaintext highlighter-rouge">create</code> and <code class="language-plaintext highlighter-rouge">update</code> actions are combined into single <code class="language-plaintext highlighter-rouge">replace</code> (and I don’t see any explanation for that).</p>
 
 <p>Theoretically, this API can be used for both client-side and server-side (but it’s important to make sure that you can allow users to change the data in your database)</p>
@@ -457,12 +470,13 @@ The thing is that body should be JSON-encoded, here is my middleware that encode
 <p>Honestly saying nothing interesting.</p>
 <ul>
   <li>This API can’t be used for client-side applications because of potential SQL injections (yes, you can restrict user from deleting/updating data and grant only <code class="language-plaintext highlighter-rouge">Select_priv</code> privilege, but it still looks dangerous). Even if you are 100% sure that you are completely secured from any application-related vulnerabilities, CRUD API still looks better then passing raw SQL queries over HTTP.</li>
-  <li>Yes, it’s possible to use it on the server, but for what? mysql2 gem is still much faster (and can be easily combined with ActiveRecord)… nothing to discuss.</li>
+  <li>Yes, it’s possible to use it on the server, but for what? <code class="language-plaintext highlighter-rouge">mysql2</code> gem is still much faster (and can be easily combined with ActiveRecord)… nothing to discuss.</li>
 </ul>
 
 <h2 id="playing-with-json-document-endpoint">Playing with JSON document endpoint</h2>
 
 <p>First of all, it looks quite strange comparing with regular MySQL tables. The database that is compatible with this API <strong>must</strong> be created using the same API. And as I wrote before, it creates 3 fields:</p>
+
 <ul>
   <li><code class="language-plaintext highlighter-rouge">_id</code> - some unique identifier</li>
   <li><code class="language-plaintext highlighter-rouge">_rev</code> - revision of document (I can’t call it ‘record’)</li>
@@ -470,6 +484,7 @@ The thing is that body should be JSON-encoded, here is my middleware that encode
 </ul>
 
 <p>Here is how it looks it MySQL:</p>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from json_types\G
 *************************** 1. row ***************************
    _id: 1
@@ -480,17 +495,17 @@ _extra: {"json_null": null, "json_string": "string", "json_number": 123.456, "js
 
 <p>CouchDB has similar interface (HTTP API, schema-less documents, MVCC) but it provides one core feature of all databases: ability to run queries. You can’t run any query when your data is serialized (no, I don’t know what is <code class="language-plaintext highlighter-rouge">where _rev LIKE '%"some":json_structure%'"</code>). Moreover MVCC for this table is not real :) It stores only latest revision.</p>
 
-<p>From my expirience when you need to store schema-less documents you have two options:</p>
+<p>From my experience when you need to store schema-less documents you have two options:</p>
 <ol>
-  <li>Use real schema-less storage (yes, like Mongo)</li>
-  <li>Serialize fields <strong>that need to be serialized</strong> into single column (and Rails provides functionality for this out-of-box: <code class="language-plaintext highlighter-rouge">ActiveRecord::Base.serialize</code>) and query the database using unserialized column.</li>
+  <li>Use real schema-less storage (yes, like MongoDB)</li>
+  <li>Serialize fields <strong>that need to be serialized</strong> into single column (and Rails provides functionality for this out-of-box: <code class="language-plaintext highlighter-rouge">ActiveRecord::Base.serialize</code>) and query the database using non-serialized column.</li>
 </ol>
 
 <p>JSON document API can be useful when you already have MySQL and don’t want to setup any other databases to store tons of unstructured data. Yes, sounds awful, but looks like a true.</p>
 
 <h1 id="conclusion">Conclusion</h1>
 
-<p>HTTP API is a tool, and it solves a lot of possible issues. It’s not released yet (and I suppose it will not be included into default MySQL 5.7 installation), but I’m waiting for it so much. Today, when SPAs are so popular and Rails application may have only HTTP API, it can simplify our server code. Let’s give it a chance!</p>
+<p>HTTP API is a tool, and it solves a lot of possible issues. It’s not released yet (and I suppose it will not be included into default MySQL 5.7 installation), but I’m waiting for it so much. Today, when Single-Page Applications are so popular and Rails application may have only HTTP API, it can simplify our server code. Let’s give it a chance!</p>
 
 </div>
 

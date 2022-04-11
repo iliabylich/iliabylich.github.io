@@ -128,9 +128,10 @@
 
   <p>This article is about <a href="https://github.com/Apipie/apipie-rails">Apipie gem</a> which provides a DSL for documenting your API. I will try to cover features that I personally use on my project.</p>
 
-<p>Comparing to other tools for generating API documentation (yardoc, sdoc) I would say that the main thing that you gain with Apipie is that your documentation is a real ruby code, so you can write computations, concerns etc.</p>
+<p>Comparing to other tools for generating API documentation (<code class="language-plaintext highlighter-rouge">yardoc</code>, <code class="language-plaintext highlighter-rouge">sdoc</code>) I would say that the main thing that you gain with Apipie is that your documentation is a real ruby code, so you can write computations, concerns etc.</p>
 
 <p>Here is a simple example of how it looks in code:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
 
   <span class="n">resource_description</span> <span class="k">do</span>
@@ -156,7 +157,7 @@
 
 <h2 id="gathering-information-from-your-routes">Gathering information from your routes</h2>
 
-<p>In the example above we’ve passed an http verb and a path of this action. We don’t have to do it! Instead, we can simply write:</p>
+<p>In the example above we have passed an HTTP verb and a path of this action. We don’t have to do it! Instead, we can simply write:</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">api!</span> <span class="s1">'Some description'</span>
 <span class="c1"># other docs here...</span>
@@ -181,15 +182,15 @@
 
 <p>As you can see, in the first example we had 3 types:</p>
 <ol>
-  <li>Hash</li>
-  <li>Array</li>
-  <li>Fixnum</li>
+  <li><code class="language-plaintext highlighter-rouge">Hash</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Array</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Fixnum</code></li>
 </ol>
 
 <p>Apipie has also:</p>
 <ol>
-  <li>Enum</li>
-  <li>Regexp</li>
+  <li><code class="language-plaintext highlighter-rouge">Enum</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Regexp</code></li>
 </ol>
 
 <h2 id="parameters-validation">Parameters validation</h2>
@@ -203,7 +204,7 @@
 
 <h2 id="concerns">Concerns</h2>
 
-<p>I would say that it doesn’t work as people usually expect.</p>
+<p>I would say that it does not work as people usually expect.</p>
 
 <p><code class="language-plaintext highlighter-rouge">Apipie::DSL::Concern</code> allows you to document actions that are defined in concerns.</p>
 
@@ -213,10 +214,10 @@
 
 <h2 id="specs-recording">Specs recording</h2>
 
-<p>Are you tired of writing examples manually? Me too :) With Apipie you can record request/response pairs to separated yaml file and display them in generated html. Pass <code class="language-plaintext highlighter-rouge">:show_in_doc</code> to metadata of your RSpec example and enjoy. Apipie embeds a module for recording requests to `    ActionController::TestCase::Behavior<code class="language-plaintext highlighter-rouge"> which is the core of all requests specs for RSpec and Minitest (yes, both of them delegate performing requests internally to </code>    ActionController::TestCase::Behavior` - <a href="https://github.com/rspec/rspec-rails/blob/master/lib/rspec/rails/example/controller_example_group.rb#L12">source</a>).</p>
+<p>Are you tired of writing examples manually? Me too :) With Apipie you can record request/response pairs to separated YAML file and display them in generated HTML. Pass <code class="language-plaintext highlighter-rouge">:show_in_doc</code> to metadata of your RSpec example and enjoy. Apipie embeds a module for recording requests to `    ActionController::TestCase::Behavior<code class="language-plaintext highlighter-rouge"> which is the core of all requests specs for RSpec and Minitest (yes, both of them delegate performing requests internally to </code>ActionController::TestCase::Behavior` - <a href="https://github.com/rspec/rspec-rails/blob/master/lib/rspec/rails/example/controller_example_group.rb#L12">source</a>).</p>
 
 <h2 id="other-features">Other features</h2>
-<p>There is a plenty of other things in Apipie that are very cool, by I didn’t have a chance to use it yet.</p>
+<p>There is a plenty of other things in Apipie that are very cool, by I did not have a chance to use it yet.</p>
 
 <ol>
   <li>Localization. Currently it supports English, Russian, Chinese and Brazilian. If you want to add support for your language, use this as an example - <a href="https://github.com/Apipie/apipie-rails/blob/master/config/locales/en.yml">source</a></li>
@@ -230,7 +231,7 @@
 
 <h2 id="extracting-docs-to-mixins">Extracting docs to mixins</h2>
 
-<p>This is the main question I’ve got after reading official readme. I don’t want to mix documentation and application logic. First of all we need to understand how exactly Apipie builds mapping between action names and compiled DSL. Even without reading source code the only guess that we may have is <code class="language-plaintext highlighter-rouge">method_added</code> hook. Every time when you define a method (on instance or on class, it doesn’t matter), Ruby automatically fires <code class="language-plaintext highlighter-rouge">method_added</code> method on your class.</p>
+<p>This is the main question I have got after reading official README. I don’t want to mix documentation and application logic. First of all we need to understand how exactly Apipie builds mapping between action names and compiled DSL. Even without reading source code the only guess that we may have is <code class="language-plaintext highlighter-rouge">method_added</code> hook. Every time when you define a method (on instance or on class, it does not matter), Ruby automatically fires <code class="language-plaintext highlighter-rouge">method_added</code> method on your class.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">TestClass</span>
   <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">method_added</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span>
@@ -256,6 +257,7 @@
 </ol>
 
 <p>And if it’s true we can write something like:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># app/docs/users_doc.rb</span>
 <span class="k">module</span> <span class="nn">UsersDoc</span>
   <span class="c1"># we need the DSL, right?</span>
@@ -280,6 +282,7 @@
 </code></pre></div></div>
 
 <p>And yes, it works! Let’s add resource description</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">UsersDoc</span>
   <span class="kp">extend</span> <span class="no">Apipie</span><span class="o">::</span><span class="no">DSL</span><span class="o">::</span><span class="no">Concern</span>
 
@@ -291,9 +294,12 @@
 </code></pre></div></div>
 
 <p>Which breaks it…</p>
+
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Apipie: Can not resolve resource UsersDoc name.
 </code></pre></div></div>
+
 <p>Yes, because our resource is <code class="language-plaintext highlighter-rouge">UsersController</code>. The error happens in the following lines in Apipie source code:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">get_resource_name</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">klass</span><span class="p">.</span><span class="nf">class</span> <span class="o">==</span> <span class="no">String</span>
         <span class="n">klass</span>
@@ -312,7 +318,7 @@
     <span class="k">end</span>
 </code></pre></div></div>
 
-<p>Most of this code doesn’t really matter, the thing is that Apipie doesn’t know what to do with module <code class="language-plaintext highlighter-rouge">UsersDoc</code>. It has no <code class="language-plaintext highlighter-rouge">resource_id</code>, let’s define it.</p>
+<p>Most of this code does not really matter, the thing is that Apipie does not know what to do with module <code class="language-plaintext highlighter-rouge">UsersDoc</code>. It has no <code class="language-plaintext highlighter-rouge">resource_id</code>, let’s define it.</p>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">resource_description</span> <span class="k">do</span>
   <span class="n">resource_id</span> <span class="s1">'Users'</span>
@@ -321,10 +327,11 @@
 </code></pre></div></div>
 
 <p>Now we get an error</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">undefined</span> <span class="nb">method</span> <span class="sb">`superclass' for UsersDoc:Module
 </span></code></pre></div></div>
 
-<p>But… Module (I mean, an instance of Module class) can’t have a superclass. It’s a module!</p>
+<p>But… Module (I mean, an instance of Module class) can’t have a parent class. It’s a module!</p>
 
 <p>Forget that you are a ruby developer and define a method called <code class="language-plaintext highlighter-rouge">superclass</code> on your module :)</p>
 
@@ -335,6 +342,7 @@
 </code></pre></div></div>
 
 <p>So, from this moment</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">UsersDoc</span><span class="p">.</span><span class="nf">superclass</span> <span class="o">==</span> <span class="no">UsersController</span>
 <span class="c1"># =&gt; true</span>
 </code></pre></div></div>
@@ -446,17 +454,17 @@ Here is a gist with a full code that wraps ugly code and blank methods:
 
 <p><a href="https://github.com/iliabylich/apipie-demo">URL</a></p>
 
-<p>You can click by statically generated docs (thanks to github pages):</p>
+<p>You can click by statically generated docs (thanks to GitHub pages):</p>
 
 <ul>
-  <li><a href="http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v1.html">Private::V1</a></li>
-  <li><a href="http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v2.html">Private::V2</a></li>
-  <li><a href="http://iliabylich.github.io/apipie-demo/doc/apidoc/public.html">Public</a></li>
+  <li><a href="http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v1.html"><code class="language-plaintext highlighter-rouge">Private::V1</code></a></li>
+  <li><a href="http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v2.html"><code class="language-plaintext highlighter-rouge">Private::V2</code></a></li>
+  <li><a href="http://iliabylich.github.io/apipie-demo/doc/apidoc/public.html"><code class="language-plaintext highlighter-rouge">Public</code></a></li>
 </ul>
 
 <h1 id="conclusion">Conclusion</h1>
 
-<p>Apipie is an amazing library and its most significant advantage is that you document ruby using ruby (being a ruby developer), which gives you ability to define custom behaviors and scenarios. I can’t even imagine myself writing API docs using yardoc (however, I use it to document plain ruby classes).</p>
+<p>Apipie is an amazing library and its most significant advantage is that you document ruby using ruby (being a ruby developer), which gives you ability to define custom behaviors and scenarios. I can’t even imagine myself writing API docs using <code class="language-plaintext highlighter-rouge">yardoc</code> (however, I use it to document plain ruby classes).</p>
 
 <p>If you have any bugs (or ideas to implement), please, <a href="https://github.com/Apipie/apipie-rails/issues">create an issue on GitHub</a>, let’s make it even better!</p>
 

@@ -107,7 +107,7 @@
 <li class="toc-entry toc-h2"><a href="#implementation">Implementation</a></li>
 <li class="toc-entry toc-h2"><a href="#future-improvements">Future improvements</a></li>
 <li class="toc-entry toc-h2"><a href="#c-bindings">C bindings</a></li>
-<li class="toc-entry toc-h2"><a href="#cpp-bindings">Cpp bindings</a></li>
+<li class="toc-entry toc-h2"><a href="#c-bindings-1">C++ bindings</a></li>
 <li class="toc-entry toc-h2"><a href="#node-bindings">Node bindings</a></li>
 <li class="toc-entry toc-h2"><a href="#wasm">WASM</a></li>
 <li class="toc-entry toc-h2"><a href="#final-thoughts">Final thoughts</a></li>
@@ -116,25 +116,25 @@
 
   <h2 id="intro">Intro</h2>
 
-<p>So, I’m ready to announce that I’ve finished working on a new Ruby parser. It’s called <code class="language-plaintext highlighter-rouge">lib-ruby-parser</code>.</p>
+<p>So, I’m ready to announce that I have finished working on a new Ruby parser. It’s called <code class="language-plaintext highlighter-rouge">lib-ruby-parser</code>.</p>
 
 <p>Key features:</p>
 
 <ol>
   <li>It’s fast. It’s written in Rust and it’s slightly faster than Ripper. The difference is about 1-2% on my machine.</li>
-  <li>It has a beautiful interface. Every single node has its own type that is documented. For example, take a look at <a href="https://docs.rs/lib-ruby-parser/0.7.0/lib_ruby_parser/nodes/struct.CSend.html">CSend node</a> that represents “conditional send” like <code class="language-plaintext highlighter-rouge">foo&amp;.bar</code>. <a href="https://docs.rs/lib-ruby-parser/0.7.0/lib_ruby_parser/nodes/index.html">Here’s a list of all defined nodes</a>. Both Ripper and RubyVM::AST have no documentation of their AST format. <code class="language-plaintext highlighter-rouge">whitequark/parser</code> <a href="https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md">has a great documentation</a>, but its AST is not “static”.</li>
-  <li>What’s “static AST”? By saying that I mean that if documentation says that “N is not-nullable” then it’s true no matter what. <code class="language-plaintext highlighter-rouge">whitequark/parser</code> does a great job, but the nature of dynamic language doesn’t allow it to provide such guarantees. I’ll show a few examples later.</li>
-  <li>It’s precise. Unlike <code class="language-plaintext highlighter-rouge">whitequark/parser</code>, its lexer (or tokenizer if it sounds better for you) is based on MRI’s <code class="language-plaintext highlighter-rouge">parse.y</code>. What does it mean? It means that I wasn’t able to find any difference in lexing on 3 million lines of code that I’ve got by pulling sources of top 300 gems (by total downloads). I’ll mention how I track it soon.</li>
-  <li>It doesn’t depend on Ruby. In fact, it has absolutely no “required” dependencies (only a few optional ones). So, it’s possible to write bindings for any other language, and I’ve made them for C/C++/Node.js. Of course, it’s possible to have bindings for Ruby (because there are bindings for C and it’s easy to reuse them)</li>
+  <li>It has a beautiful interface. Every single node has its own type that is documented. For example, take a look at <a href="https://docs.rs/lib-ruby-parser/0.7.0/lib_ruby_parser/nodes/struct.CSend.html"><code class="language-plaintext highlighter-rouge">CSend</code> node</a> that represents “conditional send” like <code class="language-plaintext highlighter-rouge">foo&amp;.bar</code>. <a href="https://docs.rs/lib-ruby-parser/0.7.0/lib_ruby_parser/nodes/index.html">Here’s a list of all defined nodes</a>. Both Ripper and <code class="language-plaintext highlighter-rouge">RubyVM::AST</code> have no documentation of their AST format. <code class="language-plaintext highlighter-rouge">whitequark/parser</code> <a href="https://github.com/whitequark/parser/blob/master/doc/AST_FORMAT.md">has a great documentation</a>, but its AST is not “static”.</li>
+  <li>What’s “static AST”? By saying that I mean that if documentation says that “N is not-nullable” then it’s true no matter what. <code class="language-plaintext highlighter-rouge">whitequark/parser</code> does a great job, but the nature of dynamic language does not allow it to provide such guarantees. I’ll show a few examples later.</li>
+  <li>It’s precise. Unlike <code class="language-plaintext highlighter-rouge">whitequark/parser</code>, its lexer (or tokenizer if it sounds better for you) is based on MRI’s <code class="language-plaintext highlighter-rouge">parse.y</code>. What does it mean? It means that I was not able to find any difference in tokenizing on 3 million lines of code that I have got by pulling sources of top 300 gems (by total downloads). I’ll mention how I track it soon.</li>
+  <li>It does not depend on Ruby. In fact, it has absolutely no “required” dependencies (only a few optional ones). So, it’s possible to write bindings for any other language, and I have made them for C/C++/Node.js. Of course, it’s possible to have bindings for Ruby (because there are bindings for C and it’s easy to reuse them)</li>
 </ol>
 
 <h2 id="implementation">Implementation</h2>
 
-<p>Current performance (in release mode, with jemalloc) is ~200K LOC/s. I think it can even be used for syntax highlighting (and in the browser, too, haha).</p>
+<p>Current performance (in release mode, with <code class="language-plaintext highlighter-rouge">jemalloc</code>) is ~200000 LOC/s. I think it can even be used for syntax highlighting (and in the browser, too, haha).</p>
 
 <p>I don’t want to dig too far, but some notes could be interesting.</p>
 
-<p>Rust is a general purpose language that is based on LLVM (&lt;3) and can be compiled directly into machine code. It doesn’t need any VMs and it can be compiled to a ton of targets (or platforms). The code doesn’t use pointers, and there are no <code class="language-plaintext highlighter-rouge">unsafe</code> calls that you might hear about.</p>
+<p>Rust is a general purpose language that is based on LLVM (&lt;3) and can be compiled directly into machine code. It does not need any VMs and it can be compiled to a ton of targets (or platforms). The code does not use pointers, and there are no <code class="language-plaintext highlighter-rouge">unsafe</code> calls that you might hear about.</p>
 
 <p>Rust does support ADT (algebraic data type) and it has generics, so you can build data structures like</p>
 
@@ -211,7 +211,7 @@ Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
 
 <p>Plus, it’s written in Rust, so to compile a grammar that is based on it you don’t anything except Rust (that you need anyway to compile something written in Rust, right?).</p>
 
-<p>Unfortunately, I’ve got a few reasons to abandon this idea:</p>
+<p>Unfortunately, I have got a few reasons to abandon this idea:</p>
 
 <ol>
   <li>
@@ -226,7 +226,7 @@ Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
 </code></pre></div>    </div>
     <p>but then I have no idea how such grammar can be maintained.</p>
   </li>
-  <li>Compilation speed. I’ve got ~20% of Ruby grammar backported and noticed a huge performance degradation.</li>
+  <li>Compilation speed. I have got ~20% of Ruby grammar backported and noticed a huge performance degradation.</li>
   <li>No stack introspection (and IIRC no “debug” mode at all). By saying “stack” here I mean parser stack, that’s a feature of LR parsers. You can check how it looks like by running <code class="language-plaintext highlighter-rouge">ruby -ye '42'</code> locally</li>
   <li>The grammar written with <code class="language-plaintext highlighter-rouge">lalrpop</code> has a different format comparing to bison, and so maintaining it (like backporting new changed from MRI) seems to be a nightmare.</li>
 </ol>
@@ -282,7 +282,7 @@ Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
 
 <p><code class="language-plaintext highlighter-rouge">Value::Stolen</code> is just a placeholder value that indicates (when you see it) that your code previously has accessed the same stack entry. It’s necessary to have it (or in general some kind of a default value that is set by <code class="language-plaintext highlighter-rouge">std::mem::take/replace</code>) to “fix” ownership model.</p>
 
-<p>So then it was done and I started profiling it. At the very beginning it was incredibly slow, but I knew it, I had way too many <code class="language-plaintext highlighter-rouge">.clone()</code> calls in my code (in Rust that’s a deep clone that is quite expensive in some cases). I added jemalloc and started profiling (<code class="language-plaintext highlighter-rouge">pprof-rs</code> &lt;3), I removed most clones and got ~160-170K LOC/s.</p>
+<p>So then it was done and I started profiling it. At the very beginning it was incredibly slow, but I knew it, I had way too many <code class="language-plaintext highlighter-rouge">.clone()</code> calls in my code (in Rust that’s a deep clone that is quite expensive in some cases). I added <code class="language-plaintext highlighter-rouge">jemalloc</code> and started profiling (<code class="language-plaintext highlighter-rouge">pprof-rs</code> &lt;3), I removed most clones and got ~160-170 thousand LOC/s.</p>
 
 <p>Great, but I wanted more. ~20% of time in my benchmark was spent on this <code class="language-plaintext highlighter-rouge">std::mem::replace</code> call that swaps non-overlapping bytes. Initially I thought that I can’t improve it (that’s the fastest way to take the value AND to put a placeholder instead of it). At some point when I was writing C++ bindings I noticed that <code class="language-plaintext highlighter-rouge">sizeof(Node)</code> is 120 bytes (<code class="language-plaintext highlighter-rouge">Node</code> here is a C++ <code class="language-plaintext highlighter-rouge">Node</code> class) and it literally opened my eyes.</p>
 
@@ -363,7 +363,7 @@ Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
 <span class="c1">// other variants</span>
 </code></pre></div></div>
 
-<p>I’ve got the same performance as Ripper.</p>
+<p>I have got the same performance as Ripper.</p>
 
 <h2 id="future-improvements">Future improvements</h2>
 
@@ -380,7 +380,7 @@ nodes:
     Int { value: "42", expression_l: 0..2 }
 </code></pre></div></div>
 
-<p><code class="language-plaintext highlighter-rouge">lib-ruby-parser</code> constructs these <code class="language-plaintext highlighter-rouge">"42"</code> strings twice by copying a part of the input. Of course, for this particular case it’s possible to store only ranges like <code class="language-plaintext highlighter-rouge">start...end</code>, but there are exceptions where values of tokens and AST nodes are not equal to input substrings (like escape sequences, <code class="language-plaintext highlighter-rouge">"\n"</code> or <code class="language-plaintext highlighter-rouge">"\u1234"</code>).</p>
+<p><code class="language-plaintext highlighter-rouge">lib-ruby-parser</code> constructs these <code class="language-plaintext highlighter-rouge">"42"</code> strings twice by copying a part of the input. Of course, for this particular case it’s possible to store only ranges like <code class="language-plaintext highlighter-rouge">start...end</code>, but there are exceptions where values of tokens and AST nodes are not equal to input sub-strings (like escape sequences, <code class="language-plaintext highlighter-rouge">"\n"</code> or <code class="language-plaintext highlighter-rouge">"\u1234"</code>).</p>
 
 <p>Even this way it’s possible to introduce the following type system:</p>
 
@@ -405,11 +405,11 @@ nodes:
 
 <p>However, then <code class="language-plaintext highlighter-rouge">input</code> must live as long as tokens and AST, and it sounds a bit problematic.</p>
 
-<p>One option that I see is adding <code class="language-plaintext highlighter-rouge">Rc&lt;Input&gt;</code> to such values and store a range in <code class="language-plaintext highlighter-rouge">SubstringOfInput</code> enum variant. That’s basicaly a <code class="language-plaintext highlighter-rouge">shared_ptr</code> from C++ world that wraps a raw pointer (like <code class="language-plaintext highlighter-rouge">T*</code>) + (pointer to) a number of existing “clones” of this pointer. Every time you copy it the shared number is incremented, destructor decreases it and once it’s zero it also deletes <code class="language-plaintext highlighter-rouge">T</code>. It’s quite cheap in terms of performance (something like <code class="language-plaintext highlighter-rouge">*n += 1</code> in constructor, <code class="language-plaintext highlighter-rouge">*n -= 1; drop(ptr) if n == 0;</code> in destructor)</p>
+<p>One option that I see is adding <code class="language-plaintext highlighter-rouge">Rc&lt;Input&gt;</code> to such values and store a range in <code class="language-plaintext highlighter-rouge">SubstringOfInput</code> enum variant. That’s basically a <code class="language-plaintext highlighter-rouge">shared_ptr</code> from C++ world that wraps a raw pointer (like <code class="language-plaintext highlighter-rouge">T*</code>) + (pointer to) a number of existing “clones” of this pointer. Every time you copy it the shared number is incremented, destructor decreases it and once it’s zero it also deletes <code class="language-plaintext highlighter-rouge">T</code>. It’s quite cheap in terms of performance (something like <code class="language-plaintext highlighter-rouge">*n += 1</code> in constructor, <code class="language-plaintext highlighter-rouge">*n -= 1; drop(ptr) if n == 0;</code> in destructor)</p>
 
 <h2 id="c-bindings">C bindings</h2>
 
-<p>GitHub repo - <a href="https://github.com/lib-ruby-parser/c-bindings">https://github.com/lib-ruby-parser/c-bindings</a></p>
+<p>GitHub repository - <a href="https://github.com/lib-ruby-parser/c-bindings">https://github.com/lib-ruby-parser/c-bindings</a></p>
 
 <p>It took me a while to fix all segfaults, memory leaks and invalid memory access patterns (I’m not a C developer). <code class="language-plaintext highlighter-rouge">Valgrind</code> and <code class="language-plaintext highlighter-rouge">asan</code> are incredibly useful tools, I can’t even imagine how much time it would take to write bindings without these guys.</p>
 
@@ -417,7 +417,7 @@ nodes:
 
 <p>It uses a combination of <code class="language-plaintext highlighter-rouge">enum</code> and <code class="language-plaintext highlighter-rouge">union</code> to represent a <code class="language-plaintext highlighter-rouge">Node</code>.</p>
 
-<h2 id="cpp-bindings">Cpp bindings</h2>
+<h2 id="c-bindings-1">C++ bindings</h2>
 
 <p><a href="https://github.com/lib-ruby-parser/cpp-bindings">https://github.com/lib-ruby-parser/cpp-bindings</a></p>
 
@@ -425,7 +425,7 @@ nodes:
 
 <p>The same story again, <code class="language-plaintext highlighter-rouge">valgrind</code>/<code class="language-plaintext highlighter-rouge">asan</code>, an extra layer that converts <code class="language-plaintext highlighter-rouge">Rust</code> objects to <code class="language-plaintext highlighter-rouge">C++</code> classes.</p>
 
-<p>Also, my <code class="language-plaintext highlighter-rouge">valgrind</code> on Mac couldn’t detect calling <code class="language-plaintext highlighter-rouge">free</code> on <code class="language-plaintext highlighter-rouge">C++</code> object (that’s invalid, should be <code class="language-plaintext highlighter-rouge">delete</code> from C++), and so I had to setup a docker container locally to find and fix it.</p>
+<p>Also, my <code class="language-plaintext highlighter-rouge">valgrind</code> on Mac could not detect calling <code class="language-plaintext highlighter-rouge">free</code> on <code class="language-plaintext highlighter-rouge">C++</code> object (that’s invalid, should be <code class="language-plaintext highlighter-rouge">delete</code> from C++), and so I had to setup a docker container locally to find and fix it.</p>
 
 <p>It uses modern <code class="language-plaintext highlighter-rouge">std::variant&lt;Nodes...&gt;</code> to represent a <code class="language-plaintext highlighter-rouge">Node</code>.</p>
 
@@ -450,7 +450,7 @@ nodes:
   <li>constructor of <code class="language-plaintext highlighter-rouge">TryCatch</code> registers <code class="language-plaintext highlighter-rouge">this</code> in some global context  (like <code class="language-plaintext highlighter-rouge">GetCurrentHandleScope().SetThrowHandler(this)</code></li>
   <li>any code that throws a JavaScript error sets it on this <code class="language-plaintext highlighter-rouge">TryCatch</code> handler</li>
   <li>it’s possible to access an exception object from any place</li>
-  <li>destructor of <code class="language-plaintext highlighter-rouge">TryCatch</code> un-registers it</li>
+  <li>destructor of <code class="language-plaintext highlighter-rouge">TryCatch</code> drops it</li>
 </ul>
 
 <p>I admit that it’s smart, but it sounds way too implicit to me. I’d like this interface to perform a register in a more explicit way (by calling <code class="language-plaintext highlighter-rouge">register/unregsiter</code> for example).</p>
@@ -467,7 +467,7 @@ nodes:
 
 <h2 id="final-thoughts">Final thoughts</h2>
 
-<p>This is one of the biggest open-source projects that I’ve ever made. It can be used from Rust/C/C++/Node.js/browser. It’s fast (but remember, it can get even faster), it’s precise and it’s very strongly typed.</p>
+<p>This is one of the biggest open-source projects that I have ever made. It can be used from Rust/C/C++/Node.js/browser. It’s fast (but remember, it can get even faster), it’s precise and it’s very strongly typed.</p>
 
 <p>Also, if you need a custom setup (like custom C++ classes or maybe a completely different API) there’s a <a href="https://github.com/lib-ruby-parser/nodes">meta-repository</a> with all nodes information. You can use it to build your own bindings (or maybe new bindings for other languages), it has a <code class="language-plaintext highlighter-rouge">nodes</code> function that returns a <code class="language-plaintext highlighter-rouge">Vec&lt;Node&gt;</code> (<code class="language-plaintext highlighter-rouge">Node</code> here is just a “configuration” of a single <code class="language-plaintext highlighter-rouge">Node</code> variant from Rust - <a href="https://github.com/lib-ruby-parser/nodes/blob/master/src/node.rs#L6">source</a>)</p>
 

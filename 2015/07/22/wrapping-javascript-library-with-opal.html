@@ -129,7 +129,7 @@
 
   <h1 id="introduction">Introduction</h1>
 
-<p>The task that is solved here is not real, but it’s still a good example of (probably?) real work with Opal. I could choose some complex enough JavaScript library and write a simple wrapper using Opal, but there’s no fun. Instead, let’s write a wrapper for existing rich client-side application (it may show you how to wrap your existing application logic). Well, wrapper for something like a client-side scheduler may sound boring, so I’ve chosen a JS-based browser game called <a href="http://browserquest.mozilla.org">BrowserQuest</a> <a href="https://github.com/mozilla/BrowserQuest">written</a> by Mozilla, and I’ll show you how to write a bot for it using Opal.</p>
+<p>The task that is solved here is not real, but it’s still a good example of (probably?) real work with Opal. I could choose some complex enough JavaScript library and write a simple wrapper using Opal, but there’s no fun. Instead, let’s write a wrapper for existing rich client-side application (it may show you how to wrap your existing application logic). Well, wrapper for something like a client-side scheduler may sound boring, so I have chosen a JavaScript-based browser game called <a href="http://browserquest.mozilla.org"><code class="language-plaintext highlighter-rouge">BrowserQuest</code></a> <a href="https://github.com/mozilla/BrowserQuest">written</a> by Mozilla, and I’ll show you how to write a bot for it using Opal.</p>
 
 <h1 id="opal">Opal</h1>
 
@@ -184,10 +184,10 @@
 
 <h1 id="compiling-opal">Compiling Opal</h1>
 
-<p>So, there are two ways to compile Ruby into Javascript:</p>
+<p>So, there are two ways to compile Ruby into JavaScript:</p>
 <ul>
-  <li>compiling Ruby code as a string to JS string</li>
-  <li>compiling specified Ruby file to JS string</li>
+  <li>compiling Ruby code as a string to JavaScript string</li>
+  <li>compiling specified Ruby file to JavaScript string</li>
 </ul>
 
 <p>To compile a file with Ruby, run:</p>
@@ -212,7 +212,7 @@
 
 <p><a href="https://github.com/mozilla/BrowserQuest/blob/master/client/js/main.js#L7">This</a> is the place where the main <code class="language-plaintext highlighter-rouge">App</code> class is created. But! It’s defined in anonymous function, so this variable is not available outside the context.</p>
 
-<p>This game uses CommonJS for loading files. This library caches(?) all previously required files and instantly returns cached result on the seconds <code class="language-plaintext highlighter-rouge">require</code>.</p>
+<p>This game uses <code class="language-plaintext highlighter-rouge">CommonJS</code> to load files. This library caches all previously required files and instantly returns cached result on the seconds <code class="language-plaintext highlighter-rouge">require</code>.</p>
 
 <p>We can use it:</p>
 <ol>
@@ -220,7 +220,7 @@
   <li>wrap any of its methods with some logic that stores current app instance globally and then call <code class="language-plaintext highlighter-rouge">super</code></li>
 </ol>
 
-<p>I’ve chosen a method called <code class="language-plaintext highlighter-rouge">start</code>:</p>
+<p>I have chosen a method called <code class="language-plaintext highlighter-rouge">start</code>:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># opal/bot.rb</span>
 <span class="k">module</span> <span class="nn">Patch</span>
   <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">apply</span>
@@ -240,7 +240,7 @@
 
 <p>Some explanations:</p>
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">%x{js code}</code> just passes provided JS into compiled version (i.e. runs it without any translation)</li>
+  <li><code class="language-plaintext highlighter-rouge">%x{js code}</code> just passes provided JavaScript into compiled version (i.e. runs it without any translation)</li>
   <li>After compiling this file we have access to a variable <code class="language-plaintext highlighter-rouge">currentApplication</code> that contains an instance of <code class="language-plaintext highlighter-rouge">App</code> class</li>
 </ul>
 
@@ -269,13 +269,13 @@
 <span class="n">promise</span><span class="p">.</span><span class="nf">then</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s1">'Done'</span> <span class="p">}</span>
 <span class="n">promise</span><span class="p">.</span><span class="nf">fail</span> <span class="p">{</span> <span class="nb">puts</span> <span class="s1">'Fail'</span> <span class="p">}</span>
 <span class="n">promise</span><span class="p">.</span><span class="nf">resolve</span>
-<span class="c1"># =&gt; 'Done' (in JS console)</span>
+<span class="c1"># =&gt; 'Done' (in JavaScript console)</span>
 <span class="c1"># or</span>
 <span class="n">promise</span><span class="p">.</span><span class="nf">reject</span>
 <span class="c1"># =&gt; 'Fail'</span>
 </code></pre></div></div>
 
-<p>(<code class="language-plaintext highlighter-rouge">Promise</code> is like an object that is a combination of <code class="language-plaintext highlighter-rouge">callback</code>-s and <code class="language-plaintext highlighter-rouge">errback</code>-s, but you don’t invoke callbacks manually, instead you just switch the state of your promise-object and it automatically triggers callbacks/errobacks)</p>
+<p>(<code class="language-plaintext highlighter-rouge">Promise</code> is like an object that is a combination of <code class="language-plaintext highlighter-rouge">callback</code>-s and <code class="language-plaintext highlighter-rouge">errback</code>-s, but you don’t invoke callbacks manually, instead you just switch the state of your promise-object and it automatically triggers <code class="language-plaintext highlighter-rouge">callbacks</code>/<code class="language-plaintext highlighter-rouge">errbacks</code>)</p>
 
 <p>Here is a little helper module that saves our time:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">module</span> <span class="nn">Utils</span>
@@ -306,11 +306,11 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p><code class="language-plaintext highlighter-rouge">wait_for</code> method takes a promise (which is a blank promise object by default) and a block (which will be converted to JS function). It calls the block and <code class="language-plaintext highlighter-rouge">resolve</code>-s the promise if it is returned true. If not, it calls itself again after 100ms (<code class="language-plaintext highlighter-rouge">after</code> = <code class="language-plaintext highlighter-rouge">setTimeout</code>) with <strong>the same promise object</strong></p>
+<p><code class="language-plaintext highlighter-rouge">wait_for</code> method takes a promise (which is a blank promise object by default) and a block (which will be converted to JavaScript function). It calls the block and <code class="language-plaintext highlighter-rouge">resolve</code>-s the promise if it is returned true. If not, it calls itself again after 100 ms (<code class="language-plaintext highlighter-rouge">after</code> = <code class="language-plaintext highlighter-rouge">setTimeout</code>) with <strong>the same promise object</strong></p>
 
 <p>To type player’s name we should run:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># I'm using opal-jquery here</span>
-<span class="c1"># I think it doesn't require any explanation</span>
+<span class="c1"># I think it does not require any explanation</span>
 <span class="n">input</span> <span class="o">=</span> <span class="no">Element</span><span class="p">.</span><span class="nf">find</span><span class="p">(</span><span class="s1">'#nameinput'</span><span class="p">)</span>
 <span class="n">input</span><span class="p">.</span><span class="nf">value</span> <span class="o">=</span> <span class="vi">@player_name</span>
 <span class="n">wait_for</span> <span class="k">do</span>
@@ -346,7 +346,7 @@
 
 <h1 id="time-to-wrap-the-code-of-the-game">Time to wrap the code of the game</h1>
 
-<p>As an enter point we are going to use global JS variable <code class="language-plaintext highlighter-rouge">currentApplication</code>. It has a property <code class="language-plaintext highlighter-rouge">game</code> (that, unexpectedly, returns instance of <code class="language-plaintext highlighter-rouge">Game</code> class). <code class="language-plaintext highlighter-rouge">game</code> has a <code class="language-plaintext highlighter-rouge">player</code> property (instance of <code class="language-plaintext highlighter-rouge">Player</code>) and <code class="language-plaintext highlighter-rouge">entities</code> property which is an object containing all entities on the map, their types and coordinates. You can easily find their JS implementations in the GitHub repository of the game.</p>
+<p>As an enter point we are going to use global JavaScript variable <code class="language-plaintext highlighter-rouge">currentApplication</code>. It has a property <code class="language-plaintext highlighter-rouge">game</code> (that, unexpectedly, returns instance of <code class="language-plaintext highlighter-rouge">Game</code> class). <code class="language-plaintext highlighter-rouge">game</code> has a <code class="language-plaintext highlighter-rouge">player</code> property (instance of <code class="language-plaintext highlighter-rouge">Player</code>) and <code class="language-plaintext highlighter-rouge">entities</code> property which is an object containing all entities on the map, their types and coordinates. You can easily find their JavaScript implementations in the GitHub repository of the game.</p>
 
 <p>So, our main objects are:</p>
 <ul>
@@ -375,7 +375,7 @@
   <span class="k">end</span>
 <span class="k">end</span>
 </code></pre></div></div>
-<p>So, we have a class called <code class="language-plaintext highlighter-rouge">Application</code> that wraps some native JS object and has a ruby-method <code class="language-plaintext highlighter-rouge">game</code> that calls JS-method <code class="language-plaintext highlighter-rouge">game</code> and wraps it using <code class="language-plaintext highlighter-rouge">Game</code> class (see below). As a bonus, we have a class-method <code class="language-plaintext highlighter-rouge">current</code> that returns wrapped <code class="language-plaintext highlighter-rouge">currentApplication</code>.</p>
+<p>So, we have a class called <code class="language-plaintext highlighter-rouge">Application</code> that wraps some native JavaScript object and has a ruby-method <code class="language-plaintext highlighter-rouge">game</code> that calls JavaScript-method <code class="language-plaintext highlighter-rouge">game</code> and wraps it using <code class="language-plaintext highlighter-rouge">Game</code> class (see below). As a bonus, we have a class-method <code class="language-plaintext highlighter-rouge">current</code> that returns wrapped <code class="language-plaintext highlighter-rouge">currentApplication</code>.</p>
 
 <p>The next class is a <code class="language-plaintext highlighter-rouge">Game</code>:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Game</span>
@@ -407,15 +407,15 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>And again, this class can wrap any JS game object, has methods <code class="language-plaintext highlighter-rouge">player</code>, <code class="language-plaintext highlighter-rouge">say</code> and <code class="language-plaintext highlighter-rouge">entities</code> (<code class="language-plaintext highlighter-rouge">EntityCollection</code> is our next class to implement).</p>
+<p>And again, this class can wrap any JavaScript game object, has methods <code class="language-plaintext highlighter-rouge">player</code>, <code class="language-plaintext highlighter-rouge">say</code> and <code class="language-plaintext highlighter-rouge">entities</code> (<code class="language-plaintext highlighter-rouge">EntityCollection</code> is our next class to implement).</p>
 
 <p>(we can test method <code class="language-plaintext highlighter-rouge">say</code> write now, just put <code class="language-plaintext highlighter-rouge">Game.current.say('Hello')</code> to the block where the game is ready and start chatting with other players)</p>
 
 <h1 id="entities">Entities</h1>
 
-<p>The game provides a global JS object <code class="language-plaintext highlighter-rouge">Types</code> with all mobs/items/armors/weapons information, it allows to identify unknown entity, compare armors and weapons by rank. Basically, it provides everything for writing a bot logic.</p>
+<p>The game provides a global JavaScript object <code class="language-plaintext highlighter-rouge">Types</code> with all mobs/items/armors/weapons information, it allows to identify unknown entity, compare armors and weapons by rank. Basically, it provides everything for writing a bot logic.</p>
 
-<p>To convert it to Ruby, use <code class="language-plaintext highlighter-rouge">Types = Native(`Types`)</code> and use this object in the Ruby world!</p>
+<p>To convert it to Ruby, use <code class="language-plaintext highlighter-rouge">Types = Native(`Types`)</code>and use this object in the Ruby world!</p>
 
 <p>Here is my definition of <code class="language-plaintext highlighter-rouge">Entity</code> class:</p>
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Entity</span>
@@ -508,7 +508,7 @@
   <li>Find a closest weapon (and pick up if it’s enough close)</li>
   <li>Find a closest armor (and pick up if it’s enough close)</li>
   <li>Find a closest healing (and pick up if it’s enough close)</li>
-  <li>GOTO 1</li>
+  <li><code class="language-plaintext highlighter-rouge">GOTO</code> 1</li>
 </ol>
 
 <p>All of these steps will be our methods, and all of them <strong>must</strong> be asynchronous.</p>
@@ -611,11 +611,11 @@
 <span class="k">end</span>
 </code></pre></div></div>
 
-<p>This, is probably the thing that I’ve personally learned during writing this article. Even if you think in Ruby, you still have to deal with asynchronous components like callbacks/promises. When you need to make an HTTP request in Ruby, you just get you favorite HTTP adapter (mine is <code class="language-plaintext highlighter-rouge">RestClient</code>), send a request and your interpreter waits for response. In JS you have to process response in some callback, because you can’t just stop your interpreter (you know, it blocks UI).</p>
+<p>This, is probably the thing that I have personally learned during writing this article. Even if you think in Ruby, you still have to deal with asynchronous components like callbacks/promises. When you need to make an HTTP request in Ruby, you just get you favorite HTTP adapter (mine is <code class="language-plaintext highlighter-rouge">RestClient</code>), send a request and your interpreter waits for response. In JavaScript you have to process response in some callback, because you can’t just stop your interpreter (you know, it blocks UI).</p>
 
 <h1 id="conclusion">Conclusion</h1>
 
-<p>As for me, the main thing Opal gives to you is some ability to think in terms of Ruby classes/modules/inheritance system. But it doesn’t let you completely escape from JS ecosystem (no callbacks? - block is a callback). I would say, most of Opal functionality related to Ruby classes can be replaced with, for example, <a href="http://jsclass.jcoglan.com/">JsClass</a> library (which is really wonderful). Opal allows you to compile <strong>existing</strong> Ruby libraries to JavaScript and use them on the client - this is probably the main feature. Some day significant amount of Ruby libraries will be ported to client-side and probably some day we will think in terms of Ruby even on the client.</p>
+<p>As for me, the main thing Opal gives to you is some ability to think in terms of Ruby classes/modules/inheritance system. But it does not let you completely escape from JavaScript ecosystem (no callbacks? - block is a callback). I would say, most of Opal functionality related to Ruby classes can be replaced with, for example, <a href="http://jsclass.jcoglan.com/"><code class="language-plaintext highlighter-rouge">JsClass</code></a> library (which is really wonderful). Opal allows you to compile <strong>existing</strong> Ruby libraries to JavaScript and use them on the client - this is probably the main feature. Some day significant amount of Ruby libraries will be ported to client-side and probably some day we will think in terms of Ruby even on the client.</p>
 
 </div>
 

@@ -114,25 +114,25 @@
 </ul>
   </div>
 
-  <p>Today I’ve tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.</p>
+  <p>Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.</p>
 
 <h1 id="setup">Setup</h1>
 
 <p>Here are my servers:</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 212.71.252.54  / 192.168.171.141 / node1</span>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 212.71.252.54  / 192.168.171.141 / node1</span>
 <span class="c"># 176.58.103.254 / 192.168.171.142 / node2</span>
 <span class="c"># 178.79.153.89  / 192.168.173.227 / node3</span>
 </code></pre></div></div>
 
 <p>Local hosts (on each server):</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># local hosts</span>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># local hosts</span>
 192.168.171.141 node1
 192.168.171.142 node2
 192.168.173.227 node3
 </code></pre></div></div>
 
 <p>And remote (on my PC):</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># remote hosts</span>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># remote hosts</span>
 212.71.252.54  node1
 176.58.103.254 node2
 178.79.153.89  node3
@@ -140,30 +140,30 @@
 
 <p>First of all, let’s download and extract it (on each node).</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>build <span class="o">&amp;&amp;</span> <span class="nb">cd </span>build
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>build <span class="o">&amp;&amp;</span> <span class="nb">cd </span>build
 wget http://download.redis.io/releases/redis-3.0.0.tar.gz
 <span class="nb">tar</span> <span class="nt">-xvzf</span> redis-3.0.0.tar.gz
 <span class="nb">cd </span>redis-3.0.0/
 </code></pre></div></div>
 
 <p>Now we can build it</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt-get <span class="nb">install</span> <span class="nt">-y</span> make gcc build-essential
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt-get <span class="nb">install</span> <span class="nt">-y</span> make gcc build-essential
 make <span class="nv">MALLOC</span><span class="o">=</span>libc <span class="c"># also jemalloc can be used</span>
 </code></pre></div></div>
 
 <p>Let’s run tests</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt-get <span class="nb">install</span> <span class="nt">-y</span> tk8.5 tcl8.5
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt-get <span class="nb">install</span> <span class="nt">-y</span> tk8.5 tcl8.5
 make <span class="nb">test</span>
 <span class="c"># a lot of output, should be green</span>
 </code></pre></div></div>
 
 <p>Then we can start Redis</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/redis-server ./redis.conf
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/redis-server ./redis.conf
 </code></pre></div></div>
 
 <h1 id="cluster-configuration">Cluster configuration</h1>
 
-<p>We need to update our configs for each node</p>
+<p>We need to update our configuration file for each node</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># redis.conf
 bind node1 # for node1
@@ -202,7 +202,7 @@ cluster-node-timeout 5000
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
 </code></pre></div></div>
 
-<p>So, our redis server is running in cluster mode (… repeating same steps on other nodes …)</p>
+<p>So, our Redis server is running in cluster mode (… repeating same steps on other nodes …)</p>
 
 <h1 id="connecting-nodes">Connecting nodes</h1>
 
@@ -239,9 +239,9 @@ Usage: redis-trib &lt;command&gt; &lt;options&gt; &lt;arguments ...&gt;
 For check, fix, reshard, del-node, set-timeout you can specify the host and port of any working node in the cluster.
 </code></pre></div></div>
 
-<p>For some reason, this tool doesn’t support hostnames, we have to pass IPs manually.</p>
+<p>For some reason, this tool does not support host names, we have to pass IP addresses manually.</p>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-3.0.0 src/redis-trib.rb create 192.168.171.141:6379 192.168.171.142:6379 192.168.173.227:6379
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-3.0.0 src/redis-trib.rb create 192.168.171.141:6379 192.168.171.142:6379 192.168.173.227:6379
 
 <span class="o">&gt;&gt;&gt;</span> Creating cluster
 Connecting to node 192.168.171.141:6379: OK
@@ -322,11 +322,11 @@ M: 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 192.168.173.227:6379
 15785 R (0 err) | 15785 W (0 err) |
 </code></pre></div></div>
 
-<p>This tool writes a huge amount of data to redis and check whether previously written data is still there.</p>
+<p>This tool writes a huge amount of data to Redis and check whether previously written data is still there.</p>
 
 <h1 id="testing-the-failover">Testing the failover</h1>
 
-<p>This chapter is something that I still don’t understand. I’ve tried to reproduce it many times and every time I have the same result.</p>
+<p>This chapter is something that I still don’t understand. I have tried to reproduce it many times and every time I have the same result.</p>
 
 <p>Run <code class="language-plaintext highlighter-rouge">consistency-test.rb</code> again and kill any other node.</p>
 
@@ -430,7 +430,7 @@ PONG
 
 <h1 id="conclusion">Conclusion</h1>
 
-<p>According to <a href="https://github.com/antirez/redis-rb-cluster#redis-rb-cluster">the repo</a> there are still a lot of things that need to be done before using Redis Cluster in production, but I would like to say Thanks to all contributors of Redis, redis-rb and redis-rb-cluster. Good job and looking forward to use in the real-world!</p>
+<p>According to <a href="https://github.com/antirez/redis-rb-cluster#redis-rb-cluster">the repository</a> there are still a lot of things that need to be done before using Redis Cluster in production, but I would like to say Thanks to all contributors of Redis, <code class="language-plaintext highlighter-rouge">redis-rb</code> and <code class="language-plaintext highlighter-rouge">redis-rb-cluster</code>. Good job and looking forward to use in the real-world!</p>
 
 <h1 id="links">Links</h1>
 
