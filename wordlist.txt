@@ -71,6 +71,7 @@ backported
 backporting
 backtrace
 bitmask
+boolean
 booleans
 changelog
 codebase
@@ -78,6 +79,7 @@ codepoint
 codepoints
 constructible
 copyable
+datasets
 deserialization
 deserialize
 destructor
@@ -114,6 +116,8 @@ pre
 prepended
 prepends
 proc
+runtime
+serializable
 serializer
 stacktraces
 stateful
