@@ -11,14 +11,14 @@ Today I have tested version 3.0.0 of Redis server which includes Redis cluster. 
 # Setup
 
 Here are my servers:
-```sh
+```text
 # 212.71.252.54  / 192.168.171.141 / node1
 # 176.58.103.254 / 192.168.171.142 / node2
 # 178.79.153.89  / 192.168.173.227 / node3
 ```
 
 Local hosts (on each server):
-```sh
+```text
 # local hosts
 192.168.171.141 node1
 192.168.171.142 node2
@@ -26,7 +26,7 @@ Local hosts (on each server):
 ```
 
 And remote (on my PC):
-```sh
+```text
 # remote hosts
 212.71.252.54  node1
 176.58.103.254 node2
@@ -36,35 +36,35 @@ And remote (on my PC):
 First of all, let's download and extract it (on each node).
 
 ```sh
-mkdir build && cd build
-wget http://download.redis.io/releases/redis-3.0.0.tar.gz
-tar -xvzf redis-3.0.0.tar.gz
-cd redis-3.0.0/
+$ mkdir build && cd build
+$ wget http://download.redis.io/releases/redis-3.0.0.tar.gz
+$ tar -xvzf redis-3.0.0.tar.gz
+$ cd redis-3.0.0/
 ```
 
 Now we can build it
 ```sh
-apt-get install -y make gcc build-essential
-make MALLOC=libc # also jemalloc can be used
+$ apt-get install -y make gcc build-essential
+$ make MALLOC=libc # also jemalloc can be used
 ```
 
 Let's run tests
 ```sh
-apt-get install -y tk8.5 tcl8.5
-make test
+$ apt-get install -y tk8.5 tcl8.5
+$ make test
 # a lot of output, should be green
 ```
 
 Then we can start Redis
 ```sh
-src/redis-server ./redis.conf
+$ src/redis-server ./redis.conf
 ```
 
 # Cluster configuration
 
 We need to update our configuration file for each node
 
-```
+```text
 # redis.conf
 bind node1 # for node1
 cluster-enabled yes
@@ -74,7 +74,7 @@ cluster-node-timeout 5000
 
 Here's what should displayed:
 
-```
+```text
 29338:M 13 Apr 21:05:00.214 * No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
                 _._
            _.-``__ ''-._
@@ -100,7 +100,7 @@ Here's what should displayed:
 ```
 
 Quite a lot of noisy debug information, but here is one line that is extremely important:
-```
+```text
 No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
 ```
 
@@ -109,7 +109,7 @@ So, our Redis server is running in cluster mode (... repeating same steps on oth
 # Connecting nodes
 
 Now we have 3 nodes:
-```
+```text
 node1:6379
 node2:6379
 node3:6379
@@ -117,8 +117,8 @@ node3:6379
 
 Let's connect them! Redis has a tool for connecting nodes called `redis-trib.rb`. And yes, it's a ruby script and it requires `redis` gem to be installed (not a problem in my case).
 
-```
-➜  redis-3.0.0 src/redis-trib.rb
+```sh
+$ src/redis-trib.rb
 Usage: redis-trib <command> <options> <arguments ...>
 
   create          host1:port1 ... hostN:portN
@@ -146,7 +146,7 @@ For check, fix, reshard, del-node, set-timeout you can specify the host and port
 For some reason, this tool does not support host names, we have to pass IP addresses manually.
 
 ```sh
-➜  redis-3.0.0 src/redis-trib.rb create 192.168.171.141:6379 192.168.171.142:6379 192.168.173.227:6379
+$ src/redis-trib.rb create 192.168.171.141:6379 192.168.171.142:6379 192.168.173.227:6379
 
 >>> Creating cluster
 Connecting to node 192.168.171.141:6379: OK
@@ -168,7 +168,7 @@ Can I set the above configuration? (type 'yes' to accept):
 
 Looks beautiful! Each node is responsible for 1/3 of data. Typing 'yes'...
 
-```
+```text
 >>> Nodes configuration updated
 >>> Assign a different config epoch to each node
 >>> Sending CLUSTER MEET messages to join the cluster
@@ -192,8 +192,8 @@ That's it!
 
 Here is how to check the status of the cluster:
 
-```
-➜  redis-3.0.0 src/redis-cli -h node2 cluster nodes
+```sh
+$ src/redis-cli -h node2 cluster nodes
 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 node1:6379 master - 0 1428949630273 3 connected 10923-16383
 78a5bbdcd545848be8a66126a71dc69dd6d23bc4 node2:6379 myself,master - 0 0 1 connected 0-5460
 1f6ed2478b461539f76b0b627de2e1b8565df719 node3:6379 master - 0 1428949629272 2 connected 5461-10922
@@ -205,16 +205,16 @@ Every single node knows about others, so the previous command can be executed on
 
 Let's setup [`redis-rb-cluster`](https://github.com/antirez/redis-rb-cluster)
 
-```
-➜  build wget https://github.com/antirez/redis-rb-cluster/archive/master.zip
-➜  build unzip master.zip
-➜  build cd redis-rb-cluster-master
+```sh
+$ wget https://github.com/antirez/redis-rb-cluster/archive/master.zip
+$ unzip master.zip
+$ cd redis-rb-cluster-master
 ```
 
 We have the file `example.rb` which is pretty boring itself. It just writes random keys into our cluster and prints them:
 
-```
-➜  redis-rb-cluster-master ruby example.rb
+```sh
+$ ruby example.rb
 1
 2
 3
@@ -223,8 +223,8 @@ We have the file `example.rb` which is pretty boring itself. It just writes rand
 
 Another example is more interesting.
 
-```
-➜  redis-rb-cluster-master ruby consistency-test.rb node1 6379
+```sh
+$ ruby consistency-test.rb node1 6379
 850 R (0 err) | 850 W (0 err) |
 4682 R (0 err) | 4682 W (0 err) |
 8490 R (0 err) | 8490 W (0 err) |
@@ -240,13 +240,13 @@ This chapter is something that I still don't understand. I have tried to reprodu
 
 Run `consistency-test.rb` again and kill any other node.
 
-```
-➜  redis-3.0.0 src/redis-cli -h node2 debug segfault
+```sh
+$ src/redis-cli -h node2 debug segfault
 ```
 
 And here is the output that I'm getting every time:
 
-```
+```text
 70273 R (0 err) | 70273 W (0 err) |
 Reading: Too many Cluster redirections? (last error: MOVED 9515 127.0.0.1:7002)
 Writing: Too many Cluster redirections? (last error: MOVED 9515 127.0.0.1:7002)
@@ -323,20 +323,20 @@ Writing: CLUSTERDOWN The cluster is down
 
 As you can see, the cluster goes down and errors amount quickly increases. After all this steps I'm getting broken cluster (and each separated node is broken, too)
 
-```
-➜  redis-3.0.0 src/redis-cli -h node3 ping
+```sh
+$src/redis-cli -h node3 ping
 PONG
-➜  redis-3.0.0 src/redis-cli -h node3 get 'test'
+$src/redis-cli -h node3 get 'test'
 (error) CLUSTERDOWN The cluster is down
 ```
 
 The cluster goes up after booting the first node manually
 
-```
+```sh
 # booting node2 manually...
-➜  redis-3.0.0  src/redis-cli -h  get qwe
+$ src/redis-cli -h  get qwe
 (error) MOVED 757 127.0.0.1:7001
-➜  redis-3.0.0  src/redis-cli -p 7001 get qwe
+$ src/redis-cli -p 7001 get qwe
 (nil)
 ```
 

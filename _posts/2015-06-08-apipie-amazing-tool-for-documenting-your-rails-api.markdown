@@ -172,7 +172,7 @@ end
 
 Which breaks it...
 
-```
+```text
 Apipie: Can not resolve resource UsersDoc name.
 ```
 

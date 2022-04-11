@@ -28,7 +28,8 @@ INSTALL PLUGIN handlersocket SONAME 'handlersocket.so';
 # Configuration
 
 My configuration is the following:
-```
+
+```text
 # [mysqld] section
 # the port number to bind to for read requests
 loose_handlersocket_port = 9998
@@ -50,7 +51,8 @@ show processlist\G
 ```
 
 You should see a lot of rows like:
-```
+
+```sql
            Id: 1
          User: system user
          Host: connecting host
@@ -62,6 +64,7 @@ You should see a lot of rows like:
     Rows_sent: 0
 Rows_examined: 0
 ```
+
 which means that HS daemon is up and running.
 
 # Simple queries
@@ -132,7 +135,7 @@ Other commands like `auth`/`insert`/`update`/`delete` are not there yet. But it'
 
 The most interesting part. To run benchmarks locally, clone the gem repository on [GitHub](https://github.com/iliabylich/handlersocket-ruby) and run `rake benchmark`. It compares `mysql2` gem to Ruby-based and C-based implementations. Here are my results:
 
-```
+```text
 Calculating -------------------------------------
              pure HS     2.000  i/100ms
               ext HS     3.149k i/100ms

@@ -42,7 +42,7 @@ puts s.valid_encoding?
 puts s.bytes
 ```
 
-```
+```sh
 $ ruby test.rb
 ruby 2.5.1p57 (2018-03-29 revision 63029) [x86_64-darwin17]
 UTF-8
@@ -114,7 +114,7 @@ self[1] { 2 }
 
 Looks valid, right? We pass a positional argument `1` and a block that returns `2` to the method called `[]`. The method should print `3`. Let's run it with Ruby 2.5:
 
-```
+```sh
 $ ruby -v test.rb
 2.5.1p57 (2018-03-29 revision 63029) [x86_64-darwin17]
 3
@@ -122,7 +122,7 @@ $ ruby -v test.rb
 
 `1 + 2 == 3`, everything is fine. Let's try 2.4:
 
-```
+```sh
 $ ruby -v test.rb
 ruby 2.4.4p296 (2018-03-28 revision 63013) [x86_64-darwin17]
 test.rb:5: syntax error, unexpected { arg, expecting end-of-input

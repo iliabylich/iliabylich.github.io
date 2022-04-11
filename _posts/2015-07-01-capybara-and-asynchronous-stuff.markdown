@@ -106,6 +106,7 @@ setTimeout(function() {
   alert('Thanks for waiting 1 second');
 }, 1000);
 ```
+
 This code actually does nothing, but it's a demonstration of how asynchronous stuff works.
 
 # But... Capybara waits for my AJAX requests
@@ -117,6 +118,7 @@ it 'displays a message' do
   expect(page).to have_text('Hey')
 end
 ```
+
 and at the moment of running this expectation your page does not have this text **but receives it a second later** - the test will be green. Why?
 
 Capybara has a setting called `default_wait_time` (was changed to `default_max_wait_time`, but is still acceptable) which is 2 seconds by default. [Here is how Capybara uses it](https://github.com/jnicklas/capybara/blob/master/lib/capybara/node/base.rb#L76).

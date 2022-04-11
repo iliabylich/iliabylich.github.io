@@ -233,6 +233,7 @@ So, our main objects are:
 + `currentApplication.game.entities`
 
 First class for wrapping is definitely an `App`:
+
 ```ruby
 class Application
   include Native
@@ -252,6 +253,7 @@ class Application
   end
 end
 ```
+
 So, we have a class called `Application` that wraps some native JavaScript object and has a ruby-method `game` that calls JavaScript-method `game` and wraps it using `Game` class (see below). As a bonus, we have a class-method `current` that returns wrapped `currentApplication`.
 
 The next class is a `Game`:

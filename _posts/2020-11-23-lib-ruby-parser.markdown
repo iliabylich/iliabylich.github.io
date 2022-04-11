@@ -93,7 +93,7 @@ Unfortunately, bison supports only C/C++/Java/D.
 
 First I looked at what's available in the world of Rust. The most popular LALR parser generator is called [`lalrpop`](https://github.com/lalrpop/lalrpop) and I was very about it at the very beginning, I think has a very, very beautiful API:
 
-```
+```rust
 pub Term: i32 = {
     <n:Num> => n,
     "(" <t:Term> ")" => t,
@@ -112,10 +112,11 @@ Unfortunately, I have got a few reasons to abandon this idea:
 
     I guess it's possible to emulate them by introducing rules like
 
-    ```
+    ```text
     bar_with_mid_rule: bar { /* do something */ }
     foo: bar_with_mid_rule baz { /* reduce */ }
     ```
+
     but then I have no idea how such grammar can be maintained.
 
 2. Compilation speed. I have got ~20% of Ruby grammar backported and noticed a huge performance degradation.
@@ -269,7 +270,7 @@ I keep thinking about turning `lib-ruby-parser` into zero copy parser and I'm be
 
 Currently all "values" that copy from source code (like numeric/string literals, token values) are copied into tokens and AST nodes:
 
-```
+```text
 "42"
 
 tokens:
@@ -292,7 +293,7 @@ enum Value<'a> {
 
 The first variant is a reference, the latter is owned. Total value (of both token and AST node) could be just a vector of such enums, and if you parse a string `"foo\n"` you'll get
 
-```
+```text
 tokens:
     Token {
         name: "tSTRING_CONTENT",

@@ -319,6 +319,7 @@ get_sequence[8]
 get_sequence[120]
  => [125]
 ```
+
 In this case `result = byte - 5` and it covers small positive numbers.
 
 **The third case**:

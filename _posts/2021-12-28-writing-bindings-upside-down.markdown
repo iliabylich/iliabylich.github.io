@@ -70,7 +70,7 @@ A small note on copying: it is possible to "move" some data in certain cases and
 
 Let's start. I'd like to demonstrate a different solution on a tiny example. Let's write a micro-library that has several Rust structs, something like a function that, let's say, takes a `String` and returns a `Vec` of all non-ASCII chars. It's called `foo`.
 
-```
+```rust
 pub fn foo(s: &str) -> Vec<char> {
     s.chars().filter(|c| !c.is_ascii()).collect()
 }
@@ -116,7 +116,7 @@ By swapping implementations at link time we can get the same algorithm that work
 
 I think it makes sense to start with C, this is what I would like to get eventually:
 
-```
+```c
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
@@ -141,7 +141,7 @@ Now the question is: how can we return this `CharList` from our Rust code? We co
 
 Instead, let's make Rust think that `CharList` on its side is some struct of some (AOT-known) size without any meaningful fields. To do that we need to dump sizes of our structs and make them available in C:
 
-```
+```c
 #include <stdio.h>
 #include "structs.h"
 
@@ -156,7 +156,7 @@ int main()
 
 We compile it, we run it, and we save its output to a text file called `sizes`, here's what I have locally
 
-```
+```c
 CHAR_SIZE=4
 CHAR_LIST_SIZE=16
 ```
@@ -168,7 +168,7 @@ Now our Rust library has to be changed to work in 2 different modes:
 
 We a new feature to our `Cargo.toml`:
 
-```
+```toml
 [features]
 default = []
 
@@ -178,7 +178,7 @@ external = []
 
 and we create a build script:
 
-```
+```rust
 #[cfg(feature = "external")]
 fn main() {
     // read path of the `sizes` file from the ENV var
@@ -694,7 +694,7 @@ typedef VALUE CharList;
 
 and so sizes are these:
 
-```
+```c
 CHAR_SIZE=8
 CHAR_LIST_SIZE=8
 ```
@@ -833,7 +833,7 @@ RUSTFLAGS="-Z sanitizer=address" ... cargo test
 
 Running tests with this options shows that we have a leak somewhere in
 
-```
+```text
 Direct leak of 96 byte(s) in 1 object(s) allocated from:
 ...
     #9 0x105905990 in char_list__push bindings.cpp:34
@@ -868,7 +868,7 @@ impl Drop for CharList {
 
 Of course, we need to add it to `bindings.h`:
 
-```
+```c
 #ifdef __cplusplus
 extern "C"
 {

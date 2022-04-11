@@ -160,7 +160,7 @@ mysql> SHOW PLUGINS;
 
 Once plugin is enabled, some MySQL variables become accessible:
 
-```
+```text
 mysql> show variables like 'myhttp_%';
 +----------------------------------+------------------------------+
 | Variable_name                    | Value                        |
@@ -169,7 +169,7 @@ mysql> show variables like 'myhttp_%';
 | myhttp_basic_auth_user_passwd    | basic_auth_passwd            |
 | myhttp_crud_url_prefix           | /crud/                       |
 | myhttp_default_db                | myhttp                       |
-| myhttp_default_mysql_user_host   | 127.0.0.1                      |
+| myhttp_default_mysql_user_host   | 127.0.0.1                    |
 | myhttp_default_mysql_user_name   | username                     |
 | myhttp_default_mysql_user_passwd | userpass                     |
 | myhttp_document_url_prefix       | /doc/                        |
@@ -198,7 +198,7 @@ mysql> show variables like 'myhttp_%';
 
 Let's try it!
 
-```
+```sh
 $ curl -v localhost:8080
 > GET / HTTP/1.1
 > User-Agent: curl/7.35.0
@@ -222,7 +222,7 @@ Well, at least it returns something (be patient, this feature is experimental)
 
 First of all, we need to create MySQL user and use his credentials in configuration file.
 
-```
+```sql
 mysql> CREATE USER 'username'@'%' IDENTIFIED BY 'userpass';
 mysql> GRANT ALL PRIVILEGES ON * . * TO 'username'@'%';
 mysql> FLUSH PRIVILEGES;
@@ -230,7 +230,7 @@ mysql> FLUSH PRIVILEGES;
 
 Then we can change plugin's settings in `/etc/my.cnf` to something like:
 
-```
+```text
 [mysqld]
 myhttp_default_db = myhttp
 myhttp_default_mysql_user_name = username
@@ -242,8 +242,8 @@ myhttp_basic_auth_user_passwd = basic_auth_passwd
 
 Here is how it should look using curl:
 
-```
-curl --user basic_auth_user:basic_auth_passwd --url http://localhost:8080/crud/myhttp/simple/1
+```sh
+$ curl --user basic_auth_user:basic_auth_passwd --url http://localhost:8080/crud/myhttp/simple/1
  {"id":"1","col_a":"Hello"}
 ```
 
@@ -260,7 +260,7 @@ we need something like [`ActiveResource`](https://github.com/rails/activeresourc
 
 Install it:
 
-```
+```sh
 $ gem install activeresource
 ```
 
@@ -295,7 +295,7 @@ Without this we can't even create a single record in the database!
 
 Let's check for alternatives. [`Her`](https://github.com/remiprev/her) is a popular (according to stars on GitHub it's even more popular then `ActiveResource`) alternative with a nice syntax sugar. Here is an example:
 
-```
+```sh
 $ gem install her
 ```
 
@@ -353,7 +353,7 @@ user = User.create(first_name: 'Test', last_name: 'User', id: 25)
 
 And finally it works! The only thing that I personally don't like in design of this API is that both `INSERT` and `UPDATE` have to be called using PUT because it produces query:
 
-```
+```sql
 REPLACE INTO db.table SET ..., pk = ...
 ```
 
@@ -377,7 +377,7 @@ First of all, it looks quite strange comparing with regular MySQL tables. The da
 
 Here is how it looks it MySQL:
 
-```
+```sql
 mysql> select * from json_types\G
 *************************** 1. row ***************************
    _id: 1
