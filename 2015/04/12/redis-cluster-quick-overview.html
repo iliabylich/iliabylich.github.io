@@ -112,7 +112,7 @@
   <span class="post-date">12 Apr 2015</span>
 
   <div class="reading-time" title="Estimated read time">
-  This article will take 6 minutes to read
+  This article will take 7 minutes to read
   <br />
   (or maybe less, the algorithm treats code as text)
 </div>
@@ -136,20 +136,20 @@
 <h1 id="setup">Setup</h1>
 
 <p>Here are my servers:</p>
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 212.71.252.54  / 192.168.171.141 / node1</span>
-<span class="c"># 176.58.103.254 / 192.168.171.142 / node2</span>
-<span class="c"># 178.79.153.89  / 192.168.173.227 / node3</span>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 212.71.252.54  / 192.168.171.141 / node1
+# 176.58.103.254 / 192.168.171.142 / node2
+# 178.79.153.89  / 192.168.173.227 / node3
 </code></pre></div></div>
 
 <p>Local hosts (on each server):</p>
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># local hosts</span>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># local hosts
 192.168.171.141 node1
 192.168.171.142 node2
 192.168.173.227 node3
 </code></pre></div></div>
 
 <p>And remote (on my PC):</p>
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># remote hosts</span>
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># remote hosts
 212.71.252.54  node1
 176.58.103.254 node2
 178.79.153.89  node3
@@ -157,32 +157,32 @@
 
 <p>First of all, let’s download and extract it (on each node).</p>
 
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">mkdir </span>build <span class="o">&amp;&amp;</span> <span class="nb">cd </span>build
-wget http://download.redis.io/releases/redis-3.0.0.tar.gz
-<span class="nb">tar</span> <span class="nt">-xvzf</span> redis-3.0.0.tar.gz
-<span class="nb">cd </span>redis-3.0.0/
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">mkdir </span>build <span class="o">&amp;&amp;</span> <span class="nb">cd </span>build
+<span class="nv">$ </span>wget http://download.redis.io/releases/redis-3.0.0.tar.gz
+<span class="nv">$ </span><span class="nb">tar</span> <span class="nt">-xvzf</span> redis-3.0.0.tar.gz
+<span class="nv">$ </span><span class="nb">cd </span>redis-3.0.0/
 </code></pre></div></div>
 
 <p>Now we can build it</p>
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt-get <span class="nb">install</span> <span class="nt">-y</span> make gcc build-essential
-make <span class="nv">MALLOC</span><span class="o">=</span>libc <span class="c"># also jemalloc can be used</span>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> make gcc build-essential
+<span class="nv">$ </span>make <span class="nv">MALLOC</span><span class="o">=</span>libc <span class="c"># also jemalloc can be used</span>
 </code></pre></div></div>
 
 <p>Let’s run tests</p>
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt-get <span class="nb">install</span> <span class="nt">-y</span> tk8.5 tcl8.5
-make <span class="nb">test</span>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> tk8.5 tcl8.5
+<span class="nv">$ </span>make <span class="nb">test</span>
 <span class="c"># a lot of output, should be green</span>
 </code></pre></div></div>
 
 <p>Then we can start Redis</p>
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>src/redis-server ./redis.conf
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>src/redis-server ./redis.conf
 </code></pre></div></div>
 
 <h1 id="cluster-configuration">Cluster configuration</h1>
 
 <p>We need to update our configuration file for each node</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># redis.conf
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># redis.conf
 bind node1 # for node1
 cluster-enabled yes
 cluster-config-file nodes-6379.conf
@@ -191,7 +191,7 @@ cluster-node-timeout 5000
 
 <p>Here’s what should displayed:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>29338:M 13 Apr 21:05:00.214 * No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>29338:M 13 Apr 21:05:00.214 * No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
                 _._
            _.-``__ ''-._
       _.-``    `.  `_.  ''-._           Redis 3.0.0 (00000000/0) 64 bit
@@ -216,7 +216,7 @@ cluster-node-timeout 5000
 </code></pre></div></div>
 
 <p>Quite a lot of noisy debug information, but here is one line that is extremely important:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
 </code></pre></div></div>
 
 <p>So, our Redis server is running in cluster mode (… repeating same steps on other nodes …)</p>
@@ -224,41 +224,41 @@ cluster-node-timeout 5000
 <h1 id="connecting-nodes">Connecting nodes</h1>
 
 <p>Now we have 3 nodes:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>node1:6379
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>node1:6379
 node2:6379
 node3:6379
 </code></pre></div></div>
 
 <p>Let’s connect them! Redis has a tool for connecting nodes called <code class="language-plaintext highlighter-rouge">redis-trib.rb</code>. And yes, it’s a ruby script and it requires <code class="language-plaintext highlighter-rouge">redis</code> gem to be installed (not a problem in my case).</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-3.0.0 src/redis-trib.rb
-Usage: redis-trib &lt;command&gt; &lt;options&gt; &lt;arguments ...&gt;
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>src/redis-trib.rb
+Usage: redis-trib &lt;<span class="nb">command</span><span class="o">&gt;</span> &lt;options&gt; &lt;arguments ...&gt;
 
   create          host1:port1 ... hostN:portN
-                  --replicas &lt;arg&gt;
+                  <span class="nt">--replicas</span> &lt;arg&gt;
   check           host:port
   fix             host:port
   reshard         host:port
-                  --from &lt;arg&gt;
-                  --to &lt;arg&gt;
-                  --slots &lt;arg&gt;
-                  --yes
+                  <span class="nt">--from</span> &lt;arg&gt;
+                  <span class="nt">--to</span> &lt;arg&gt;
+                  <span class="nt">--slots</span> &lt;arg&gt;
+                  <span class="nt">--yes</span>
   add-node        new_host:new_port existing_host:existing_port
-                  --slave
-                  --master-id &lt;arg&gt;
+                  <span class="nt">--slave</span>
+                  <span class="nt">--master-id</span> &lt;arg&gt;
   del-node        host:port node_id
   set-timeout     host:port milliseconds
-  call            host:port command arg arg .. arg
+  call            host:port <span class="nb">command </span>arg arg .. arg
   import          host:port
-                  --from &lt;arg&gt;
-  help            (show this help)
+                  <span class="nt">--from</span> &lt;arg&gt;
+  <span class="nb">help</span>            <span class="o">(</span>show this <span class="nb">help</span><span class="o">)</span>
 
-For check, fix, reshard, del-node, set-timeout you can specify the host and port of any working node in the cluster.
+For check, fix, reshard, del-node, set-timeout you can specify the host and port of any working node <span class="k">in </span>the cluster.
 </code></pre></div></div>
 
 <p>For some reason, this tool does not support host names, we have to pass IP addresses manually.</p>
 
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-3.0.0 src/redis-trib.rb create 192.168.171.141:6379 192.168.171.142:6379 192.168.173.227:6379
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>src/redis-trib.rb create 192.168.171.141:6379 192.168.171.142:6379 192.168.173.227:6379
 
 <span class="o">&gt;&gt;&gt;</span> Creating cluster
 Connecting to node 192.168.171.141:6379: OK
@@ -280,7 +280,7 @@ Can I <span class="nb">set </span>the above configuration? <span class="o">(</sp
 
 <p>Looks beautiful! Each node is responsible for 1/3 of data. Typing ‘yes’…</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt;&gt; Nodes configuration updated
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt;&gt; Nodes configuration updated
 &gt;&gt;&gt; Assign a different config epoch to each node
 &gt;&gt;&gt; Sending CLUSTER MEET messages to join the cluster
 Waiting for the cluster to join.
@@ -303,7 +303,7 @@ M: 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 192.168.173.227:6379
 
 <p>Here is how to check the status of the cluster:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-3.0.0 src/redis-cli -h node2 cluster nodes
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>src/redis-cli <span class="nt">-h</span> node2 cluster nodes
 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 node1:6379 master - 0 1428949630273 3 connected 10923-16383
 78a5bbdcd545848be8a66126a71dc69dd6d23bc4 node2:6379 myself,master - 0 0 1 connected 0-5460
 1f6ed2478b461539f76b0b627de2e1b8565df719 node3:6379 master - 0 1428949629272 2 connected 5461-10922
@@ -315,14 +315,14 @@ M: 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 192.168.173.227:6379
 
 <p>Let’s setup <a href="https://github.com/antirez/redis-rb-cluster"><code class="language-plaintext highlighter-rouge">redis-rb-cluster</code></a></p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  build wget https://github.com/antirez/redis-rb-cluster/archive/master.zip
-➜  build unzip master.zip
-➜  build cd redis-rb-cluster-master
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>wget https://github.com/antirez/redis-rb-cluster/archive/master.zip
+<span class="nv">$ </span>unzip master.zip
+<span class="nv">$ </span><span class="nb">cd </span>redis-rb-cluster-master
 </code></pre></div></div>
 
 <p>We have the file <code class="language-plaintext highlighter-rouge">example.rb</code> which is pretty boring itself. It just writes random keys into our cluster and prints them:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-rb-cluster-master ruby example.rb
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby example.rb
 1
 2
 3
@@ -331,12 +331,12 @@ M: 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 192.168.173.227:6379
 
 <p>Another example is more interesting.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-rb-cluster-master ruby consistency-test.rb node1 6379
-850 R (0 err) | 850 W (0 err) |
-4682 R (0 err) | 4682 W (0 err) |
-8490 R (0 err) | 8490 W (0 err) |
-12196 R (0 err) | 12196 W (0 err) |
-15785 R (0 err) | 15785 W (0 err) |
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby consistency-test.rb node1 6379
+850 R <span class="o">(</span>0 err<span class="o">)</span> | 850 W <span class="o">(</span>0 err<span class="o">)</span> |
+4682 R <span class="o">(</span>0 err<span class="o">)</span> | 4682 W <span class="o">(</span>0 err<span class="o">)</span> |
+8490 R <span class="o">(</span>0 err<span class="o">)</span> | 8490 W <span class="o">(</span>0 err<span class="o">)</span> |
+12196 R <span class="o">(</span>0 err<span class="o">)</span> | 12196 W <span class="o">(</span>0 err<span class="o">)</span> |
+15785 R <span class="o">(</span>0 err<span class="o">)</span> | 15785 W <span class="o">(</span>0 err<span class="o">)</span> |
 </code></pre></div></div>
 
 <p>This tool writes a huge amount of data to Redis and check whether previously written data is still there.</p>
@@ -347,12 +347,12 @@ M: 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 192.168.173.227:6379
 
 <p>Run <code class="language-plaintext highlighter-rouge">consistency-test.rb</code> again and kill any other node.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-3.0.0 src/redis-cli -h node2 debug segfault
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>src/redis-cli <span class="nt">-h</span> node2 debug segfault
 </code></pre></div></div>
 
 <p>And here is the output that I’m getting every time:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>70273 R (0 err) | 70273 W (0 err) |
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>70273 R (0 err) | 70273 W (0 err) |
 Reading: Too many Cluster redirections? (last error: MOVED 9515 127.0.0.1:7002)
 Writing: Too many Cluster redirections? (last error: MOVED 9515 127.0.0.1:7002)
 72378 R (1 err) | 72378 W (1 err) |
@@ -428,19 +428,19 @@ Writing: CLUSTERDOWN The cluster is down
 
 <p>As you can see, the cluster goes down and errors amount quickly increases. After all this steps I’m getting broken cluster (and each separated node is broken, too)</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜  redis-3.0.0 src/redis-cli -h node3 ping
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$src</span>/redis-cli <span class="nt">-h</span> node3 ping
 PONG
-➜  redis-3.0.0 src/redis-cli -h node3 get 'test'
-(error) CLUSTERDOWN The cluster is down
+<span class="nv">$src</span>/redis-cli <span class="nt">-h</span> node3 get <span class="s1">'test'</span>
+<span class="o">(</span>error<span class="o">)</span> CLUSTERDOWN The cluster is down
 </code></pre></div></div>
 
 <p>The cluster goes up after booting the first node manually</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># booting node2 manually...
-➜  redis-3.0.0  src/redis-cli -h  get qwe
-(error) MOVED 757 127.0.0.1:7001
-➜  redis-3.0.0  src/redis-cli -p 7001 get qwe
-(nil)
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># booting node2 manually...</span>
+<span class="nv">$ </span>src/redis-cli <span class="nt">-h</span>  get qwe
+<span class="o">(</span>error<span class="o">)</span> MOVED 757 127.0.0.1:7001
+<span class="nv">$ </span>src/redis-cli <span class="nt">-p</span> 7001 get qwe
+<span class="o">(</span>nil<span class="o">)</span>
 </code></pre></div></div>
 
 <p>I hope this will be fixed soon.</p>

@@ -112,7 +112,7 @@
   <span class="post-date">22 Nov 2020</span>
 
   <div class="reading-time" title="Estimated read time">
-  This article will take 11 minutes to read
+  This article will take 12 minutes to read
   <br />
   (or maybe less, the algorithm treats code as text)
 </div>
@@ -218,12 +218,12 @@
 
 <p>First I looked at what’s available in the world of Rust. The most popular LALR parser generator is called <a href="https://github.com/lalrpop/lalrpop"><code class="language-plaintext highlighter-rouge">lalrpop</code></a> and I was very about it at the very beginning, I think has a very, very beautiful API:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pub Term: i32 = {
-    &lt;n:Num&gt; =&gt; n,
-    "(" &lt;t:Term&gt; ")" =&gt; t,
-};
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="n">Term</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">&lt;</span><span class="n">n</span><span class="p">:</span><span class="nb">Num</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="n">n</span><span class="p">,</span>
+    <span class="s">"("</span> <span class="o">&lt;</span><span class="n">t</span><span class="p">:</span><span class="n">Term</span><span class="o">&gt;</span> <span class="s">")"</span> <span class="k">=&gt;</span> <span class="n">t</span><span class="p">,</span>
+<span class="p">};</span>
 
-Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
+<span class="nb">Num</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">s</span><span class="p">:</span><span class="s">r"[0-9]+"</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="nn">i32</span><span class="p">::</span><span class="nf">from_str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
 </code></pre></div></div>
 
 <p>Plus, it’s written in Rust, so to compile a grammar that is based on it you don’t anything except Rust (that you need anyway to compile something written in Rust, right?).</p>
@@ -238,9 +238,10 @@ Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
 
     <p>I guess it’s possible to emulate them by introducing rules like</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bar_with_mid_rule: bar { /* do something */ }
+    <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bar_with_mid_rule: bar { /* do something */ }
  foo: bar_with_mid_rule baz { /* reduce */ }
 </code></pre></div>    </div>
+
     <p>but then I have no idea how such grammar can be maintained.</p>
   </li>
   <li>Compilation speed. I have got ~20% of Ruby grammar backported and noticed a huge performance degradation.</li>
@@ -388,7 +389,7 @@ Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
 
 <p>Currently all “values” that copy from source code (like numeric/string literals, token values) are copied into tokens and AST nodes:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"42"
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"42"
 
 tokens:
     Token { name: "tINTEGER", value: "42", loc: 0...2 }
@@ -409,7 +410,7 @@ nodes:
 
 <p>The first variant is a reference, the latter is owned. Total value (of both token and AST node) could be just a vector of such enums, and if you parse a string <code class="language-plaintext highlighter-rouge">"foo\n"</code> you’ll get</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tokens:
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tokens:
     Token {
         name: "tSTRING_CONTENT",
         value: vec![

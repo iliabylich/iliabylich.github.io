@@ -253,6 +253,7 @@
   <span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">Thanks for waiting 1 second</span><span class="dl">'</span><span class="p">);</span>
 <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
 </code></pre></div></div>
+
 <p>This code actually does nothing, but it’s a demonstration of how asynchronous stuff works.</p>
 
 <h1 id="but-capybara-waits-for-my-ajax-requests">But… Capybara waits for my AJAX requests</h1>
@@ -263,6 +264,7 @@
   <span class="n">expect</span><span class="p">(</span><span class="n">page</span><span class="p">).</span><span class="nf">to</span> <span class="n">have_text</span><span class="p">(</span><span class="s1">'Hey'</span><span class="p">)</span>
 <span class="k">end</span>
 </code></pre></div></div>
+
 <p>and at the moment of running this expectation your page does not have this text <strong>but receives it a second later</strong> - the test will be green. Why?</p>
 
 <p>Capybara has a setting called <code class="language-plaintext highlighter-rouge">default_wait_time</code> (was changed to <code class="language-plaintext highlighter-rouge">default_max_wait_time</code>, but is still acceptable) which is 2 seconds by default. <a href="https://github.com/jnicklas/capybara/blob/master/lib/capybara/node/base.rb#L76">Here is how Capybara uses it</a>.</p>

@@ -112,7 +112,7 @@
   <span class="post-date">27 Dec 2021</span>
 
   <div class="reading-time" title="Estimated read time">
-  This article will take 27 minutes to read
+  This article will take 28 minutes to read
   <br />
   (or maybe less, the algorithm treats code as text)
 </div>
@@ -207,15 +207,15 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
 
 <p>Let’s start. I’d like to demonstrate a different solution on a tiny example. Let’s write a micro-library that has several Rust structs, something like a function that, let’s say, takes a <code class="language-plaintext highlighter-rouge">String</code> and returns a <code class="language-plaintext highlighter-rouge">Vec</code> of all non-ASCII chars. It’s called <code class="language-plaintext highlighter-rouge">foo</code>.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pub fn foo(s: &amp;str) -&gt; Vec&lt;char&gt; {
-    s.chars().filter(|c| !c.is_ascii()).collect()
-}
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">foo</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">char</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">s</span><span class="nf">.chars</span><span class="p">()</span><span class="nf">.filter</span><span class="p">(|</span><span class="n">c</span><span class="p">|</span> <span class="o">!</span><span class="n">c</span><span class="nf">.is_ascii</span><span class="p">())</span><span class="nf">.collect</span><span class="p">()</span>
+<span class="p">}</span>
 
-#[test]
-fn test_foo() {
-    let chars = foo("abc😋中国def");
-    assert_eq!(chars, vec!['😋', '中', '国']);
-}
+<span class="nd">#[test]</span>
+<span class="k">fn</span> <span class="nf">test_foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">chars</span> <span class="o">=</span> <span class="nf">foo</span><span class="p">(</span><span class="s">"abc😋中国def"</span><span class="p">);</span>
+    <span class="nd">assert_eq!</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="nd">vec!</span><span class="p">[</span><span class="sc">'😋'</span><span class="p">,</span> <span class="sc">'中'</span><span class="p">,</span> <span class="sc">'国'</span><span class="p">]);</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>There are two structs that belong to Rust world exclusively: <code class="language-plaintext highlighter-rouge">Vec</code> and <code class="language-plaintext highlighter-rouge">char</code>.</p>
@@ -256,46 +256,46 @@ fn test_foo() {
 
 <p>I think it makes sense to start with C, this is what I would like to get eventually:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#ifndef STRUCTS_H
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifndef STRUCTS_H
 #define STRUCTS_H
+</span>
+<span class="cp">#include</span> <span class="cpf">&lt;stddef.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdbool.h&gt;</span><span class="cp">
+</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">Char</span>
+<span class="p">{</span>
+    <span class="kt">char</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+<span class="p">}</span> <span class="n">Char</span><span class="p">;</span>
 
-#include &lt;stddef.h&gt;
-#include &lt;stdbool.h&gt;
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">CharList</span>
+<span class="p">{</span>
+    <span class="n">Char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">len</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">CharList</span><span class="p">;</span>
 
-typedef struct Char
-{
-    char bytes[4];
-} Char;
-
-typedef struct CharList
-{
-    Char *ptr;
-    size_t len;
-} CharList;
-
-#endif // STRUCTS_H
-</code></pre></div></div>
+<span class="cp">#endif // STRUCTS_H
+</span></code></pre></div></div>
 
 <p>Now the question is: how can we return this <code class="language-plaintext highlighter-rouge">CharList</code> from our Rust code? We could use <code class="language-plaintext highlighter-rouge">bindgen</code> and something-something. No, no and no.</p>
 
 <p>Instead, let’s make Rust think that <code class="language-plaintext highlighter-rouge">CharList</code> on its side is some struct of some (AOT-known) size without any meaningful fields. To do that we need to dump sizes of our structs and make them available in C:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#include &lt;stdio.h&gt;
-#include "structs.h"
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">"structs.h"</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"CHAR_SIZE=%lu</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Char</span><span class="p">));</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"CHAR_LIST_SIZE=%lu</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">CharList</span><span class="p">));</span>
 
-int main()
-{
-    printf("CHAR_SIZE=%lu\n", sizeof(Char));
-    printf("CHAR_LIST_SIZE=%lu\n", sizeof(CharList));
-
-    return 0;
-}
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>We compile it, we run it, and we save its output to a text file called <code class="language-plaintext highlighter-rouge">sizes</code>, here’s what I have locally</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CHAR_SIZE=4
-CHAR_LIST_SIZE=16
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">CHAR_SIZE</span><span class="o">=</span><span class="mi">4</span>
+<span class="n">CHAR_LIST_SIZE</span><span class="o">=</span><span class="mi">16</span>
 </code></pre></div></div>
 
 <p>Now our Rust library has to be changed to work in 2 different modes:</p>
@@ -307,43 +307,43 @@ CHAR_LIST_SIZE=16
 
 <p>We a new feature to our <code class="language-plaintext highlighter-rouge">Cargo.toml</code>:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[features]
-default = []
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[features]</span>
+<span class="py">default</span> <span class="p">=</span> <span class="p">[]</span>
 
-# enables "external" mode, when structs have only size but no fields
-external = []
+<span class="c"># enables "external" mode, when structs have only size but no fields</span>
+<span class="py">external</span> <span class="p">=</span> <span class="p">[]</span>
 </code></pre></div></div>
 
 <p>and we create a build script:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#[cfg(feature = "external")]
-fn main() {
-    // read path of the `sizes` file from the ENV var
-    let sizes_filepath = env!("SIZES_FILEPATH");
-    // read `sizes` file
-    let sizes = std::fs::read_to_string(sizes_filepath)
-                  .expect("SIZES_FILEPATH has to point to a file");
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[cfg(feature</span> <span class="nd">=</span> <span class="s">"external"</span><span class="nd">)]</span>
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// read path of the `sizes` file from the ENV var</span>
+    <span class="k">let</span> <span class="n">sizes_filepath</span> <span class="o">=</span> <span class="nd">env!</span><span class="p">(</span><span class="s">"SIZES_FILEPATH"</span><span class="p">);</span>
+    <span class="c1">// read `sizes` file</span>
+    <span class="k">let</span> <span class="n">sizes</span> <span class="o">=</span> <span class="nn">std</span><span class="p">::</span><span class="nn">fs</span><span class="p">::</span><span class="nf">read_to_string</span><span class="p">(</span><span class="n">sizes_filepath</span><span class="p">)</span>
+                  <span class="nf">.expect</span><span class="p">(</span><span class="s">"SIZES_FILEPATH has to point to a file"</span><span class="p">);</span>
 
-    // parse it line by line and re-write to Rust
-    let sizes_rs = sizes
-        .lines()
-        .map(|line| {
-            let parts = line.split("=").collect::&lt;Vec&lt;_&gt;&gt;();
-            let name = parts[0];
-            let value = parts[1];
-            format!("pub(crate) const {}: usize = {};", name, value)
-        })
-        .collect::&lt;Vec&lt;_&gt;&gt;()
-        .join("\n");
+    <span class="c1">// parse it line by line and re-write to Rust</span>
+    <span class="k">let</span> <span class="n">sizes_rs</span> <span class="o">=</span> <span class="n">sizes</span>
+        <span class="nf">.lines</span><span class="p">()</span>
+        <span class="nf">.map</span><span class="p">(|</span><span class="n">line</span><span class="p">|</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="nf">.split</span><span class="p">(</span><span class="s">"="</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+            <span class="k">let</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+            <span class="k">let</span> <span class="n">value</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+            <span class="nd">format!</span><span class="p">(</span><span class="s">"pub(crate) const {}: usize = {};"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="p">})</span>
+        <span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;&gt;</span><span class="p">()</span>
+        <span class="nf">.join</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 
-    // write it back to sizes.rs
-    std::fs::write("src/sizes.rs", sizes_rs).unwrap();
-}
+    <span class="c1">// write it back to sizes.rs</span>
+    <span class="nn">std</span><span class="p">::</span><span class="nn">fs</span><span class="p">::</span><span class="nf">write</span><span class="p">(</span><span class="s">"src/sizes.rs"</span><span class="p">,</span> <span class="n">sizes_rs</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="p">}</span>
 
-#[cfg(not(feature = "external"))]
-fn main() {
-    // dummy main for "native" mode when no work is needed
-}
+<span class="nd">#[cfg(not(feature</span> <span class="nd">=</span> <span class="s">"external"</span><span class="nd">))]</span>
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// dummy main for "native" mode when no work is needed</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>Note: also there should be a <code class="language-plaintext highlighter-rouge">rerun-if-changed</code> line, but for the sake of implicitly I ignore dependencies here.</p>
@@ -815,8 +815,8 @@ fn main() {
 
 <p>and so sizes are these:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CHAR_SIZE=8
-CHAR_LIST_SIZE=8
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">CHAR_SIZE</span><span class="o">=</span><span class="mi">8</span>
+<span class="n">CHAR_LIST_SIZE</span><span class="o">=</span><span class="mi">8</span>
 </code></pre></div></div>
 
 <p><code class="language-plaintext highlighter-rouge">VALUE</code> is simply an alias to <code class="language-plaintext highlighter-rouge">unsigned long</code> on x86_64, so blobs are aliases:</p>
@@ -945,7 +945,7 @@ CHAR_LIST_SIZE=8
 
 <p>Running tests with this options shows that we have a leak somewhere in</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Direct leak of 96 byte(s) in 1 object(s) allocated from:
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Direct leak of 96 byte(s) in 1 object(s) allocated from:
 ...
     #9 0x105905990 in char_list__push bindings.cpp:34
     #10 0x105904c04 in rust_foo::external::CharList::push::hf5bdccdb764b0c62 lib.rs:91
@@ -977,18 +977,18 @@ CHAR_LIST_SIZE=8
 
 <p>Of course, we need to add it to <code class="language-plaintext highlighter-rouge">bindings.h</code>:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#ifdef __cplusplus
-extern "C"
-{
-#endif
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifdef __cplusplus
+</span><span class="k">extern</span> <span class="s">"C"</span>
+<span class="p">{</span>
+<span class="cp">#endif
+</span>
+    <span class="kt">void</span> <span class="n">char__drop</span><span class="p">(</span><span class="n">Char_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="n">char_list__drop</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">);</span>
 
-    void char__drop(Char_BLOB *self);
-    void char_list__drop(CharList_BLOB *self);
-
-#ifdef __cplusplus
-}
-#endif
-</code></pre></div></div>
+<span class="cp">#ifdef __cplusplus
+</span><span class="p">}</span>
+<span class="cp">#endif
+</span></code></pre></div></div>
 
 <p>Here’s a C implementation (depending on your implementation <code class="language-plaintext highlighter-rouge">char__drop</code> could to something):</p>
 

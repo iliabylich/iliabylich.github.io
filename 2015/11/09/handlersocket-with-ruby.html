@@ -157,7 +157,8 @@
 <h1 id="configuration">Configuration</h1>
 
 <p>My configuration is the following:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># [mysqld] section
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># [mysqld] section
 # the port number to bind to for read requests
 loose_handlersocket_port = 9998
 # the port number to bind to for write requests
@@ -177,17 +178,19 @@ open_files_limit = 65535
 </code></pre></div></div>
 
 <p>You should see a lot of rows like:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>           Id: 1
-         User: system user
-         Host: connecting host
-           db: NULL
-      Command: Connect
-         Time: NULL
-        State: handlersocket: mode=rd, 0 conns, 0 active
-         Info: NULL
-    Rows_sent: 0
-Rows_examined: 0
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code>           <span class="n">Id</span><span class="p">:</span> <span class="mi">1</span>
+         <span class="k">User</span><span class="p">:</span> <span class="k">system</span> <span class="k">user</span>
+         <span class="k">Host</span><span class="p">:</span> <span class="n">connecting</span> <span class="k">host</span>
+           <span class="n">db</span><span class="p">:</span> <span class="k">NULL</span>
+      <span class="n">Command</span><span class="p">:</span> <span class="k">Connect</span>
+         <span class="nb">Time</span><span class="p">:</span> <span class="k">NULL</span>
+        <span class="k">State</span><span class="p">:</span> <span class="n">handlersocket</span><span class="p">:</span> <span class="k">mode</span><span class="o">=</span><span class="n">rd</span><span class="p">,</span> <span class="mi">0</span> <span class="n">conns</span><span class="p">,</span> <span class="mi">0</span> <span class="n">active</span>
+         <span class="n">Info</span><span class="p">:</span> <span class="k">NULL</span>
+    <span class="n">Rows_sent</span><span class="p">:</span> <span class="mi">0</span>
+<span class="n">Rows_examined</span><span class="p">:</span> <span class="mi">0</span>
 </code></pre></div></div>
+
 <p>which means that HS daemon is up and running.</p>
 
 <h1 id="simple-queries">Simple queries</h1>
@@ -255,7 +258,7 @@ Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
 
 <p>The most interesting part. To run benchmarks locally, clone the gem repository on <a href="https://github.com/iliabylich/handlersocket-ruby">GitHub</a> and run <code class="language-plaintext highlighter-rouge">rake benchmark</code>. It compares <code class="language-plaintext highlighter-rouge">mysql2</code> gem to Ruby-based and C-based implementations. Here are my results:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Calculating -------------------------------------
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Calculating -------------------------------------
              pure HS     2.000  i/100ms
               ext HS     3.149k i/100ms
               mysql2   669.000  i/100ms

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="https://iliabylich.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://iliabylich.github.io/" rel="alternate" type="text/html" /><updated>2022-04-11T13:29:28+00:00</updated><id>https://iliabylich.github.io/feed.xml</id><title type="html">Ilya Bylich</title><subtitle>I&apos;m a Ruby/Rust developer, sometimes I write long technical stories</subtitle><entry><title type="html">Writing bindings upside down</title><link href="https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down.html" rel="alternate" type="text/html" title="Writing bindings upside down" /><published>2021-12-27T21:00:00+00:00</published><updated>2021-12-27T21:00:00+00:00</updated><id>https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down</id><content type="html" xml:base="https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down.html"><![CDATA[<p>Quite a long time ago I started writing C/C++/Ruby/Node.js/WASM bindings so I could call <a href="https://github.com/lib-ruby-parser/lib-ruby-parser">my Rust project</a> from those languages. It is a Ruby language parser.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="https://iliabylich.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://iliabylich.github.io/" rel="alternate" type="text/html" /><updated>2022-04-11T13:49:06+00:00</updated><id>https://iliabylich.github.io/feed.xml</id><title type="html">Ilya Bylich</title><subtitle>I&apos;m a Ruby/Rust developer, sometimes I write long technical stories</subtitle><entry><title type="html">Writing bindings upside down</title><link href="https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down.html" rel="alternate" type="text/html" title="Writing bindings upside down" /><published>2021-12-27T21:00:00+00:00</published><updated>2021-12-27T21:00:00+00:00</updated><id>https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down</id><content type="html" xml:base="https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down.html"><![CDATA[<p>Quite a long time ago I started writing C/C++/Ruby/Node.js/WASM bindings so I could call <a href="https://github.com/lib-ruby-parser/lib-ruby-parser">my Rust project</a> from those languages. It is a Ruby language parser.</p>
 
 <p>I tried multiple ways and found one that is very (VERY) controversial, but I think it deserves it’s own article.</p>
 
@@ -71,15 +71,15 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
 
 <p>Let’s start. I’d like to demonstrate a different solution on a tiny example. Let’s write a micro-library that has several Rust structs, something like a function that, let’s say, takes a <code class="language-plaintext highlighter-rouge">String</code> and returns a <code class="language-plaintext highlighter-rouge">Vec</code> of all non-ASCII chars. It’s called <code class="language-plaintext highlighter-rouge">foo</code>.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pub fn foo(s: &amp;str) -&gt; Vec&lt;char&gt; {
-    s.chars().filter(|c| !c.is_ascii()).collect()
-}
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">foo</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">char</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">s</span><span class="nf">.chars</span><span class="p">()</span><span class="nf">.filter</span><span class="p">(|</span><span class="n">c</span><span class="p">|</span> <span class="o">!</span><span class="n">c</span><span class="nf">.is_ascii</span><span class="p">())</span><span class="nf">.collect</span><span class="p">()</span>
+<span class="p">}</span>
 
-#[test]
-fn test_foo() {
-    let chars = foo("abc😋中国def");
-    assert_eq!(chars, vec!['😋', '中', '国']);
-}
+<span class="nd">#[test]</span>
+<span class="k">fn</span> <span class="nf">test_foo</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">chars</span> <span class="o">=</span> <span class="nf">foo</span><span class="p">(</span><span class="s">"abc😋中国def"</span><span class="p">);</span>
+    <span class="nd">assert_eq!</span><span class="p">(</span><span class="n">chars</span><span class="p">,</span> <span class="nd">vec!</span><span class="p">[</span><span class="sc">'😋'</span><span class="p">,</span> <span class="sc">'中'</span><span class="p">,</span> <span class="sc">'国'</span><span class="p">]);</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>There are two structs that belong to Rust world exclusively: <code class="language-plaintext highlighter-rouge">Vec</code> and <code class="language-plaintext highlighter-rouge">char</code>.</p>
@@ -120,46 +120,46 @@ fn test_foo() {
 
 <p>I think it makes sense to start with C, this is what I would like to get eventually:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#ifndef STRUCTS_H
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifndef STRUCTS_H
 #define STRUCTS_H
+</span>
+<span class="cp">#include</span> <span class="cpf">&lt;stddef.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdbool.h&gt;</span><span class="cp">
+</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">Char</span>
+<span class="p">{</span>
+    <span class="kt">char</span> <span class="n">bytes</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+<span class="p">}</span> <span class="n">Char</span><span class="p">;</span>
 
-#include &lt;stddef.h&gt;
-#include &lt;stdbool.h&gt;
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">CharList</span>
+<span class="p">{</span>
+    <span class="n">Char</span> <span class="o">*</span><span class="n">ptr</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">len</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">CharList</span><span class="p">;</span>
 
-typedef struct Char
-{
-    char bytes[4];
-} Char;
-
-typedef struct CharList
-{
-    Char *ptr;
-    size_t len;
-} CharList;
-
-#endif // STRUCTS_H
-</code></pre></div></div>
+<span class="cp">#endif // STRUCTS_H
+</span></code></pre></div></div>
 
 <p>Now the question is: how can we return this <code class="language-plaintext highlighter-rouge">CharList</code> from our Rust code? We could use <code class="language-plaintext highlighter-rouge">bindgen</code> and something-something. No, no and no.</p>
 
 <p>Instead, let’s make Rust think that <code class="language-plaintext highlighter-rouge">CharList</code> on its side is some struct of some (AOT-known) size without any meaningful fields. To do that we need to dump sizes of our structs and make them available in C:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#include &lt;stdio.h&gt;
-#include "structs.h"
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">"structs.h"</span><span class="cp">
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"CHAR_SIZE=%lu</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Char</span><span class="p">));</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"CHAR_LIST_SIZE=%lu</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">CharList</span><span class="p">));</span>
 
-int main()
-{
-    printf("CHAR_SIZE=%lu\n", sizeof(Char));
-    printf("CHAR_LIST_SIZE=%lu\n", sizeof(CharList));
-
-    return 0;
-}
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>We compile it, we run it, and we save its output to a text file called <code class="language-plaintext highlighter-rouge">sizes</code>, here’s what I have locally</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CHAR_SIZE=4
-CHAR_LIST_SIZE=16
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">CHAR_SIZE</span><span class="o">=</span><span class="mi">4</span>
+<span class="n">CHAR_LIST_SIZE</span><span class="o">=</span><span class="mi">16</span>
 </code></pre></div></div>
 
 <p>Now our Rust library has to be changed to work in 2 different modes:</p>
@@ -171,43 +171,43 @@ CHAR_LIST_SIZE=16
 
 <p>We a new feature to our <code class="language-plaintext highlighter-rouge">Cargo.toml</code>:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[features]
-default = []
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[features]</span>
+<span class="py">default</span> <span class="p">=</span> <span class="p">[]</span>
 
-# enables "external" mode, when structs have only size but no fields
-external = []
+<span class="c"># enables "external" mode, when structs have only size but no fields</span>
+<span class="py">external</span> <span class="p">=</span> <span class="p">[]</span>
 </code></pre></div></div>
 
 <p>and we create a build script:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#[cfg(feature = "external")]
-fn main() {
-    // read path of the `sizes` file from the ENV var
-    let sizes_filepath = env!("SIZES_FILEPATH");
-    // read `sizes` file
-    let sizes = std::fs::read_to_string(sizes_filepath)
-                  .expect("SIZES_FILEPATH has to point to a file");
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[cfg(feature</span> <span class="nd">=</span> <span class="s">"external"</span><span class="nd">)]</span>
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// read path of the `sizes` file from the ENV var</span>
+    <span class="k">let</span> <span class="n">sizes_filepath</span> <span class="o">=</span> <span class="nd">env!</span><span class="p">(</span><span class="s">"SIZES_FILEPATH"</span><span class="p">);</span>
+    <span class="c1">// read `sizes` file</span>
+    <span class="k">let</span> <span class="n">sizes</span> <span class="o">=</span> <span class="nn">std</span><span class="p">::</span><span class="nn">fs</span><span class="p">::</span><span class="nf">read_to_string</span><span class="p">(</span><span class="n">sizes_filepath</span><span class="p">)</span>
+                  <span class="nf">.expect</span><span class="p">(</span><span class="s">"SIZES_FILEPATH has to point to a file"</span><span class="p">);</span>
 
-    // parse it line by line and re-write to Rust
-    let sizes_rs = sizes
-        .lines()
-        .map(|line| {
-            let parts = line.split("=").collect::&lt;Vec&lt;_&gt;&gt;();
-            let name = parts[0];
-            let value = parts[1];
-            format!("pub(crate) const {}: usize = {};", name, value)
-        })
-        .collect::&lt;Vec&lt;_&gt;&gt;()
-        .join("\n");
+    <span class="c1">// parse it line by line and re-write to Rust</span>
+    <span class="k">let</span> <span class="n">sizes_rs</span> <span class="o">=</span> <span class="n">sizes</span>
+        <span class="nf">.lines</span><span class="p">()</span>
+        <span class="nf">.map</span><span class="p">(|</span><span class="n">line</span><span class="p">|</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="nf">.split</span><span class="p">(</span><span class="s">"="</span><span class="p">)</span><span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+            <span class="k">let</span> <span class="n">name</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+            <span class="k">let</span> <span class="n">value</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+            <span class="nd">format!</span><span class="p">(</span><span class="s">"pub(crate) const {}: usize = {};"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="p">})</span>
+        <span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;&gt;</span><span class="p">()</span>
+        <span class="nf">.join</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
 
-    // write it back to sizes.rs
-    std::fs::write("src/sizes.rs", sizes_rs).unwrap();
-}
+    <span class="c1">// write it back to sizes.rs</span>
+    <span class="nn">std</span><span class="p">::</span><span class="nn">fs</span><span class="p">::</span><span class="nf">write</span><span class="p">(</span><span class="s">"src/sizes.rs"</span><span class="p">,</span> <span class="n">sizes_rs</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="p">}</span>
 
-#[cfg(not(feature = "external"))]
-fn main() {
-    // dummy main for "native" mode when no work is needed
-}
+<span class="nd">#[cfg(not(feature</span> <span class="nd">=</span> <span class="s">"external"</span><span class="nd">))]</span>
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// dummy main for "native" mode when no work is needed</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>Note: also there should be a <code class="language-plaintext highlighter-rouge">rerun-if-changed</code> line, but for the sake of implicitly I ignore dependencies here.</p>
@@ -679,8 +679,8 @@ fn main() {
 
 <p>and so sizes are these:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CHAR_SIZE=8
-CHAR_LIST_SIZE=8
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">CHAR_SIZE</span><span class="o">=</span><span class="mi">8</span>
+<span class="n">CHAR_LIST_SIZE</span><span class="o">=</span><span class="mi">8</span>
 </code></pre></div></div>
 
 <p><code class="language-plaintext highlighter-rouge">VALUE</code> is simply an alias to <code class="language-plaintext highlighter-rouge">unsigned long</code> on x86_64, so blobs are aliases:</p>
@@ -809,7 +809,7 @@ CHAR_LIST_SIZE=8
 
 <p>Running tests with this options shows that we have a leak somewhere in</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Direct leak of 96 byte(s) in 1 object(s) allocated from:
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Direct leak of 96 byte(s) in 1 object(s) allocated from:
 ...
     #9 0x105905990 in char_list__push bindings.cpp:34
     #10 0x105904c04 in rust_foo::external::CharList::push::hf5bdccdb764b0c62 lib.rs:91
@@ -841,18 +841,18 @@ CHAR_LIST_SIZE=8
 
 <p>Of course, we need to add it to <code class="language-plaintext highlighter-rouge">bindings.h</code>:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#ifdef __cplusplus
-extern "C"
-{
-#endif
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifdef __cplusplus
+</span><span class="k">extern</span> <span class="s">"C"</span>
+<span class="p">{</span>
+<span class="cp">#endif
+</span>
+    <span class="kt">void</span> <span class="n">char__drop</span><span class="p">(</span><span class="n">Char_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="n">char_list__drop</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">);</span>
 
-    void char__drop(Char_BLOB *self);
-    void char_list__drop(CharList_BLOB *self);
-
-#ifdef __cplusplus
-}
-#endif
-</code></pre></div></div>
+<span class="cp">#ifdef __cplusplus
+</span><span class="p">}</span>
+<span class="cp">#endif
+</span></code></pre></div></div>
 
 <p>Here’s a C implementation (depending on your implementation <code class="language-plaintext highlighter-rouge">char__drop</code> could to something):</p>
 
@@ -1100,12 +1100,12 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
 
 <p>First I looked at what’s available in the world of Rust. The most popular LALR parser generator is called <a href="https://github.com/lalrpop/lalrpop"><code class="language-plaintext highlighter-rouge">lalrpop</code></a> and I was very about it at the very beginning, I think has a very, very beautiful API:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pub Term: i32 = {
-    &lt;n:Num&gt; =&gt; n,
-    "(" &lt;t:Term&gt; ")" =&gt; t,
-};
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="n">Term</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">&lt;</span><span class="n">n</span><span class="p">:</span><span class="nb">Num</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="n">n</span><span class="p">,</span>
+    <span class="s">"("</span> <span class="o">&lt;</span><span class="n">t</span><span class="p">:</span><span class="n">Term</span><span class="o">&gt;</span> <span class="s">")"</span> <span class="k">=&gt;</span> <span class="n">t</span><span class="p">,</span>
+<span class="p">};</span>
 
-Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
+<span class="nb">Num</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">s</span><span class="p">:</span><span class="s">r"[0-9]+"</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="nn">i32</span><span class="p">::</span><span class="nf">from_str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
 </code></pre></div></div>
 
 <p>Plus, it’s written in Rust, so to compile a grammar that is based on it you don’t anything except Rust (that you need anyway to compile something written in Rust, right?).</p>
@@ -1120,9 +1120,10 @@ Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
 
     <p>I guess it’s possible to emulate them by introducing rules like</p>
 
-    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bar_with_mid_rule: bar { /* do something */ }
+    <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code> bar_with_mid_rule: bar { /* do something */ }
  foo: bar_with_mid_rule baz { /* reduce */ }
 </code></pre></div>    </div>
+
     <p>but then I have no idea how such grammar can be maintained.</p>
   </li>
   <li>Compilation speed. I have got ~20% of Ruby grammar backported and noticed a huge performance degradation.</li>
@@ -1270,7 +1271,7 @@ Num: i32 = &lt;s:r"[0-9]+"&gt; =&gt; i32::from_str(s).unwrap();
 
 <p>Currently all “values” that copy from source code (like numeric/string literals, token values) are copied into tokens and AST nodes:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"42"
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"42"
 
 tokens:
     Token { name: "tINTEGER", value: "42", loc: 0...2 }
@@ -1291,7 +1292,7 @@ nodes:
 
 <p>The first variant is a reference, the latter is owned. Total value (of both token and AST node) could be just a vector of such enums, and if you parse a string <code class="language-plaintext highlighter-rouge">"foo\n"</code> you’ll get</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tokens:
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tokens:
     Token {
         name: "tSTRING_CONTENT",
         value: vec![
@@ -3713,11 +3714,11 @@ UncaughtThrowError (uncaught throw :x)
 <span class="nb">puts</span> <span class="n">s</span><span class="p">.</span><span class="nf">bytes</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ruby test.rb
-ruby 2.5.1p57 (2018-03-29 revision 63029) [x86_64-darwin17]
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby test.rb
+ruby 2.5.1p57 <span class="o">(</span>2018-03-29 revision 63029<span class="o">)</span> <span class="o">[</span>x86_64-darwin17]
 UTF-8
-false
-255
+<span class="nb">false
+</span>255
 </code></pre></div></div>
 
 <p>In this case string is not a “real” string. This bytes sequence is simply invalid for UTF-8 (in UTF-8 any codepoint &gt; 127 works as a flag that indicates that the char is multi-byte and the next char (or chars) defines a real value), but Ruby allows it. It’s not even a String, it’s just a container of bytes. And for some reason Ruby allows you to pack an arbitrary sequence of bytes into a string, and if you want to ask “Is it valid?” you have a (I think) conceptually wrong <code class="language-plaintext highlighter-rouge">String#valid_encoding?</code> method. Maybe the right way to solve it would be to:</p>
@@ -3781,17 +3782,17 @@ false
 
 <p>Looks valid, right? We pass a positional argument <code class="language-plaintext highlighter-rouge">1</code> and a block that returns <code class="language-plaintext highlighter-rouge">2</code> to the method called <code class="language-plaintext highlighter-rouge">[]</code>. The method should print <code class="language-plaintext highlighter-rouge">3</code>. Let’s run it with Ruby 2.5:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ruby -v test.rb
-2.5.1p57 (2018-03-29 revision 63029) [x86_64-darwin17]
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby <span class="nt">-v</span> test.rb
+2.5.1p57 <span class="o">(</span>2018-03-29 revision 63029<span class="o">)</span> <span class="o">[</span>x86_64-darwin17]
 3
 </code></pre></div></div>
 
 <p><code class="language-plaintext highlighter-rouge">1 + 2 == 3</code>, everything is fine. Let’s try 2.4:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ruby -v test.rb
-ruby 2.4.4p296 (2018-03-28 revision 63013) [x86_64-darwin17]
-test.rb:5: syntax error, unexpected { arg, expecting end-of-input
-self[1] { 2 }
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby <span class="nt">-v</span> test.rb
+ruby 2.4.4p296 <span class="o">(</span>2018-03-28 revision 63013<span class="o">)</span> <span class="o">[</span>x86_64-darwin17]
+test.rb:5: syntax error, unexpected <span class="o">{</span> arg, expecting end-of-input
+self[1] <span class="o">{</span> 2 <span class="o">}</span>
          ^
 </code></pre></div></div>
 
@@ -4589,6 +4590,7 @@ so there’s always a root object in marshalled string (which is actually placed
 <span class="n">get_sequence</span><span class="p">[</span><span class="mi">120</span><span class="p">]</span>
  <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">125</span><span class="p">]</span>
 </code></pre></div></div>
+
 <p>In this case <code class="language-plaintext highlighter-rouge">result = byte - 5</code> and it covers small positive numbers.</p>
 
 <p><strong>The third case</strong>:</p>
@@ -5333,7 +5335,8 @@ from the server without any serialization on the client/server.</p>
 <h1 id="configuration">Configuration</h1>
 
 <p>My configuration is the following:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># [mysqld] section
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># [mysqld] section
 # the port number to bind to for read requests
 loose_handlersocket_port = 9998
 # the port number to bind to for write requests
@@ -5353,17 +5356,19 @@ open_files_limit = 65535
 </code></pre></div></div>
 
 <p>You should see a lot of rows like:</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>           Id: 1
-         User: system user
-         Host: connecting host
-           db: NULL
-      Command: Connect
-         Time: NULL
-        State: handlersocket: mode=rd, 0 conns, 0 active
-         Info: NULL
-    Rows_sent: 0
-Rows_examined: 0
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code>           <span class="n">Id</span><span class="p">:</span> <span class="mi">1</span>
+         <span class="k">User</span><span class="p">:</span> <span class="k">system</span> <span class="k">user</span>
+         <span class="k">Host</span><span class="p">:</span> <span class="n">connecting</span> <span class="k">host</span>
+           <span class="n">db</span><span class="p">:</span> <span class="k">NULL</span>
+      <span class="n">Command</span><span class="p">:</span> <span class="k">Connect</span>
+         <span class="nb">Time</span><span class="p">:</span> <span class="k">NULL</span>
+        <span class="k">State</span><span class="p">:</span> <span class="n">handlersocket</span><span class="p">:</span> <span class="k">mode</span><span class="o">=</span><span class="n">rd</span><span class="p">,</span> <span class="mi">0</span> <span class="n">conns</span><span class="p">,</span> <span class="mi">0</span> <span class="n">active</span>
+         <span class="n">Info</span><span class="p">:</span> <span class="k">NULL</span>
+    <span class="n">Rows_sent</span><span class="p">:</span> <span class="mi">0</span>
+<span class="n">Rows_examined</span><span class="p">:</span> <span class="mi">0</span>
 </code></pre></div></div>
+
 <p>which means that HS daemon is up and running.</p>
 
 <h1 id="simple-queries">Simple queries</h1>
@@ -5431,7 +5436,7 @@ Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
 
 <p>The most interesting part. To run benchmarks locally, clone the gem repository on <a href="https://github.com/iliabylich/handlersocket-ruby">GitHub</a> and run <code class="language-plaintext highlighter-rouge">rake benchmark</code>. It compares <code class="language-plaintext highlighter-rouge">mysql2</code> gem to Ruby-based and C-based implementations. Here are my results:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Calculating -------------------------------------
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Calculating -------------------------------------
              pure HS     2.000  i/100ms
               ext HS     3.149k i/100ms
               mysql2   669.000  i/100ms
@@ -5935,6 +5940,7 @@ Comparison:
 </ul>
 
 <p>First class for wrapping is definitely an <code class="language-plaintext highlighter-rouge">App</code>:</p>
+
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Application</span>
   <span class="kp">include</span> <span class="no">Native</span>
 
@@ -5953,6 +5959,7 @@ Comparison:
   <span class="k">end</span>
 <span class="k">end</span>
 </code></pre></div></div>
+
 <p>So, we have a class called <code class="language-plaintext highlighter-rouge">Application</code> that wraps some native JavaScript object and has a ruby-method <code class="language-plaintext highlighter-rouge">game</code> that calls JavaScript-method <code class="language-plaintext highlighter-rouge">game</code> and wraps it using <code class="language-plaintext highlighter-rouge">Game</code> class (see below). As a bonus, we have a class-method <code class="language-plaintext highlighter-rouge">current</code> that returns wrapped <code class="language-plaintext highlighter-rouge">currentApplication</code>.</p>
 
 <p>The next class is a <code class="language-plaintext highlighter-rouge">Game</code>:</p>
@@ -6298,6 +6305,7 @@ Comparison:
   <span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">Thanks for waiting 1 second</span><span class="dl">'</span><span class="p">);</span>
 <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
 </code></pre></div></div>
+
 <p>This code actually does nothing, but it’s a demonstration of how asynchronous stuff works.</p>
 
 <h1 id="but-capybara-waits-for-my-ajax-requests">But… Capybara waits for my AJAX requests</h1>
@@ -6308,6 +6316,7 @@ Comparison:
   <span class="n">expect</span><span class="p">(</span><span class="n">page</span><span class="p">).</span><span class="nf">to</span> <span class="n">have_text</span><span class="p">(</span><span class="s1">'Hey'</span><span class="p">)</span>
 <span class="k">end</span>
 </code></pre></div></div>
+
 <p>and at the moment of running this expectation your page does not have this text <strong>but receives it a second later</strong> - the test will be green. Why?</p>
 
 <p>Capybara has a setting called <code class="language-plaintext highlighter-rouge">default_wait_time</code> (was changed to <code class="language-plaintext highlighter-rouge">default_max_wait_time</code>, but is still acceptable) which is 2 seconds by default. <a href="https://github.com/jnicklas/capybara/blob/master/lib/capybara/node/base.rb#L76">Here is how Capybara uses it</a>.</p>
@@ -6778,7 +6787,7 @@ You need to specify the directory with templates:</p>
 
 <p>Which breaks it…</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Apipie: Can not resolve resource UsersDoc name.
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Apipie: Can not resolve resource UsersDoc name.
 </code></pre></div></div>
 
 <p>Yes, because our resource is <code class="language-plaintext highlighter-rouge">UsersController</code>. The error happens in the following lines in Apipie source code:</p>

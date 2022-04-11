@@ -177,11 +177,11 @@
 <span class="nb">puts</span> <span class="n">s</span><span class="p">.</span><span class="nf">bytes</span>
 </code></pre></div></div>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ruby test.rb
-ruby 2.5.1p57 (2018-03-29 revision 63029) [x86_64-darwin17]
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby test.rb
+ruby 2.5.1p57 <span class="o">(</span>2018-03-29 revision 63029<span class="o">)</span> <span class="o">[</span>x86_64-darwin17]
 UTF-8
-false
-255
+<span class="nb">false
+</span>255
 </code></pre></div></div>
 
 <p>In this case string is not a “real” string. This bytes sequence is simply invalid for UTF-8 (in UTF-8 any codepoint &gt; 127 works as a flag that indicates that the char is multi-byte and the next char (or chars) defines a real value), but Ruby allows it. It’s not even a String, it’s just a container of bytes. And for some reason Ruby allows you to pack an arbitrary sequence of bytes into a string, and if you want to ask “Is it valid?” you have a (I think) conceptually wrong <code class="language-plaintext highlighter-rouge">String#valid_encoding?</code> method. Maybe the right way to solve it would be to:</p>
@@ -245,17 +245,17 @@ false
 
 <p>Looks valid, right? We pass a positional argument <code class="language-plaintext highlighter-rouge">1</code> and a block that returns <code class="language-plaintext highlighter-rouge">2</code> to the method called <code class="language-plaintext highlighter-rouge">[]</code>. The method should print <code class="language-plaintext highlighter-rouge">3</code>. Let’s run it with Ruby 2.5:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ruby -v test.rb
-2.5.1p57 (2018-03-29 revision 63029) [x86_64-darwin17]
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby <span class="nt">-v</span> test.rb
+2.5.1p57 <span class="o">(</span>2018-03-29 revision 63029<span class="o">)</span> <span class="o">[</span>x86_64-darwin17]
 3
 </code></pre></div></div>
 
 <p><code class="language-plaintext highlighter-rouge">1 + 2 == 3</code>, everything is fine. Let’s try 2.4:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ruby -v test.rb
-ruby 2.4.4p296 (2018-03-28 revision 63013) [x86_64-darwin17]
-test.rb:5: syntax error, unexpected { arg, expecting end-of-input
-self[1] { 2 }
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>ruby <span class="nt">-v</span> test.rb
+ruby 2.4.4p296 <span class="o">(</span>2018-03-28 revision 63013<span class="o">)</span> <span class="o">[</span>x86_64-darwin17]
+test.rb:5: syntax error, unexpected <span class="o">{</span> arg, expecting end-of-input
+self[1] <span class="o">{</span> 2 <span class="o">}</span>
          ^
 </code></pre></div></div>
 

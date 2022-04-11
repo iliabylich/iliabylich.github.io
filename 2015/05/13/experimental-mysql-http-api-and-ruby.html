@@ -290,7 +290,7 @@ mysql&gt; <span class="nb">exit</span>
 
 <p>Once plugin is enabled, some MySQL variables become accessible:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; show variables like 'myhttp_%';
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; show variables like 'myhttp_%';
 +----------------------------------+------------------------------+
 | Variable_name                    | Value                        |
 +----------------------------------+------------------------------+
@@ -298,7 +298,7 @@ mysql&gt; <span class="nb">exit</span>
 | myhttp_basic_auth_user_passwd    | basic_auth_passwd            |
 | myhttp_crud_url_prefix           | /crud/                       |
 | myhttp_default_db                | myhttp                       |
-| myhttp_default_mysql_user_host   | 127.0.0.1                      |
+| myhttp_default_mysql_user_host   | 127.0.0.1                    |
 | myhttp_default_mysql_user_name   | username                     |
 | myhttp_default_mysql_user_passwd | userpass                     |
 | myhttp_document_url_prefix       | /doc/                        |
@@ -329,21 +329,21 @@ mysql&gt; <span class="nb">exit</span>
 
 <p>Let’s try it!</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl -v localhost:8080
-&gt; GET / HTTP/1.1
-&gt; User-Agent: curl/7.35.0
-&gt; Host: 127.0.0.1:8080
-&gt; Accept: */*
-&gt;
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">-v</span> localhost:8080
+<span class="o">&gt;</span> GET / HTTP/1.1
+<span class="o">&gt;</span> User-Agent: curl/7.35.0
+<span class="o">&gt;</span> Host: 127.0.0.1:8080
+<span class="o">&gt;</span> Accept: <span class="k">*</span>/<span class="k">*</span>
+<span class="o">&gt;</span>
 &lt; HTTP/1.1 404 Not Found
 &lt; Cache-control: must-revalidate
 &lt; Connection: Keep-Alive
 &lt; Pragma: no-cache
-* Server MyHTTP 1.0.0-alpha is not blacklisted
+<span class="k">*</span> Server MyHTTP 1.0.0-alpha is not blacklisted
 &lt; Server: MyHTTP 1.0.0-alpha
 &lt; Content-Length: 36
 &lt;
-{"error":404, "message":"Not Found"}
+<span class="o">{</span><span class="s2">"error"</span>:404, <span class="s2">"message"</span>:<span class="s2">"Not Found"</span><span class="o">}</span>
 </code></pre></div></div>
 
 <p>Well, at least it returns something (be patient, this feature is experimental)</p>
@@ -352,14 +352,14 @@ mysql&gt; <span class="nb">exit</span>
 
 <p>First of all, we need to create MySQL user and use his credentials in configuration file.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; CREATE USER 'username'@'%' IDENTIFIED BY 'userpass';
-mysql&gt; GRANT ALL PRIVILEGES ON * . * TO 'username'@'%';
-mysql&gt; FLUSH PRIVILEGES;
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">CREATE</span> <span class="k">USER</span> <span class="s1">'username'</span><span class="o">@</span><span class="s1">'%'</span> <span class="n">IDENTIFIED</span> <span class="k">BY</span> <span class="s1">'userpass'</span><span class="p">;</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="k">GRANT</span> <span class="k">ALL</span> <span class="k">PRIVILEGES</span> <span class="k">ON</span> <span class="o">*</span> <span class="p">.</span> <span class="o">*</span> <span class="k">TO</span> <span class="s1">'username'</span><span class="o">@</span><span class="s1">'%'</span><span class="p">;</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="n">FLUSH</span> <span class="k">PRIVILEGES</span><span class="p">;</span>
 </code></pre></div></div>
 
 <p>Then we can change plugin’s settings in <code class="language-plaintext highlighter-rouge">/etc/my.cnf</code> to something like:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[mysqld]
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[mysqld]
 myhttp_default_db = myhttp
 myhttp_default_mysql_user_name = username
 myhttp_default_mysql_user_passwd = userpass
@@ -370,8 +370,8 @@ myhttp_basic_auth_user_passwd = basic_auth_passwd
 
 <p>Here is how it should look using curl:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl --user basic_auth_user:basic_auth_passwd --url http://localhost:8080/crud/myhttp/simple/1
- {"id":"1","col_a":"Hello"}
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl <span class="nt">--user</span> basic_auth_user:basic_auth_passwd <span class="nt">--url</span> http://localhost:8080/crud/myhttp/simple/1
+ <span class="o">{</span><span class="s2">"id"</span>:<span class="s2">"1"</span>,<span class="s2">"col_a"</span>:<span class="s2">"Hello"</span><span class="o">}</span>
 </code></pre></div></div>
 
 <h1 id="connecting-with-ruby">Connecting with Ruby</h1>
@@ -387,7 +387,7 @@ we need something like <a href="https://github.com/rails/activeresource"><code c
 
 <p>Install it:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem install activeresource
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gem <span class="nb">install </span>activeresource
 </code></pre></div></div>
 
 <p>And use:</p>
@@ -420,7 +420,7 @@ Without this we can’t even create a single record in the database!</p>
 
 <p>Let’s check for alternatives. <a href="https://github.com/remiprev/her"><code class="language-plaintext highlighter-rouge">Her</code></a> is a popular (according to stars on GitHub it’s even more popular then <code class="language-plaintext highlighter-rouge">ActiveResource</code>) alternative with a nice syntax sugar. Here is an example:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ gem install her
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>gem <span class="nb">install </span>her
 </code></pre></div></div>
 
 <div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">require</span> <span class="s1">'her'</span>
@@ -475,7 +475,7 @@ The thing is that body should be JSON-encoded, here is my middleware that encode
 
 <p>And finally it works! The only thing that I personally don’t like in design of this API is that both <code class="language-plaintext highlighter-rouge">INSERT</code> and <code class="language-plaintext highlighter-rouge">UPDATE</code> have to be called using PUT because it produces query:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>REPLACE INTO db.table SET ..., pk = ...
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">REPLACE</span> <span class="k">INTO</span> <span class="n">db</span><span class="p">.</span><span class="k">table</span> <span class="k">SET</span> <span class="p">...,</span> <span class="n">pk</span> <span class="o">=</span> <span class="p">...</span>
 </code></pre></div></div>
 
 <p>That’s why we have to pass id, <code class="language-plaintext highlighter-rouge">create</code> and <code class="language-plaintext highlighter-rouge">update</code> actions are combined into single <code class="language-plaintext highlighter-rouge">replace</code> (and I don’t see any explanation for that).</p>
@@ -502,12 +502,12 @@ The thing is that body should be JSON-encoded, here is my middleware that encode
 
 <p>Here is how it looks it MySQL:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; select * from json_types\G
-*************************** 1. row ***************************
-   _id: 1
-  _rev: 1
-_extra: {"json_null": null, "json_string": "string", "json_number": 123.456, "json_bool": true}
-1 row in set (0.00 sec)
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mysql</span><span class="o">&gt;</span> <span class="k">select</span> <span class="o">*</span> <span class="k">from</span> <span class="n">json_types</span><span class="err">\</span><span class="k">G</span>
+<span class="o">***************************</span> <span class="mi">1</span><span class="p">.</span> <span class="k">row</span> <span class="o">***************************</span>
+   <span class="n">_id</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="n">_rev</span><span class="p">:</span> <span class="mi">1</span>
+<span class="n">_extra</span><span class="p">:</span> <span class="p">{</span><span class="nv">"json_null"</span><span class="p">:</span> <span class="k">null</span><span class="p">,</span> <span class="nv">"json_string"</span><span class="p">:</span> <span class="nv">"string"</span><span class="p">,</span> <span class="nv">"json_number"</span><span class="p">:</span> <span class="mi">123</span><span class="p">.</span><span class="mi">456</span><span class="p">,</span> <span class="nv">"json_bool"</span><span class="p">:</span> <span class="k">true</span><span class="p">}</span>
+<span class="mi">1</span> <span class="k">row</span> <span class="k">in</span> <span class="k">set</span> <span class="p">(</span><span class="mi">0</span><span class="p">.</span><span class="mi">00</span> <span class="n">sec</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>CouchDB has similar interface (HTTP API, schema-less documents, MVCC) but it provides one core feature of all databases: ability to run queries. You can’t run any query when your data is serialized (no, I don’t know what is <code class="language-plaintext highlighter-rouge">where _rev LIKE '%"some":json_structure%'"</code>). Moreover MVCC for this table is not real :) It stores only latest revision.</p>
