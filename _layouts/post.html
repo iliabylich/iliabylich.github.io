@@ -15,36 +15,31 @@ layout: default
   {{ content }}
 </div>
 
-{% if page.comments %}
-  <script src="https://giscus.app/client.js"
-          data-repo="iliabylich/iliabylich.github.io"
-          data-repo-id="R_kgDOHHRsoQ"
-          data-category="Q&A"
-          data-category-id="DIC_kwDOHHRsoc4COyUi"
-          data-mapping="pathname"
-          data-reactions-enabled="1"
-          data-emit-metadata="0"
-          data-input-position="top"
-          data-theme="light"
-          data-lang="en"
-          data-loading="lazy"
-          crossorigin="anonymous"
-          async>
-  </script>
-{% endif %}
-
 <div class="related">
   <h2>Related Posts</h2>
   <ul class="related-posts">
     {% for post in site.related_posts limit:3 %}
-      <li>
-        <h3>
-          <a href="{{ post.url }}">
-            {{ post.title }}
-            <small>{{ post.date | date_to_string }}</small>
-          </a>
-        </h3>
-      </li>
+    <li>
+      <h3>
+        <a href="{{ post.url }}">
+          {{ post.title }}
+          <small>{{ post.date | date_to_string }}</small>
+        </a>
+      </h3>
+    </li>
     {% endfor %}
   </ul>
 </div>
+
+{% if page.comments %}
+<iframe src="https://ilyabyli.ch/commentary/index?post_id={{ page.slug }}" frameborder="0" scrolling="no" width="100%">
+</iframe>
+
+<script type="text/javascript">
+  window.addEventListener("message", ({ data }) => {
+    if (data.type === "resize") {
+      document.querySelector("iframe").style.height = `${data.height}px`;
+    }
+  })
+</script>
+{% endif %}
