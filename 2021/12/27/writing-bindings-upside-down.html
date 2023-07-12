@@ -102,7 +102,7 @@
 
     </nav>
 
-    <p>&copy; 2022. All rights reserved.</p>
+    <p>&copy; 2023. All rights reserved.</p>
   </div>
 </div>
 
@@ -1013,7 +1013,7 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
 <span class="p">{</span>
     <span class="c1">// noop, Char has no allocations</span>
 <span class="p">}</span>
-<span class="kt">void</span> <span class="nf">char_list__drop</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span>
+<span class="kt">void</span> <span class="n">char_list__drop</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="p">((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;~</span><span class="n">vector</span><span class="p">();</span>
 <span class="p">}</span>
@@ -1154,57 +1154,52 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
 
 </div>
 
-
-  <script src="https://giscus.app/client.js"
-          data-repo="iliabylich/iliabylich.github.io"
-          data-repo-id="R_kgDOHHRsoQ"
-          data-category="Q&A"
-          data-category-id="DIC_kwDOHHRsoc4COyUi"
-          data-mapping="pathname"
-          data-reactions-enabled="1"
-          data-emit-metadata="0"
-          data-input-position="top"
-          data-theme="light"
-          data-lang="en"
-          data-loading="lazy"
-          crossorigin="anonymous"
-          async>
-  </script>
-
-
 <div class="related">
   <h2>Related Posts</h2>
   <ul class="related-posts">
     
-      <li>
-        <h3>
-          <a href="/2020/11/22/lib-ruby-parser.html">
-            lib-ruby-parser
-            <small>22 Nov 2020</small>
-          </a>
-        </h3>
-      </li>
+    <li>
+      <h3>
+        <a href="/2020/11/22/lib-ruby-parser.html">
+          lib-ruby-parser
+          <small>22 Nov 2020</small>
+        </a>
+      </h3>
+    </li>
     
-      <li>
-        <h3>
-          <a href="/2020/01/25/evaluating-ruby-in-ruby.html">
-            Evaluating Ruby in Ruby
-            <small>25 Jan 2020</small>
-          </a>
-        </h3>
-      </li>
+    <li>
+      <h3>
+        <a href="/2020/01/25/evaluating-ruby-in-ruby.html">
+          Evaluating Ruby in Ruby
+          <small>25 Jan 2020</small>
+        </a>
+      </h3>
+    </li>
     
-      <li>
-        <h3>
-          <a href="/2018/07/18/my-favorite-parts-of-ruby.html">
-            My favorite parts of Ruby
-            <small>18 Jul 2018</small>
-          </a>
-        </h3>
-      </li>
+    <li>
+      <h3>
+        <a href="/2018/07/18/my-favorite-parts-of-ruby.html">
+          My favorite parts of Ruby
+          <small>18 Jul 2018</small>
+        </a>
+      </h3>
+    </li>
     
   </ul>
 </div>
+
+
+<iframe src="https://ilyabyli.ch/commentary/index?post_id=writing-bindings-upside-down" frameborder="0" scrolling="no" width="100%">
+</iframe>
+
+<script type="text/javascript">
+  window.addEventListener("message", ({ data }) => {
+    if (data.type === "resize") {
+      document.querySelector("iframe").style.height = `${data.height}px`;
+    }
+  })
+</script>
+
 
     </div>
   </body>
