@@ -50,12 +50,14 @@ RSpec
 Redis
 RubySpec
 SSL
+SQL's
 TLV
 Travis
 UI
 UTF
 V8
 VM
+VM's
 VMs
 Valgrind
 WASM
@@ -65,6 +67,7 @@ WebKit
 WebSQL
 YAML
 YARV
+YARV's
 arity
 backport
 backported
