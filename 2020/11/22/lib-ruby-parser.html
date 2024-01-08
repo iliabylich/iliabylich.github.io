@@ -102,7 +102,7 @@
 
     </nav>
 
-    <p>&copy; 2023. All rights reserved.</p>
+    <p>&copy; 2024. All rights reserved.</p>
   </div>
 </div>
 
@@ -220,11 +220,11 @@
 <p>First I looked at what’s available in the world of Rust. The most popular LALR parser generator is called <a href="https://github.com/lalrpop/lalrpop"><code class="language-plaintext highlighter-rouge">lalrpop</code></a> and I was very about it at the very beginning, I think has a very, very beautiful API:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="n">Term</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="o">&lt;</span><span class="n">n</span><span class="p">:</span><span class="nb">Num</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="n">n</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="n">n</span><span class="p">:</span><span class="n">Num</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="n">n</span><span class="p">,</span>
     <span class="s">"("</span> <span class="o">&lt;</span><span class="n">t</span><span class="p">:</span><span class="n">Term</span><span class="o">&gt;</span> <span class="s">")"</span> <span class="k">=&gt;</span> <span class="n">t</span><span class="p">,</span>
 <span class="p">};</span>
 
-<span class="nb">Num</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">s</span><span class="p">:</span><span class="s">r"[0-9]+"</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="nn">i32</span><span class="p">::</span><span class="nf">from_str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="n">Num</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">s</span><span class="p">:</span><span class="s">r"[0-9]+"</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="nn">i32</span><span class="p">::</span><span class="nf">from_str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
 </code></pre></div></div>
 
 <p>Plus, it’s written in Rust, so to compile a grammar that is based on it you don’t anything except Rust (that you need anyway to compile something written in Rust, right?).</p>
@@ -266,7 +266,7 @@
     <span class="nf">NodeList</span><span class="p">(</span><span class="n">NodeList</span><span class="p">),</span>
     <span class="nf">Bool</span><span class="p">(</span><span class="nb">bool</span><span class="p">),</span>
     <span class="nf">MaybeStrTerm</span><span class="p">(</span><span class="n">MaybeStrTerm</span><span class="p">),</span>
-    <span class="nf">Num</span><span class="p">(</span><span class="nb">Num</span><span class="p">),</span>
+    <span class="nf">Num</span><span class="p">(</span><span class="n">Num</span><span class="p">),</span>
 
     <span class="cm">/* For custom superclass rule */</span>
     <span class="nf">Superclass</span><span class="p">(</span><span class="n">Superclass</span><span class="p">),</span>
@@ -531,7 +531,8 @@ nodes:
 </div>
 
 
-<iframe src="https://commentary.ilyabylich.me/commentary/index?post_id=lib-ruby-parser" frameborder="0" scrolling="no" width="100%">
+<iframe src="https://commentary.ilyabylich.me/commentary/index?post_id=lib-ruby-parser" frameborder="0" scrolling="no"
+  width="100%">
 </iframe>
 
 <script type="text/javascript">
@@ -541,7 +542,6 @@ nodes:
     }
   })
 </script>
-
 
     </div>
   </body>

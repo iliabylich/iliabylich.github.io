@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="https://iliabylich.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://iliabylich.github.io/" rel="alternate" type="text/html" /><updated>2023-11-19T16:33:54+00:00</updated><id>https://iliabylich.github.io/feed.xml</id><title type="html">Ilya Bylich</title><subtitle>I&apos;m a Ruby/Rust developer, sometimes I write long technical stories</subtitle><entry><title type="html">Writing bindings upside down</title><link href="https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down.html" rel="alternate" type="text/html" title="Writing bindings upside down" /><published>2021-12-27T21:00:00+00:00</published><updated>2021-12-27T21:00:00+00:00</updated><id>https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down</id><content type="html" xml:base="https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down.html"><![CDATA[<p>Quite a long time ago I started writing C/C++/Ruby/Node.js/WASM bindings so I could call <a href="https://github.com/lib-ruby-parser/lib-ruby-parser">my Rust project</a> from those languages. It is a Ruby language parser.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="https://iliabylich.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://iliabylich.github.io/" rel="alternate" type="text/html" /><updated>2024-01-08T15:38:24+00:00</updated><id>https://iliabylich.github.io/feed.xml</id><title type="html">Ilya Bylich</title><subtitle>I&apos;m a Ruby/Rust developer, sometimes I write long technical stories</subtitle><entry><title type="html">Writing bindings upside down</title><link href="https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down.html" rel="alternate" type="text/html" title="Writing bindings upside down" /><published>2021-12-27T21:00:00+00:00</published><updated>2021-12-27T21:00:00+00:00</updated><id>https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down</id><content type="html" xml:base="https://iliabylich.github.io/2021/12/27/writing-bindings-upside-down.html"><![CDATA[<p>Quite a long time ago I started writing C/C++/Ruby/Node.js/WASM bindings so I could call <a href="https://github.com/lib-ruby-parser/lib-ruby-parser">my Rust project</a> from those languages. It is a Ruby language parser.</p>
 
 <p>I tried multiple ways and found one that is very (VERY) controversial, but I think it deserves it’s own article.</p>
 
@@ -613,19 +613,19 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
         <span class="k">return</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
     <span class="p">}</span>
 
-    <span class="n">CharList_BLOB</span> <span class="n">char_list__new</span><span class="p">()</span> <span class="k">noexcept</span>
+    <span class="n">CharList_BLOB</span> <span class="nf">char_list__new</span><span class="p">()</span> <span class="k">noexcept</span>
     <span class="p">{</span>
         <span class="k">return</span> <span class="n">PACK_CharList</span><span class="p">(</span><span class="n">CharList</span><span class="p">());</span>
     <span class="p">}</span>
-    <span class="kt">void</span> <span class="n">char_list__push</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">Char_BLOB</span> <span class="n">item</span><span class="p">)</span> <span class="k">noexcept</span>
+    <span class="kt">void</span> <span class="nf">char_list__push</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">Char_BLOB</span> <span class="n">item</span><span class="p">)</span> <span class="k">noexcept</span>
     <span class="p">{</span>
         <span class="p">((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">push_back</span><span class="p">(</span><span class="n">UNPACK_Char</span><span class="p">(</span><span class="n">item</span><span class="p">));</span>
     <span class="p">}</span>
-    <span class="kt">size_t</span> <span class="n">char_list__len</span><span class="p">(</span><span class="k">const</span> <span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span> <span class="k">noexcept</span>
+    <span class="kt">size_t</span> <span class="nf">char_list__len</span><span class="p">(</span><span class="k">const</span> <span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span> <span class="k">noexcept</span>
     <span class="p">{</span>
         <span class="k">return</span> <span class="p">((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span>
     <span class="p">}</span>
-    <span class="n">Char_BLOB</span> <span class="n">char_list__at</span><span class="p">(</span><span class="k">const</span> <span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">idx</span><span class="p">)</span> <span class="k">noexcept</span>
+    <span class="n">Char_BLOB</span> <span class="nf">char_list__at</span><span class="p">(</span><span class="k">const</span> <span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">idx</span><span class="p">)</span> <span class="k">noexcept</span>
     <span class="p">{</span>
         <span class="k">return</span> <span class="n">PACK_Char</span><span class="p">(((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">));</span>
     <span class="p">}</span>
@@ -876,7 +876,7 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
 <span class="p">{</span>
     <span class="c1">// noop, Char has no allocations</span>
 <span class="p">}</span>
-<span class="kt">void</span> <span class="n">char_list__drop</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span>
+<span class="kt">void</span> <span class="nf">char_list__drop</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="p">((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;~</span><span class="n">vector</span><span class="p">();</span>
 <span class="p">}</span>
@@ -1101,11 +1101,11 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
 <p>First I looked at what’s available in the world of Rust. The most popular LALR parser generator is called <a href="https://github.com/lalrpop/lalrpop"><code class="language-plaintext highlighter-rouge">lalrpop</code></a> and I was very about it at the very beginning, I think has a very, very beautiful API:</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="n">Term</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="o">&lt;</span><span class="n">n</span><span class="p">:</span><span class="nb">Num</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="n">n</span><span class="p">,</span>
+    <span class="o">&lt;</span><span class="n">n</span><span class="p">:</span><span class="n">Num</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="n">n</span><span class="p">,</span>
     <span class="s">"("</span> <span class="o">&lt;</span><span class="n">t</span><span class="p">:</span><span class="n">Term</span><span class="o">&gt;</span> <span class="s">")"</span> <span class="k">=&gt;</span> <span class="n">t</span><span class="p">,</span>
 <span class="p">};</span>
 
-<span class="nb">Num</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">s</span><span class="p">:</span><span class="s">r"[0-9]+"</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="nn">i32</span><span class="p">::</span><span class="nf">from_str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+<span class="n">Num</span><span class="p">:</span> <span class="nb">i32</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">s</span><span class="p">:</span><span class="s">r"[0-9]+"</span><span class="o">&gt;</span> <span class="k">=&gt;</span> <span class="nn">i32</span><span class="p">::</span><span class="nf">from_str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
 </code></pre></div></div>
 
 <p>Plus, it’s written in Rust, so to compile a grammar that is based on it you don’t anything except Rust (that you need anyway to compile something written in Rust, right?).</p>
@@ -1147,7 +1147,7 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
     <span class="nf">NodeList</span><span class="p">(</span><span class="n">NodeList</span><span class="p">),</span>
     <span class="nf">Bool</span><span class="p">(</span><span class="nb">bool</span><span class="p">),</span>
     <span class="nf">MaybeStrTerm</span><span class="p">(</span><span class="n">MaybeStrTerm</span><span class="p">),</span>
-    <span class="nf">Num</span><span class="p">(</span><span class="nb">Num</span><span class="p">),</span>
+    <span class="nf">Num</span><span class="p">(</span><span class="n">Num</span><span class="p">),</span>
 
     <span class="cm">/* For custom superclass rule */</span>
     <span class="nf">Superclass</span><span class="p">(</span><span class="n">Superclass</span><span class="p">),</span>
@@ -6249,7 +6249,7 @@ Comparison:
 <p>When you write integration tests sometimes you need to run asynchronous JavaScript in context of your page and get a response back to Ruby. Here is an example from my current project: the client part of our application supports offline mode, so we store the data in WebSQL and sync it with server once connection is restored. The API of WebSQL is asynchronous, so we have a result of execution in some provided callback:</p>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// something like</span>
-<span class="nx">WebSQLWrapper</span><span class="p">.</span><span class="nx">execute</span><span class="p">(</span><span class="dl">'</span><span class="s1">select 1</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
+<span class="nx">WebSQLWrapper</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="dl">'</span><span class="s1">select 1</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// result of execution becomes available after some time</span>
 <span class="p">});</span>
 </code></pre></div></div>
@@ -6301,8 +6301,8 @@ Comparison:
 
 <p>Here is a simple of the code that returns it’s response asynchronously:</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">Thanks for waiting 1 second</span><span class="dl">'</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nf">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">Thanks for waiting 1 second</span><span class="dl">'</span><span class="p">);</span>
 <span class="p">},</span> <span class="mi">1000</span><span class="p">);</span>
 </code></pre></div></div>
 
@@ -6442,9 +6442,9 @@ You need to specify the directory with templates:</p>
 <p>Let’s create our template for this command:</p>
 
 <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// spec/fixtures/async_commands/template.js.erb</span>
-<span class="nx">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]);</span>
-  <span class="o">&lt;%=</span> <span class="nx">parsed_json</span><span class="p">(</span><span class="nx">js</span><span class="p">[:</span><span class="nx">json</span><span class="p">])</span> <span class="o">%&gt;</span>
+<span class="nf">setTimeout</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">json</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]);</span>
+  <span class="o">&lt;%=</span> <span class="nf">parsed_json</span><span class="p">(</span><span class="nx">js</span><span class="p">[:</span><span class="nx">json</span><span class="p">])</span> <span class="o">%&gt;</span>
 <span class="p">})</span>
 </code></pre></div></div>
 
@@ -6493,11 +6493,11 @@ You need to specify the directory with templates:</p>
 
 <p>And use it template:</p>
 
-<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">someLongRunningMethod</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">someLongRunningMethod</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
   <span class="c1">// 'done' is a method that generates JavaScript</span>
   <span class="c1">// 'data' returns data that we've passed to 'run'</span>
   <span class="c1">// :name is a key in that Hash</span>
-  <span class="o">&lt;%=</span> <span class="nx">done</span><span class="p">(</span><span class="nx">data</span><span class="p">[:</span><span class="nx">name</span><span class="p">])</span> <span class="o">%&gt;</span>
+  <span class="o">&lt;%=</span> <span class="nf">done</span><span class="p">(</span><span class="nx">data</span><span class="p">[:</span><span class="nx">name</span><span class="p">])</span> <span class="o">%&gt;</span>
 <span class="p">})</span>
 </code></pre></div></div>
 
@@ -6870,7 +6870,7 @@ Here is a gist with a full code that wraps ugly code and blank methods:
   <span class="p">}</span>
 
   <span class="k">def</span> <span class="nf">auth_with</span><span class="p">(</span><span class="n">auth_method</span><span class="p">)</span>
-    <span class="n">mod</span> <span class="o">=</span> <span class="no">AUTH_METHODS</span><span class="p">[</span><span class="n">auth_method</span><span class="p">]</span> <span class="n">or</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="no">AUTH_METHODS</span><span class="p">[</span><span class="n">auth_method</span><span class="p">]</span> <span class="ow">or</span>
       <span class="k">raise</span> <span class="s2">"Unknown auth strategy </span><span class="si">#{</span><span class="n">auth_method</span><span class="si">}</span><span class="s2">"</span>
     <span class="nb">send</span><span class="p">(</span><span class="ss">:include</span><span class="p">,</span> <span class="n">mod</span><span class="p">)</span>
   <span class="k">end</span>

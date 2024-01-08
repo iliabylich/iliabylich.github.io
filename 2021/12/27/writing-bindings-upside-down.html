@@ -102,7 +102,7 @@
 
     </nav>
 
-    <p>&copy; 2023. All rights reserved.</p>
+    <p>&copy; 2024. All rights reserved.</p>
   </div>
 </div>
 
@@ -750,19 +750,19 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
         <span class="k">return</span> <span class="n">s</span><span class="o">-&gt;</span><span class="n">bytes</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
     <span class="p">}</span>
 
-    <span class="n">CharList_BLOB</span> <span class="n">char_list__new</span><span class="p">()</span> <span class="k">noexcept</span>
+    <span class="n">CharList_BLOB</span> <span class="nf">char_list__new</span><span class="p">()</span> <span class="k">noexcept</span>
     <span class="p">{</span>
         <span class="k">return</span> <span class="n">PACK_CharList</span><span class="p">(</span><span class="n">CharList</span><span class="p">());</span>
     <span class="p">}</span>
-    <span class="kt">void</span> <span class="n">char_list__push</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">Char_BLOB</span> <span class="n">item</span><span class="p">)</span> <span class="k">noexcept</span>
+    <span class="kt">void</span> <span class="nf">char_list__push</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="n">Char_BLOB</span> <span class="n">item</span><span class="p">)</span> <span class="k">noexcept</span>
     <span class="p">{</span>
         <span class="p">((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">push_back</span><span class="p">(</span><span class="n">UNPACK_Char</span><span class="p">(</span><span class="n">item</span><span class="p">));</span>
     <span class="p">}</span>
-    <span class="kt">size_t</span> <span class="n">char_list__len</span><span class="p">(</span><span class="k">const</span> <span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span> <span class="k">noexcept</span>
+    <span class="kt">size_t</span> <span class="nf">char_list__len</span><span class="p">(</span><span class="k">const</span> <span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span> <span class="k">noexcept</span>
     <span class="p">{</span>
         <span class="k">return</span> <span class="p">((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">();</span>
     <span class="p">}</span>
-    <span class="n">Char_BLOB</span> <span class="n">char_list__at</span><span class="p">(</span><span class="k">const</span> <span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">idx</span><span class="p">)</span> <span class="k">noexcept</span>
+    <span class="n">Char_BLOB</span> <span class="nf">char_list__at</span><span class="p">(</span><span class="k">const</span> <span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">idx</span><span class="p">)</span> <span class="k">noexcept</span>
     <span class="p">{</span>
         <span class="k">return</span> <span class="n">PACK_Char</span><span class="p">(((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">at</span><span class="p">(</span><span class="n">idx</span><span class="p">));</span>
     <span class="p">}</span>
@@ -1013,7 +1013,7 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
 <span class="p">{</span>
     <span class="c1">// noop, Char has no allocations</span>
 <span class="p">}</span>
-<span class="kt">void</span> <span class="n">char_list__drop</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span>
+<span class="kt">void</span> <span class="nf">char_list__drop</span><span class="p">(</span><span class="n">CharList_BLOB</span> <span class="o">*</span><span class="n">self</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="p">((</span><span class="n">CharList</span> <span class="o">*</span><span class="p">)</span><span class="n">self</span><span class="p">)</span><span class="o">-&gt;~</span><span class="n">vector</span><span class="p">();</span>
 <span class="p">}</span>
@@ -1189,7 +1189,8 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
 </div>
 
 
-<iframe src="https://commentary.ilyabylich.me/commentary/index?post_id=writing-bindings-upside-down" frameborder="0" scrolling="no" width="100%">
+<iframe src="https://commentary.ilyabylich.me/commentary/index?post_id=writing-bindings-upside-down" frameborder="0" scrolling="no"
+  width="100%">
 </iframe>
 
 <script type="text/javascript">
@@ -1199,7 +1200,6 @@ rustc_demangle-7f98f837d3579544.rustc_demangle.5563b4d3-cgu.0.rcgu.o:           
     }
   })
 </script>
-
 
     </div>
   </body>
