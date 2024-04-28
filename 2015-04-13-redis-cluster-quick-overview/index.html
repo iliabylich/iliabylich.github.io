@@ -1,0 +1,214 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=cache-control content="max-age=0"><meta http-equiv=cache-control content="no-cache"><meta http-equiv=expires content="0"><meta http-equiv=expires content="Tue, 01 Jan 1980 1:00:00 GMT"><meta http-equiv=pragma content="no-cache"><link rel=apple-touch-icon-precomposed sizes=192x192 href=/icon-192x192.png><link rel="shortcut icon" href=/favicon.ico><meta name=theme-color media="(prefers-color-scheme: light)" content="#ffffff"><meta name=theme-color media="(prefers-color-scheme: dark)" content="#1b1b1b"><meta name=description content="Redis Cluster. Quick overview."><title>Redis Cluster. Quick overview. | Ilya Bylich - Blog</title><style>:root{--background:#ffffff}@media(prefers-color-scheme:dark){:root{--background:#1b1b1b}}html{background-color:var(--background)}body{background-color:var(--background)}</style><link rel=stylesheet type=text/css href=/style.min.bc9c53f4c8c502891338c2b605412b41da61bca150c6a77869811fc296d3098c.css media=all></head><body><nav><ul class=menu><li><a tabindex=-1 class=menu-link href=/>Home</a></li><li><a tabindex=-1 class=menu-link href=https://github.com/iliabylich>GitHub</a></li><li><a tabindex=-1 class=menu-link href=https://twitter.com/IlyaBylich>Twitter</a></li><li><a tabindex=-1 class=menu-link href=mailto:ibylich@gmail.com>Email me</a></li><li><a tabindex=-1 class=menu-link href=/index.xml>RSS</a></li></ul></nav><div id=single-header><h1>Redis Cluster. Quick overview.</h1><div id=single-meta><span class=datesub>Apr 13, 2015</span>
+<span id=tags>&nbsp;&nbsp;
+<span><a href=https://iliabylich.github.io/tags/redis/>#redis</a>
+</span>&nbsp; <span><a href=https://iliabylich.github.io/tags/databases/>#databases</a>
+</span>&nbsp;</span></div></div><aside class="hidden lg:block toc" id=tableOfContentContainer><nav id=TableOfContents><ul><li><a href=#setup>Setup</a></li><li><a href=#cluster-configuration>Cluster configuration</a></li><li><a href=#connecting-nodes>Connecting nodes</a></li><li><a href=#testing-our-cluster>Testing our cluster</a></li><li><a href=#benchmarks>Benchmarks</a></li><li><a href=#testing-the-failover>Testing the failover</a></li><li><a href=#conclusion>Conclusion</a></li><li><a href=#links>Links</a></li></ul></nav></aside><main><p>Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.</p><h2 id=setup>Setup</h2><p>Here are my servers:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span># 212.71.252.54  / 192.168.171.141 / node1
+</span></span><span style=display:flex><span># 176.58.103.254 / 192.168.171.142 / node2
+</span></span><span style=display:flex><span># 178.79.153.89  / 192.168.173.227 / node3
+</span></span></code></pre></div><p>Local hosts (on each server):</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span># local hosts
+</span></span><span style=display:flex><span>192.168.171.141 node1
+</span></span><span style=display:flex><span>192.168.171.142 node2
+</span></span><span style=display:flex><span>192.168.173.227 node3
+</span></span></code></pre></div><p>And remote (on my PC):</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span># remote hosts
+</span></span><span style=display:flex><span>212.71.252.54  node1
+</span></span><span style=display:flex><span>176.58.103.254 node2
+</span></span><span style=display:flex><span>178.79.153.89  node3
+</span></span></code></pre></div><p>First of all, let&rsquo;s download and extract it (on each node).</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ mkdir build <span style=color:#f92672>&amp;&amp;</span> cd build
+</span></span><span style=display:flex><span>$ wget http://download.redis.io/releases/redis-3.0.0.tar.gz
+</span></span><span style=display:flex><span>$ tar -xvzf redis-3.0.0.tar.gz
+</span></span><span style=display:flex><span>$ cd redis-3.0.0/
+</span></span></code></pre></div><p>Now we can build it</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ apt-get install -y make gcc build-essential
+</span></span><span style=display:flex><span>$ make MALLOC<span style=color:#f92672>=</span>libc <span style=color:#75715e># also jemalloc can be used</span>
+</span></span></code></pre></div><p>Let&rsquo;s run tests</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ apt-get install -y tk8.5 tcl8.5
+</span></span><span style=display:flex><span>$ make test
+</span></span><span style=display:flex><span><span style=color:#75715e># a lot of output, should be green</span>
+</span></span></code></pre></div><p>Then we can start Redis</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ src/redis-server ./redis.conf
+</span></span></code></pre></div><h2 id=cluster-configuration>Cluster configuration</h2><p>We need to update our configuration file for each node</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span># redis.conf
+</span></span><span style=display:flex><span>bind node1 # for node1
+</span></span><span style=display:flex><span>cluster-enabled yes
+</span></span><span style=display:flex><span>cluster-config-file nodes-6379.conf
+</span></span><span style=display:flex><span>cluster-node-timeout 5000
+</span></span></code></pre></div><p>Here&rsquo;s what should displayed:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>29338:M 13 Apr 21:05:00.214 * No cluster configuration found, I&#39;m a1eec932d923b55e23a5fe6a488ed7a97e27c826
+</span></span><span style=display:flex><span>                _._
+</span></span><span style=display:flex><span>           _.-``__ &#39;&#39;-._
+</span></span><span style=display:flex><span>      _.-``    `.  `_.  &#39;&#39;-._           Redis 3.0.0 (00000000/0) 64 bit
+</span></span><span style=display:flex><span>  .-`` .-```.  ```\/    _.,_ &#39;&#39;-._
+</span></span><span style=display:flex><span> (    &#39;      ,       .-`  | `,    )     Running in cluster mode
+</span></span><span style=display:flex><span> |`-._`-...-` __...-.``-._|&#39;` _.-&#39;|     Port: 6379
+</span></span><span style=display:flex><span> |    `-._   `._    /     _.-&#39;    |     PID: 29338
+</span></span><span style=display:flex><span>  `-._    `-._  `-./  _.-&#39;    _.-&#39;
+</span></span><span style=display:flex><span> |`-._`-._    `-.__.-&#39;    _.-&#39;_.-&#39;|
+</span></span><span style=display:flex><span> |    `-._`-._        _.-&#39;_.-&#39;    |           http://redis.io
+</span></span><span style=display:flex><span>  `-._    `-._`-.__.-&#39;_.-&#39;    _.-&#39;
+</span></span><span style=display:flex><span> |`-._`-._    `-.__.-&#39;    _.-&#39;_.-&#39;|
+</span></span><span style=display:flex><span> |    `-._`-._        _.-&#39;_.-&#39;    |
+</span></span><span style=display:flex><span>  `-._    `-._`-.__.-&#39;_.-&#39;    _.-&#39;
+</span></span><span style=display:flex><span>      `-._    `-.__.-&#39;    _.-&#39;
+</span></span><span style=display:flex><span>          `-._        _.-&#39;
+</span></span><span style=display:flex><span>              `-.__.-&#39;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>29338:M 13 Apr 21:05:00.246 # Server started, Redis version 3.0.0
+</span></span><span style=display:flex><span>29338:M 13 Apr 21:05:00.247 * DB loaded from disk: 0.000 seconds
+</span></span><span style=display:flex><span>29338:M 13 Apr 21:05:00.247 * The server is now ready to accept connections on port 6379
+</span></span></code></pre></div><p>Quite a lot of noisy debug information, but here is one line that is extremely important:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>No cluster configuration found, I&#39;m a1eec932d923b55e23a5fe6a488ed7a97e27c826
+</span></span></code></pre></div><p>So, our Redis server is running in cluster mode (&mldr; repeating same steps on other nodes &mldr;)</p><h2 id=connecting-nodes>Connecting nodes</h2><p>Now we have 3 nodes:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>node1:6379
+</span></span><span style=display:flex><span>node2:6379
+</span></span><span style=display:flex><span>node3:6379
+</span></span></code></pre></div><p>Let&rsquo;s connect them! Redis has a tool for connecting nodes called <code>redis-trib.rb</code>. And yes, it&rsquo;s a ruby script and it requires <code>redis</code> gem to be installed (not a problem in my case).</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ src/redis-trib.rb
+</span></span><span style=display:flex><span>Usage: redis-trib &lt;command&gt; &lt;options&gt; &lt;arguments ...&gt;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  create          host1:port1 ... hostN:portN
+</span></span><span style=display:flex><span>                  --replicas &lt;arg&gt;
+</span></span><span style=display:flex><span>  check           host:port
+</span></span><span style=display:flex><span>  fix             host:port
+</span></span><span style=display:flex><span>  reshard         host:port
+</span></span><span style=display:flex><span>                  --from &lt;arg&gt;
+</span></span><span style=display:flex><span>                  --to &lt;arg&gt;
+</span></span><span style=display:flex><span>                  --slots &lt;arg&gt;
+</span></span><span style=display:flex><span>                  --yes
+</span></span><span style=display:flex><span>  add-node        new_host:new_port existing_host:existing_port
+</span></span><span style=display:flex><span>                  --slave
+</span></span><span style=display:flex><span>                  --master-id &lt;arg&gt;
+</span></span><span style=display:flex><span>  del-node        host:port node_id
+</span></span><span style=display:flex><span>  set-timeout     host:port milliseconds
+</span></span><span style=display:flex><span>  call            host:port command arg arg .. arg
+</span></span><span style=display:flex><span>  import          host:port
+</span></span><span style=display:flex><span>                  --from &lt;arg&gt;
+</span></span><span style=display:flex><span>  help            <span style=color:#f92672>(</span>show this help<span style=color:#f92672>)</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>For check, fix, reshard, del-node, set-timeout you can specify the host and port of any working node in the cluster.
+</span></span></code></pre></div><p>For some reason, this tool does not support host names, we have to pass IP addresses manually.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ src/redis-trib.rb create 192.168.171.141:6379 192.168.171.142:6379 192.168.173.227:6379
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>&gt;&gt;&gt; Creating cluster
+</span></span><span style=display:flex><span>Connecting to node 192.168.171.141:6379: OK
+</span></span><span style=display:flex><span>Connecting to node 192.168.171.142:6379: OK
+</span></span><span style=display:flex><span>Connecting to node 192.168.173.227:6379: OK
+</span></span><span style=display:flex><span>&gt;&gt;&gt; Performing hash slots allocation on <span style=color:#ae81ff>3</span> nodes...
+</span></span><span style=display:flex><span>Using <span style=color:#ae81ff>3</span> masters:
+</span></span><span style=display:flex><span>192.168.171.141:6379
+</span></span><span style=display:flex><span>192.168.171.142:6379
+</span></span><span style=display:flex><span>192.168.173.227:6379
+</span></span><span style=display:flex><span>M: 78a5bbdcd545848be8a66126a71dc69dd6d23bc4 192.168.171.141:6379
+</span></span><span style=display:flex><span>   slots:0-5460 <span style=color:#f92672>(</span><span style=color:#ae81ff>5461</span> slots<span style=color:#f92672>)</span> master
+</span></span><span style=display:flex><span>M: 1f6ed2478b461539f76b0b627de2e1b8565df719 192.168.171.142:6379
+</span></span><span style=display:flex><span>   slots:5461-10922 <span style=color:#f92672>(</span><span style=color:#ae81ff>5462</span> slots<span style=color:#f92672>)</span> master
+</span></span><span style=display:flex><span>M: 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 192.168.173.227:6379
+</span></span><span style=display:flex><span>   slots:10923-16383 <span style=color:#f92672>(</span><span style=color:#ae81ff>5461</span> slots<span style=color:#f92672>)</span> master
+</span></span><span style=display:flex><span>Can I set the above configuration? <span style=color:#f92672>(</span>type <span style=color:#e6db74>&#39;yes&#39;</span> to accept<span style=color:#f92672>)</span>:
+</span></span></code></pre></div><p>Looks beautiful! Each node is responsible for 1/3 of data. Typing &lsquo;yes&rsquo;&mldr;</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>&gt;&gt;&gt; Nodes configuration updated
+</span></span><span style=display:flex><span>&gt;&gt;&gt; Assign a different config epoch to each node
+</span></span><span style=display:flex><span>&gt;&gt;&gt; Sending CLUSTER MEET messages to join the cluster
+</span></span><span style=display:flex><span>Waiting for the cluster to join.
+</span></span><span style=display:flex><span>&gt;&gt;&gt; Performing Cluster Check (using node 127.0.0.1:7001)
+</span></span><span style=display:flex><span>M: 78a5bbdcd545848be8a66126a71dc69dd6d23bc4 192.168.171.141:6379
+</span></span><span style=display:flex><span>   slots:0-5460 (5461 slots) master
+</span></span><span style=display:flex><span>M: 1f6ed2478b461539f76b0b627de2e1b8565df719 192.168.171.142:6379
+</span></span><span style=display:flex><span>   slots:5461-10922 (5462 slots) master
+</span></span><span style=display:flex><span>M: 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 192.168.173.227:6379
+</span></span><span style=display:flex><span>   slots:10923-16383 (5461 slots) master
+</span></span><span style=display:flex><span>[OK] All nodes agree about slots configuration.
+</span></span><span style=display:flex><span>&gt;&gt;&gt; Check for open slots...
+</span></span><span style=display:flex><span>&gt;&gt;&gt; Check slots coverage...
+</span></span><span style=display:flex><span>[OK] All 16384 slots covered.
+</span></span></code></pre></div><p>That&rsquo;s it!</p><h2 id=testing-our-cluster>Testing our cluster</h2><p>Here is how to check the status of the cluster:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ src/redis-cli -h node2 cluster nodes
+</span></span><span style=display:flex><span>7a092b06c8c75e98176b7612e74d2e89e8b3eda7 node1:6379 master - <span style=color:#ae81ff>0</span> <span style=color:#ae81ff>1428949630273</span> <span style=color:#ae81ff>3</span> connected 10923-16383
+</span></span><span style=display:flex><span>78a5bbdcd545848be8a66126a71dc69dd6d23bc4 node2:6379 myself,master - <span style=color:#ae81ff>0</span> <span style=color:#ae81ff>0</span> <span style=color:#ae81ff>1</span> connected 0-5460
+</span></span><span style=display:flex><span>1f6ed2478b461539f76b0b627de2e1b8565df719 node3:6379 master - <span style=color:#ae81ff>0</span> <span style=color:#ae81ff>1428949629272</span> <span style=color:#ae81ff>2</span> connected 5461-10922
+</span></span></code></pre></div><p>Every single node knows about others, so the previous command can be executed on any node.</p><h2 id=benchmarks>Benchmarks</h2><p>Let&rsquo;s setup <a href=https://github.com/antirez/redis-rb-cluster target=_blank rel="noreferrer nofollow"><code>redis-rb-cluster</code></a></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ wget https://github.com/antirez/redis-rb-cluster/archive/master.zip
+</span></span><span style=display:flex><span>$ unzip master.zip
+</span></span><span style=display:flex><span>$ cd redis-rb-cluster-master
+</span></span></code></pre></div><p>We have the file <code>example.rb</code> which is pretty boring itself. It just writes random keys into our cluster and prints them:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ ruby example.rb
+</span></span><span style=display:flex><span><span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>2</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>3</span>
+</span></span><span style=display:flex><span>...
+</span></span></code></pre></div><p>Another example is more interesting.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ ruby consistency-test.rb node1 <span style=color:#ae81ff>6379</span>
+</span></span><span style=display:flex><span><span style=color:#ae81ff>850</span> R <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> | <span style=color:#ae81ff>850</span> W <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> |
+</span></span><span style=display:flex><span><span style=color:#ae81ff>4682</span> R <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> | <span style=color:#ae81ff>4682</span> W <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> |
+</span></span><span style=display:flex><span><span style=color:#ae81ff>8490</span> R <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> | <span style=color:#ae81ff>8490</span> W <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> |
+</span></span><span style=display:flex><span><span style=color:#ae81ff>12196</span> R <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> | <span style=color:#ae81ff>12196</span> W <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> |
+</span></span><span style=display:flex><span><span style=color:#ae81ff>15785</span> R <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> | <span style=color:#ae81ff>15785</span> W <span style=color:#f92672>(</span><span style=color:#ae81ff>0</span> err<span style=color:#f92672>)</span> |
+</span></span></code></pre></div><p>This tool writes a huge amount of data to Redis and check whether previously written data is still there.</p><h2 id=testing-the-failover>Testing the failover</h2><p>This chapter is something that I still don&rsquo;t understand. I have tried to reproduce it many times and every time I have the same result.</p><p>Run <code>consistency-test.rb</code> again and kill any other node.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$ src/redis-cli -h node2 debug segfault
+</span></span></code></pre></div><p>And here is the output that I&rsquo;m getting every time:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-text data-lang=text><span style=display:flex><span>70273 R (0 err) | 70273 W (0 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 9515 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 9515 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72378 R (1 err) | 72378 W (1 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 9650 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 9650 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72379 R (2 err) | 72379 W (2 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 5797 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 5797 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72380 R (3 err) | 72380 W (3 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 9772 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 9772 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72384 R (4 err) | 72384 W (4 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 10245 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 10245 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72385 R (5 err) | 72385 W (5 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 7376 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 7376 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72385 R (6 err) | 72385 W (6 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 6781 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 6781 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72396 R (7 err) | 72396 W (7 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 10275 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 10275 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72401 R (8 err) | 72401 W (8 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 8639 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 8639 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72402 R (9 err) | 72402 W (9 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 8173 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 8173 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72402 R (10 err) | 72402 W (10 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 9525 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 9525 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72403 R (11 err) | 72403 W (11 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 9346 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 9346 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72406 R (12 err) | 72406 W (12 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 6391 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 6391 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72411 R (13 err) | 72411 W (13 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 6353 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 6353 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72413 R (14 err) | 72413 W (14 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 10245 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 10245 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72418 R (15 err) | 72418 W (15 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 6438 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 6438 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72422 R (16 err) | 72422 W (16 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 6826 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: Too many Cluster redirections? (last error: MOVED 6826 127.0.0.1:7002)
+</span></span><span style=display:flex><span>72423 R (17 err) | 72423 W (17 err) |
+</span></span><span style=display:flex><span>Reading: Too many Cluster redirections? (last error: MOVED 9713 127.0.0.1:7002)
+</span></span><span style=display:flex><span>Writing: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Reading: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Reading: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Writing: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>72423 R (295 err) | 72423 W (295 err) |
+</span></span><span style=display:flex><span>72423 R (2219 err) | 72423 W (2219 err) |
+</span></span><span style=display:flex><span>Reading: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Writing: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Reading: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Writing: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>72423 R (4186 err) | 72423 W (4186 err) |
+</span></span><span style=display:flex><span>Reading: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Writing: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>72423 R (6190 err) | 72423 W (6190 err) |
+</span></span><span style=display:flex><span>Writing: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>72423 R (8207 err) | 72423 W (8207 err) |
+</span></span><span style=display:flex><span>Reading: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Reading: CLUSTERDOWN The cluster is down
+</span></span><span style=display:flex><span>Writing: CLUSTERDOWN The cluster is down
+</span></span></code></pre></div><p>As you can see, the cluster goes down and errors amount quickly increases. After all this steps I&rsquo;m getting broken cluster (and each separated node is broken, too)</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span>$src/redis-cli -h node3 ping
+</span></span><span style=display:flex><span>PONG
+</span></span><span style=display:flex><span>$src/redis-cli -h node3 get <span style=color:#e6db74>&#39;test&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#f92672>(</span>error<span style=color:#f92672>)</span> CLUSTERDOWN The cluster is down
+</span></span></code></pre></div><p>The cluster goes up after booting the first node manually</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sh data-lang=sh><span style=display:flex><span><span style=color:#75715e># booting node2 manually...</span>
+</span></span><span style=display:flex><span>$ src/redis-cli -h  get qwe
+</span></span><span style=display:flex><span><span style=color:#f92672>(</span>error<span style=color:#f92672>)</span> MOVED <span style=color:#ae81ff>757</span> 127.0.0.1:7001
+</span></span><span style=display:flex><span>$ src/redis-cli -p <span style=color:#ae81ff>7001</span> get qwe
+</span></span><span style=display:flex><span><span style=color:#f92672>(</span>nil<span style=color:#f92672>)</span>
+</span></span></code></pre></div><p>I hope this will be fixed soon.</p><h2 id=conclusion>Conclusion</h2><p>According to <a href=https://github.com/antirez/redis-rb-cluster#redis-rb-cluster target=_blank rel="noreferrer nofollow">the repository</a>
+there are still a lot of things that need to be done before using Redis Cluster in production, but I would like to say Thanks to all contributors of Redis, <code>redis-rb</code> and <code>redis-rb-cluster</code>. Good job and looking forward to use in the real-world!</p><h2 id=links>Links</h2><ul><li><p><a href=http://redis.io/topics/cluster-tutorial target=_blank rel="noreferrer nofollow">official tutorial</a></p></li><li><p><a href=http://redis.io/topics/cluster-spec target=_blank rel="noreferrer nofollow">cluster specification</a></p></li><li><p><a href=https://raw.githubusercontent.com/antirez/redis/3.0/00-RELEASENOTES target=_blank rel="noreferrer nofollow">changelog</a></p></li></ul></main><br><footer><script defer>function addCopyButtonToCodeBlocks(){const e=document.querySelectorAll('code[class^="language-"]');e.forEach(e=>{const t=document.createElement("button");t.classList.add("copy-code-button"),t.innerHTML="copy",t.addEventListener("click",()=>{const n=e.textContent;navigator.clipboard.writeText(n),t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},1500)}),e.parentNode.before(t)})}setTimeout(function(){addCopyButtonToCodeBlocks()},100)</script><script defer>function throttle(e,t){var n=Date.now();return function(){var s=Date.now();n+t-s<0&&(e(),n=s)}}function scrollHandler(){const e=Array.from(document.querySelectorAll("body h2, body h3"));function t(){for(var n,s,o,i=window.pageYOffset||document.documentElement.scrollTop,t=0;t<e.length;t++)s=e[t].getAttribute("id"),n=document.querySelector('nav ul li a[href="#'+s+'"]'),n&&n.classList.remove("active-toc");for(t=e.length-1;t>=0;t--)if(o=e[t].offsetTop,i>o-75&&(s=e[t].getAttribute("id"),n=document.querySelector('nav ul li a[href="#'+s+'"]'),n)){n.classList.add("active-toc");break}}window.addEventListener("scroll",throttle(t,300))}setTimeout(scrollHandler,100)</script></footer></body></html>
