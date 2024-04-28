@@ -1,0 +1,18 @@
+{{ partial "header.html" . }}
+
+<div id="single-header">
+    <h1>{{ .Title | markdownify }}</h1>
+
+    <div id="single-meta">
+        <span class="datesub">{{ .Date.Format "Jan 2, 2006" }}</span>
+        {{ partial "tags.html" .}}
+    </div>
+</div>
+
+<aside class="hidden lg:block toc " id="tableOfContentContainer">
+    {{ .TableOfContents }}
+</aside>
+
+<main>{{ .Content }}</main>
+
+{{ partial "footer.html" . }}

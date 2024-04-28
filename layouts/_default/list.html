@@ -1,0 +1,24 @@
+{{ partial "header.html" . }}
+
+<div class="home-content">
+    {{ .Content }}
+</div>
+
+<h2 class="section-title">
+    {{ .CurrentSection.Title }}
+</h2>
+
+<ul class="post-list">
+    {{ range .CurrentSection.RegularPages }}
+
+        <li>
+            <div style="display: grid; grid-template-columns: 7em auto">
+                <span class="date">{{ .Date.Format "Jan 2, 2006" }}</span>
+                <a href="{{ .RelPermalink }}">{{ .Page.Title | markdownify }}</a>
+            </div>
+        </li>
+
+    {{ end }}
+</ul>
+
+{{ partial "footer.html" . }}

@@ -1,3 +1,30 @@
-baseURL = 'https://example.org/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+baseURL = "https://iliabylich.github.io/"
+languageCode = "en-us"
+title = "Ilya Bylich - Blog"
+
+[menu]
+  [[menu.main]]
+    name = "Home"
+    pre = "home"
+    url = "/"
+    weight = 1
+  [[menu.main]]
+    name = "GitHub"
+    pre = "github"
+    url = "https://github.com/iliabylich"
+    weight = 2
+  [[menu.main]]
+    name = "Twitter"
+    pre = "twitter"
+    url = "https://twitter.com/IlyaBylich"
+    weight = 3
+  [[menu.main]]
+    name = "Email me"
+    pre = "email-me"
+    url = "mailto:ibylich@gmail.com"
+    weight = 4
+[[menu.main]]
+    name = "RSS"
+    pre = "rss"
+    url = "/index.xml"
+    weight = 5
