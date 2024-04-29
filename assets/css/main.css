@@ -1,7 +1,7 @@
 :root {
   --complimentary: #815205;
   --text: black;
-  --code: black;
+  --code: #898989;
   --text-dim: #444;
   --link: #3366cc;
   --link-visited: #795cb2;
@@ -63,13 +63,11 @@ html {
 body {
   margin: auto;
   padding: 0em 1em 2em 1em;
-  font-family:
-    "Inter",
-    -apple-system,
-    BlinkMacSystemFont,
-    "Roboto",
-    Helvetica,
-    sans-serif;
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "slnt" 0;
   line-height: 1.54;
   text-align: justify;
 }
