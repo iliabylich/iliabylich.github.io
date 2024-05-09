@@ -11,12 +11,17 @@
 <ul class="post-list">
     {{ range .CurrentSection.RegularPages }}
 
-        <li>
-            <div style="display: grid; grid-template-columns: 7em auto">
-                <span class="date">{{ .Date.Format "Jan 2, 2006" }}</span>
-                <a href="{{ .RelPermalink }}">{{ .Page.Title | markdownify }}</a>
-            </div>
-        </li>
+    {{ $href := .RelPermalink }}
+    {{ with .Params.relPermalinkOverride }}
+    {{ $href = . }}
+    {{ end }}
+
+    <li>
+        <div style="display: grid; grid-template-columns: 7em auto">
+            <span class="date">{{ .Date.Format "Jan 2, 2006" }}</span>
+            <a href="{{ $href }}">{{ .Page.Title | markdownify }}</a>
+        </div>
+    </li>
 
     {{ end }}
 </ul>
