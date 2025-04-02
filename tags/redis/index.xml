@@ -1,5 +1,17 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Redis on Ilya Bylich - Blog</title><link>https://iliabylich.github.io/tags/redis/</link><description>Recent content in Redis on Ilya Bylich - Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Mon, 13 Apr 2015 00:00:00 +0000</lastBuildDate><atom:link href="https://iliabylich.github.io/tags/redis/index.xml" rel="self" type="application/rss+xml"/><item><title>Redis Cluster. Quick overview.</title><link>https://iliabylich.github.io/2015-04-13-redis-cluster-quick-overview/</link><pubDate>Mon, 13 Apr 2015 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2015-04-13-redis-cluster-quick-overview/</guid><description>Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.
-Setup Here are my servers:
-# 212.71.252.54 / 192.168.171.141 / node1 # 176.58.103.254 / 192.168.171.142 / node2 # 178.79.153.89 / 192.168.173.227 / node3 Local hosts (on each server):
-# local hosts 192.168.171.141 node1 192.168.171.142 node2 192.168.173.227 node3 And remote (on my PC):
-# remote hosts 212.71.252.54 node1 176.58.103.254 node2 178.79.153.89 node3 First of all, let&amp;rsquo;s download and extract it (on each node).</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Redis on Ilya Bylich - Blog</title><link>https://iliabylich.github.io/tags/redis/</link><description>Recent content in Redis on Ilya Bylich - Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Mon, 13 Apr 2015 00:00:00 +0000</lastBuildDate><atom:link href="https://iliabylich.github.io/tags/redis/index.xml" rel="self" type="application/rss+xml"/><item><title>Redis Cluster. Quick overview.</title><link>https://iliabylich.github.io/2015-04-13-redis-cluster-quick-overview/</link><pubDate>Mon, 13 Apr 2015 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2015-04-13-redis-cluster-quick-overview/</guid><description>&lt;p>Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.&lt;/p>
+&lt;h2 id="setup">Setup&lt;/h2>
+&lt;p>Here are my servers:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span># 212.71.252.54 / 192.168.171.141 / node1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># 176.58.103.254 / 192.168.171.142 / node2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># 178.79.153.89 / 192.168.173.227 / node3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Local hosts (on each server):&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span># local hosts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>192.168.171.141 node1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>192.168.171.142 node2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>192.168.173.227 node3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And remote (on my PC):&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span># remote hosts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>212.71.252.54 node1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>176.58.103.254 node2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>178.79.153.89 node3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>First of all, let&amp;rsquo;s download and extract it (on each node).&lt;/p></description></item></channel></rss>

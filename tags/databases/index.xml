@@ -1,10 +1,46 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Databases on Ilya Bylich - Blog</title><link>https://iliabylich.github.io/tags/databases/</link><description>Recent content in Databases on Ilya Bylich - Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Tue, 10 Nov 2015 00:00:00 +0000</lastBuildDate><atom:link href="https://iliabylich.github.io/tags/databases/index.xml" rel="self" type="application/rss+xml"/><item><title>HandlerSocket + Ruby</title><link>https://iliabylich.github.io/2015-11-10-handlersocket-with-ruby/</link><pubDate>Tue, 10 Nov 2015 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2015-11-10-handlersocket-with-ruby/</guid><description>What is HandlerSocket (HS) a plugin for MySQL which allows you to read/write to MySQL and gives you a separate connection to MySQL and does not allow you to run SQL queries but allows to run simple CRUD queries only using indexes HandlerSocket query language is very simple (I&amp;rsquo;d even say it&amp;rsquo;s primitive), but it&amp;rsquo;s much faster than MySQL&amp;rsquo;s one. Though, of course, there are some limitations. Interested?
-Installation You already have it if you are using Percona Server or MariaDB.</description></item><item><title>Experimental MySQL HTTP API and Ruby</title><link>https://iliabylich.github.io/2015-05-14-experimental-mysql-http-api-and-ruby/</link><pubDate>Thu, 14 May 2015 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2015-05-14-experimental-mysql-http-api-and-ruby/</guid><description>HTTP API Yes, MySQL has an HTTP API which is:
-an experimental feature it ships as a native plugin only for 5.7 version Basically, it allows you to work with your database in the following ways:
-as an SQL endpoint as a CRUD endpoint as a JSON document endpoint SQL endpoint It gives an ability to run queries like
-GET http://host:port/sql/:database/:query For example
-GET http://localhost:8080/sql/testdb/SELECT+1 is a synonym of SQL&amp;rsquo;s SELECT 1.</description></item><item><title>Redis Cluster. Quick overview.</title><link>https://iliabylich.github.io/2015-04-13-redis-cluster-quick-overview/</link><pubDate>Mon, 13 Apr 2015 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2015-04-13-redis-cluster-quick-overview/</guid><description>Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.
-Setup Here are my servers:
-# 212.71.252.54 / 192.168.171.141 / node1 # 176.58.103.254 / 192.168.171.142 / node2 # 178.79.153.89 / 192.168.173.227 / node3 Local hosts (on each server):
-# local hosts 192.168.171.141 node1 192.168.171.142 node2 192.168.173.227 node3 And remote (on my PC):
-# remote hosts 212.71.252.54 node1 176.58.103.254 node2 178.79.153.89 node3 First of all, let&amp;rsquo;s download and extract it (on each node).</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Databases on Ilya Bylich - Blog</title><link>https://iliabylich.github.io/tags/databases/</link><description>Recent content in Databases on Ilya Bylich - Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Tue, 10 Nov 2015 00:00:00 +0000</lastBuildDate><atom:link href="https://iliabylich.github.io/tags/databases/index.xml" rel="self" type="application/rss+xml"/><item><title>HandlerSocket + Ruby</title><link>https://iliabylich.github.io/2015-11-10-handlersocket-with-ruby/</link><pubDate>Tue, 10 Nov 2015 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2015-11-10-handlersocket-with-ruby/</guid><description>&lt;h2 id="what-is-handlersocket-hs">What is HandlerSocket (HS)&lt;/h2>
+&lt;ul>
+&lt;li>a plugin for MySQL&lt;/li>
+&lt;li>which allows you to read/write to MySQL&lt;/li>
+&lt;li>and gives you a separate connection to MySQL&lt;/li>
+&lt;li>and does not allow you to run SQL queries&lt;/li>
+&lt;li>but allows to run simple CRUD queries &lt;em>only&lt;/em> using indexes&lt;/li>
+&lt;/ul>
+&lt;p>HandlerSocket query language is very simple (I&amp;rsquo;d even say it&amp;rsquo;s primitive), but it&amp;rsquo;s much faster than MySQL&amp;rsquo;s one. Though, of course, there are some limitations. Interested?&lt;/p>
+&lt;h2 id="installation">Installation&lt;/h2>
+&lt;p>You already have it if you are using Percona Server or MariaDB. If not, install it from &lt;a href="https://github.com/DeNA/HandlerSocket-Plugin-for-MySQL" target="_blank" rel="noreferrer nofollow">the source&lt;/a>
+.&lt;/p></description></item><item><title>Experimental MySQL HTTP API and Ruby</title><link>https://iliabylich.github.io/2015-05-14-experimental-mysql-http-api-and-ruby/</link><pubDate>Thu, 14 May 2015 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2015-05-14-experimental-mysql-http-api-and-ruby/</guid><description>&lt;h2 id="http-api">HTTP API&lt;/h2>
+&lt;p>Yes, MySQL has an HTTP API which is:&lt;/p>
+&lt;ol>
+&lt;li>an experimental feature&lt;/li>
+&lt;li>it ships as a native plugin &lt;a href="http://labs.mysql.com/?id=3" target="_blank" rel="noreferrer nofollow">only for 5.7 version&lt;/a>
+&lt;/li>
+&lt;/ol>
+&lt;p>Basically, it allows you to work with your database in the following ways:&lt;/p>
+&lt;ol>
+&lt;li>as an SQL endpoint&lt;/li>
+&lt;li>as a CRUD endpoint&lt;/li>
+&lt;li>as a JSON document endpoint&lt;/li>
+&lt;/ol>
+&lt;h2 id="sql-endpoint">SQL endpoint&lt;/h2>
+&lt;p>It gives an ability to run queries like&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>GET http://host:port/sql/:database/:query
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For example&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-sh" data-lang="sh">&lt;span style="display:flex;">&lt;span>GET http://localhost:8080/sql/testdb/SELECT+1
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>is a synonym of SQL&amp;rsquo;s &lt;code>SELECT 1&lt;/code>.&lt;/p></description></item><item><title>Redis Cluster. Quick overview.</title><link>https://iliabylich.github.io/2015-04-13-redis-cluster-quick-overview/</link><pubDate>Mon, 13 Apr 2015 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2015-04-13-redis-cluster-quick-overview/</guid><description>&lt;p>Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.&lt;/p>
+&lt;h2 id="setup">Setup&lt;/h2>
+&lt;p>Here are my servers:&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span># 212.71.252.54 / 192.168.171.141 / node1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># 176.58.103.254 / 192.168.171.142 / node2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span># 178.79.153.89 / 192.168.173.227 / node3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Local hosts (on each server):&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span># local hosts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>192.168.171.141 node1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>192.168.171.142 node2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>192.168.173.227 node3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>And remote (on my PC):&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-text" data-lang="text">&lt;span style="display:flex;">&lt;span># remote hosts
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>212.71.252.54 node1
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>176.58.103.254 node2
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>178.79.153.89 node3
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>First of all, let&amp;rsquo;s download and extract it (on each node).&lt;/p></description></item></channel></rss>

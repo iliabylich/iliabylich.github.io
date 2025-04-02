@@ -1,8 +1,13 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>VM on Ilya Bylich - Blog</title><link>https://iliabylich.github.io/tags/vm/</link><description>Recent content in VM on Ilya Bylich - Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Sun, 26 Jan 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://iliabylich.github.io/tags/vm/index.xml" rel="self" type="application/rss+xml"/><item><title>Evaluating Ruby in Ruby</title><link>https://iliabylich.github.io/2020-01-26-evaluating-ruby-in-ruby/</link><pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2020-01-26-evaluating-ruby-in-ruby/</guid><description>TL;DR This article is about instruction sequences and evaluating them using pure Ruby.
-The repository is available here .
-Is it a Ruby implementation?
-No. It&amp;rsquo;s just a runner of instructions. It is similar to MRI&amp;rsquo;s virtual machine, but it lacks many features and it&amp;rsquo;s 100 times slower.
-Can I use it in my applications?
-Of course, no. Well, if you want.
-Does it work at all?
-Yes, and it even passes most language specs from RubySpec test suite.</description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>VM on Ilya Bylich - Blog</title><link>https://iliabylich.github.io/tags/vm/</link><description>Recent content in VM on Ilya Bylich - Blog</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Sun, 26 Jan 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://iliabylich.github.io/tags/vm/index.xml" rel="self" type="application/rss+xml"/><item><title>Evaluating Ruby in Ruby</title><link>https://iliabylich.github.io/2020-01-26-evaluating-ruby-in-ruby/</link><pubDate>Sun, 26 Jan 2020 00:00:00 +0000</pubDate><guid>https://iliabylich.github.io/2020-01-26-evaluating-ruby-in-ruby/</guid><description>&lt;h2 id="tldr">TL;DR&lt;/h2>
+&lt;p>This article is about instruction sequences and evaluating them using pure Ruby.&lt;/p>
+&lt;p>The repository is available &lt;a href="https://github.com/iliabylich/my.rb" target="_blank" rel="noreferrer nofollow">here&lt;/a>
+.&lt;/p>
+&lt;blockquote>
+&lt;p>Is it a Ruby implementation?&lt;/p>&lt;/blockquote>
+&lt;p>No. It&amp;rsquo;s just a runner of instructions. It is similar to MRI&amp;rsquo;s virtual machine, but it lacks many features and it&amp;rsquo;s 100 times slower.&lt;/p>
+&lt;blockquote>
+&lt;p>Can I use it in my applications?&lt;/p>&lt;/blockquote>
+&lt;p>Of course, no. Well, if you want.&lt;/p>
+&lt;blockquote>
+&lt;p>Does it work at all?&lt;/p>&lt;/blockquote>
+&lt;p>Yes, and it even passes most language specs from RubySpec test suite.&lt;/p></description></item></channel></rss>
