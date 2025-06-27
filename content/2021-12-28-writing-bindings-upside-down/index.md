@@ -14,7 +14,7 @@ I tried multiple ways and found one that is very (VERY) controversial, but I thi
 
 Let's say you have a library in C. Just for simplicity, Rust is not special here.
 
-![library-puzzle-piece.png](/writing-bindings-upside-down-1.png)
+![library-puzzle-piece.png](library-puzzle-piece.png)
 
 How can you use it in C++? A very simple solution is to wrap your header file with
 
@@ -47,7 +47,7 @@ In both cases it's possible to get pointer to attached data at any moment, both 
 Pros: still quite simple.
 Cons: really error-prone, libraries designed this way quite frequently have memory leaks and segfaults.
 
-![traditional-bindings.png](/writing-bindings-upside-down-2.png)
+![traditional-bindings.png](traditional-bindings.png)
 
 ## Slow but more reliable solution
 
@@ -99,7 +99,7 @@ What if our library could depend on some contract that requires bindings to prov
 
 Rust does not know what is C++ `std::vector` or Ruby `String`, but we know it, our bindings know it and by providing a set of foreign utility functions (implemented on the bindings side) we could work with it just like with native `std::Vec<T>`.
 
-![library-with-external-primitives.png](/writing-bindings-upside-down-3.png)
+![library-with-external-primitives.png](library-with-external-primitives.png)
 
 Here "Primitives" will be:
 
