@@ -1,4 +1,4 @@
-{{ partial "header.html" . }}
+{{ define "main" }}
 
 <div id="single-header">
     <h1>{{ .Title | markdownify }}</h1>
@@ -14,4 +14,4 @@
 
 <main>{{ .Content }}</main>
 
-{{ partial "footer.html" . }}
+{{ end }}
