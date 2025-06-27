@@ -5,7 +5,7 @@
 &lt;h2 id="traditional-way">Traditional way&lt;/h2>
 &lt;p>Let&amp;rsquo;s say you have a library in C. Just for simplicity, Rust is not special here.&lt;/p>
 &lt;p>&lt;p class="imgp">
- &lt;img loading="lazy" src="https://iliabylich.github.io/writing-bindings-upside-down-1.png" alt="library-puzzle-piece.png" />
+ &lt;img loading="lazy" src="library-puzzle-piece.png" alt="library-puzzle-piece.png" />
 &lt;/p>
 &lt;/p>
 &lt;p>How can you use it in C++? A very simple solution is to wrap your header file with&lt;/p></description></item><item><title>lib-ruby-parser</title><link>/2020-11-23-lib-ruby-parser/</link><pubDate>Mon, 23 Nov 2020 00:00:00 +0000</pubDate><guid>/2020-11-23-lib-ruby-parser/</guid><description>&lt;h2 id="intro">Intro&lt;/h2>
