@@ -2,7 +2,6 @@
 title: "Redis Cluster. Quick overview."
 date: "2015-04-13"
 cover: ""
-tags: ["Redis", "databases"]
 ---
 Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.
 

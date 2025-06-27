@@ -2,7 +2,6 @@
 title: "Writing bindings upside down"
 date: "2021-12-28"
 cover: ""
-tags: ["Rust", "C", "C++", "Ruby", "JavaScript", "Node", "bindings", "LLVM", "LTO"]
 ---
 
 ## Bindings

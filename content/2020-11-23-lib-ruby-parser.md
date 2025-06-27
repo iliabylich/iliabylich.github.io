@@ -2,7 +2,6 @@
 title: "lib-ruby-parser"
 date: "2020-11-23"
 cover: ""
-tags: ["Ruby", "parser", "Rust"]
 ---
 
 ## Intro

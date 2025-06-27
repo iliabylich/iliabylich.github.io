@@ -2,7 +2,6 @@
 title: "Experimental MySQL HTTP API and Ruby"
 date: "2015-05-14"
 cover: ""
-tags: ["Ruby", "MySQL", "databases"]
 ---
 
 ## HTTP API

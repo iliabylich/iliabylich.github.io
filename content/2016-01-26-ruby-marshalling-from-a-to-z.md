@@ -2,7 +2,6 @@
 title: "Ruby Marshalling from A to Z"
 date: "2016-01-26"
 cover: ""
-tags: ["Ruby", "marshalling", "serialization", "TLV"]
 ---
 
 ## What is Marshalling

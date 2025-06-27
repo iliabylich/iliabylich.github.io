@@ -2,7 +2,6 @@
 title: "Apipie - amazing tool for documenting your Rails API"
 date: "2015-06-08"
 cover: ""
-tags: ["Ruby", "Apipie", "documenting", "API"]
 ---
 
 ## Apipie

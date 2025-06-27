@@ -2,7 +2,6 @@
 title: "Saving execution context for later debugging"
 date: "2015-08-21"
 cover: ""
-tags: ["Ruby", "binding", "closure", "debugging"]
 ---
 
 ## The problem

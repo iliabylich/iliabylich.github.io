@@ -35,16 +35,3 @@
   font-weight: normal;
   color: var(--text-dim);
 }
-
-#tags {
-  font-weight: normal;
-  color: var(--text-dim);
-}
-
-#tags a {
-  filter: brightness(80%);
-}
-
-#tags a:visited {
-  filter: brightness(80%);
-}

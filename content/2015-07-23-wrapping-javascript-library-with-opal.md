@@ -2,7 +2,6 @@
 title: "Wrapping JavaScript library with Opal"
 date: "2015-07-23"
 cover: ""
-tags: ["Ruby", "Opal"]
 ---
 
 ## Introduction

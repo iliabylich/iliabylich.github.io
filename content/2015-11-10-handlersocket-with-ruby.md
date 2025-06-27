@@ -2,7 +2,6 @@
 title: "HandlerSocket + Ruby"
 date: "2015-11-10"
 cover: ""
-tags: ["Ruby", "MySQL", "HandlerSocket", "databases", "SQL", "NoSQL"]
 ---
 
 ## What is HandlerSocket (HS)

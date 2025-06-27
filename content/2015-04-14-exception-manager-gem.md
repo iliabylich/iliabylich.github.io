@@ -2,7 +2,6 @@
 title: "ExceptionManager gem"
 date: "2015-04-14"
 cover: ""
-tags: ["ruby", "gem", "exceptions"]
 ---
 
 ## What is this?

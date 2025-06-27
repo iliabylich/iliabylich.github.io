@@ -2,7 +2,6 @@
 title: "Evaluating Ruby in Ruby"
 date: "2020-01-26"
 cover: ""
-tags: ["Ruby", "VM"]
 ---
 
 ## TL;DR

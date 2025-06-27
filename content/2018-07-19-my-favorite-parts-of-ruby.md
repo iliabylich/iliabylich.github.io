@@ -2,7 +2,6 @@
 title: "My favorite parts of Ruby"
 date: "2018-07-19"
 cover: ""
-tags: ["Ruby"]
 ---
 
 ## Before we start

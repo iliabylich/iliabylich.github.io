@@ -2,7 +2,6 @@
 title: "Capybara and asynchronous stuff"
 date: "2015-07-01"
 cover: ""
-tags: ["Ruby", "Capybara", "WebDriver"]
 ---
 
 ## What is Capybara, Poltergeist and PhantomJS?

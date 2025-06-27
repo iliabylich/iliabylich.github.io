@@ -2,7 +2,6 @@
 title: "What is Ruby DSL"
 date: "2015-05-26"
 cover: ""
-tags: ["Ruby", "DSL"]
 ---
 
 ## What is Ruby DSL?
