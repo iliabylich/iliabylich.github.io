@@ -27,15 +27,10 @@
   <meta name="description" content="{{ .Title }}">
 
   {{ with .OutputFormats.Get "rss" -}}
-  {{ printf `
-  <link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}
+  <link rel="{{ .Rel }}" type="application/rss+xml" href="{{ .Permalink }}" title="{{ $.Site.Title }}" />
   {{ end -}}
 
-  {{ if .IsHome }}
-  <title>{{ .Site.Title }}</title>
-  {{ else }}
-  <title>{{ .Title }} | {{ .Site.Title }}</title>
-  {{ end }}
+  <title>{{ .Title }}</title>
 
   <!-- Prevent flicker on page load. -->
   <style>
