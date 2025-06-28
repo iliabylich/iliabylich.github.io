@@ -1,7 +1,10 @@
-<nav>
-    <ul class="menu">
+<nav class="pt-5 pb-5">
+    <ul class="flex flex-row items-center justify-start">
         {{ range .Site.Menus.main }}
-        <li><a tabindex="-1" class="menu-link" href="{{ .URL | relURL }}">{{ safeHTML .Name }}</a></li>
+        <li class="pr-3">
+            <a class="text-blue-500 hover:underline dark:text-blue-300" href="{{ .URL | relURL }}">{{ safeHTML .Name
+                }}</a>
+        </li>
         {{ end }}
     </ul>
 </nav>

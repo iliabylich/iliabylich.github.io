@@ -3,28 +3,46 @@ languageCode = "en-us"
 title = "Ilya Bylich - Blog"
 
 [menu]
-  [[menu.main]]
-    name = "Home"
-    pre = "home"
-    url = "/"
-    weight = 1
-  [[menu.main]]
-    name = "GitHub"
-    pre = "github"
-    url = "https://github.com/iliabylich"
-    weight = 2
-  [[menu.main]]
-    name = "Twitter"
-    pre = "twitter"
-    url = "https://twitter.com/IlyaBylich"
-    weight = 3
-  [[menu.main]]
-    name = "Email me"
-    pre = "email-me"
-    url = "mailto:ibylich@gmail.com"
-    weight = 4
 [[menu.main]]
-    name = "RSS"
-    pre = "rss"
-    url = "/index.xml"
-    weight = 5
+name = "Home"
+pre = "home"
+url = "/"
+weight = 1
+[[menu.main]]
+name = "GitHub"
+pre = "github"
+url = "https://github.com/iliabylich"
+weight = 2
+[[menu.main]]
+name = "Twitter"
+pre = "twitter"
+url = "https://twitter.com/IlyaBylich"
+weight = 3
+[[menu.main]]
+name = "Email me"
+pre = "email-me"
+url = "mailto:ibylich@gmail.com"
+weight = 4
+[[menu.main]]
+name = "RSS"
+pre = "rss"
+url = "/index.xml"
+weight = 5
+
+[build]
+[build.buildStats]
+enable = true
+[[build.cachebusters]]
+source = 'assets/notwatching/hugo_stats\.json'
+target = 'css'
+[[build.cachebusters]]
+source = '(postcss|tailwind)\.config\.js'
+target = 'css'
+[module]
+[[module.mounts]]
+source = 'assets'
+target = 'assets'
+[[module.mounts]]
+disableWatch = true
+source = 'hugo_stats.json'
+target = 'assets/notwatching/hugo_stats.json'

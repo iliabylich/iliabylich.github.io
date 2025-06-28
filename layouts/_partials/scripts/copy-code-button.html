@@ -1,31 +1,17 @@
-<script defer>
-  function addCopyButtonToCodeBlocks() {
-    // Get all code blocks with a class of "language-*"
-    const codeBlocks = document.querySelectorAll('code[class^="language-"]');
+<script type="module" defer>
+  const copyToClipboard = (e) => {
+    const button = e.target;
+    const src = button.nextElementSibling.textContent
+    navigator.clipboard.writeText(src)
 
-    codeBlocks.forEach((codeBlock) => {
-      const copyButton = document.createElement("button");
-      copyButton.classList.add("copy-code-button");
-      copyButton.innerHTML = "copy";
-
-      // Add a click event listener to the copy button
-      copyButton.addEventListener("click", () => {
-        // Copy the code inside the code block to the clipboard
-        const codeToCopy = codeBlock.textContent;
-        navigator.clipboard.writeText(codeToCopy);
-
-        // Update the copy button text to indicate that the code has been copied
-        copyButton.innerHTML = "copied!";
-        setTimeout(() => {
-          copyButton.innerHTML = "copy";
-        }, 1500);
-      });
-
-      // Add the copy button to the code block
-      codeBlock.parentNode.before(copyButton);
-    });
+    const originalText = button.innerText
+    button.innerText = "copied!"
+    setTimeout(() => {
+      button.innerText = originalText
+    }, 1500);
   }
-  setTimeout(function () {
-    addCopyButtonToCodeBlocks();
-  }, 100);
+
+  Array.from(document.querySelectorAll("[data-copy]")).forEach(button => {
+    button.addEventListener("click", copyToClipboard)
+  })
 </script>

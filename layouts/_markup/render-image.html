@@ -1,3 +1,10 @@
-<p class="imgp">
-  <img loading="lazy" src="{{ .Destination | safeURL }}" alt="{{ .Text }}" {{ with .Title}} title="{{ . }}"{{ end }} />
+{{ $external := strings.Contains .Destination "://" }}
+<p class="text-center">
+  {{- if $external }}
+  <img class="inline" loading="lazy" src="{{ .Destination | safeURL }}" alt="{{ .Text }}" />
+  {{ else }}
+  {{ $image := .Page.Resources.Get .Destination }}
+  <img class="inline" loading="lazy" src="{{ $image.RelPermalink }}" width="{{ $image.Width }}"
+    height="{{ $image.Height }}">
+  {{ end }}
 </p>

@@ -1,16 +1,17 @@
 {{ define "main" }}
 
-<h2 class="section-title">
+<h2 class="font-bold text-2xl pb-5">
     {{ .Title }}
 </h2>
 
-<ul class="post-list">
+<ul class="list-disc list-inside">
     {{ range .CurrentSection.RegularPages }}
     <li>
-        <div style="display: grid; grid-template-columns: 7em auto">
-            <span class="date">{{ .Date.Format "Jan 2, 2006" }}</span>
-            <a href="{{ or .Params.relPermalinkOverride .RelPermalink }}">{{ .Page.Title | markdownify }}</a>
-        </div>
+        <span class="inline-block w-30 text-sm">{{ .Date.Format "Jan 2, 2006" }}</span>
+        <a class="text-blue-500 hover:underline dark:text-blue-300"
+            href="{{ or .Params.relPermalinkOverride .RelPermalink }}">
+            {{ .Page.Title | markdownify }}
+        </a>
     </li>
     {{ end }}
 </ul>

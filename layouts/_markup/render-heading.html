@@ -1,0 +1,9 @@
+{{- $class := "" }}
+{{- if eq .Level 1 }}{{- $class = "text-4xl" }}{{- end }}
+{{- if eq .Level 2 }}{{- $class = "text-2xl" }}{{- end }}
+{{- if eq .Level 3 }}{{- $class = "text-xl" }}{{- end }}
+
+<h{{ .Level }} id="{{ .Anchor }}" class="{{ $class }} border-b-2 mt-8 mb-2 border-black dark:border-gray-400">
+    {{ .Text }}
+    <a href="#{{ .Anchor }}">#</a>
+</h{{ .Level }}>
