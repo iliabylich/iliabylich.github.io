@@ -11,6 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+      - run: npm install
+
       - uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: 'latest'
