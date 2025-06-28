@@ -5,7 +5,7 @@ cover: ""
 ---
 Today I have tested version 3.0.0 of Redis server which includes Redis cluster. Here are some first thoughts about this.
 
-## Setup
+# Setup
 
 Here are my servers:
 ```text
@@ -57,7 +57,7 @@ Then we can start Redis
 $ src/redis-server ./redis.conf
 ```
 
-## Cluster configuration
+# Cluster configuration
 
 We need to update our configuration file for each node
 
@@ -103,7 +103,7 @@ No cluster configuration found, I'm a1eec932d923b55e23a5fe6a488ed7a97e27c826
 
 So, our Redis server is running in cluster mode (... repeating same steps on other nodes ...)
 
-## Connecting nodes
+# Connecting nodes
 
 Now we have 3 nodes:
 ```text
@@ -185,7 +185,7 @@ M: 7a092b06c8c75e98176b7612e74d2e89e8b3eda7 192.168.173.227:6379
 
 That's it!
 
-## Testing our cluster
+# Testing our cluster
 
 Here is how to check the status of the cluster:
 
@@ -198,7 +198,7 @@ $ src/redis-cli -h node2 cluster nodes
 
 Every single node knows about others, so the previous command can be executed on any node.
 
-## Benchmarks
+# Benchmarks
 
 Let's setup [`redis-rb-cluster`](https://github.com/antirez/redis-rb-cluster)
 
@@ -231,7 +231,7 @@ $ ruby consistency-test.rb node1 6379
 
 This tool writes a huge amount of data to Redis and check whether previously written data is still there.
 
-## Testing the failover
+# Testing the failover
 
 This chapter is something that I still don't understand. I have tried to reproduce it many times and every time I have the same result.
 
@@ -339,11 +339,11 @@ $ src/redis-cli -p 7001 get qwe
 
 I hope this will be fixed soon.
 
-## Conclusion
+# Conclusion
 
 According to [the repository](https://github.com/antirez/redis-rb-cluster#redis-rb-cluster) there are still a lot of things that need to be done before using Redis Cluster in production, but I would like to say Thanks to all contributors of Redis, `redis-rb` and `redis-rb-cluster`. Good job and looking forward to use in the real-world!
 
-## Links
+# Links
 
 + [official tutorial](http://redis.io/topics/cluster-tutorial)
 

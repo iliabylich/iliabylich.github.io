@@ -4,7 +4,7 @@ date: "2015-06-08"
 cover: ""
 ---
 
-## Apipie
+# Apipie
 
 This article is about [Apipie gem](https://github.com/Apipie/apipie-rails) which provides a DSL for documenting your API. I will try to cover features that I personally use on my project.
 
@@ -34,9 +34,9 @@ end
 
 So, you invoke a DSL from Apipie before your action method and it automatically comes to generated docs.
 
-## Features
+# Features
 
-### Gathering information from your routes
+## Gathering information from your routes
 
 In the example above we have passed an HTTP verb and a path of this action. We don't have to do it! Instead, we can simply write:
 
@@ -53,13 +53,13 @@ It automatically takes information from your routes that look like
 resources :users, only: [:create]
 ```
 
-### API versioning
+## API versioning
 
 You can pass versions of your API that include this endpoint on
 1. resource level (as in example)
 2. action level (in pretty much the same way, `api_versions ...`
 
-### Parameters typing
+## Parameters typing
 
 As you can see, in the first example we had 3 types:
 1. `Hash`
@@ -70,7 +70,7 @@ Apipie has also:
 4. `Enum`
 5. `Regexp`
 
-### Parameters validation
+## Parameters validation
 
 We have already typed parameters, so why do we ignore it and write custom `before_action`-s for validating parameters manually? This feature is enabled by default, but if you don't think that it's a good idea to validate your parameters through documenting tool, just pass
 
@@ -80,7 +80,7 @@ config.validate = false
 
 The creator of the gem told me that 'People either love it or don't understand why it's even there', so it's up to you to decide if you need it.
 
-### Concerns
+## Concerns
 
 I would say that it does not work as people usually expect.
 
@@ -90,22 +90,22 @@ I would say that it does not work as people usually expect.
 
 Usually people think that it allows you to extract documentation from your controller in order to not mix code with documentation and application logic. And, to be honest, I think so too. The workaround for doing this goes below in the sections 'Extracting docs to mixins'
 
-### Specs recording
+## Specs recording
 
 Are you tired of writing examples manually? Me too :) With Apipie you can record request/response pairs to separated YAML file and display them in generated HTML. Pass `:show_in_doc` to metadata of your RSpec example and enjoy. Apipie embeds a module for recording requests to `    ActionController::TestCase::Behavior` which is the core of all requests specs for RSpec and Minitest (yes, both of them delegate performing requests internally to `ActionController::TestCase::Behavior` - [source](https://github.com/rspec/rspec-rails/blob/master/lib/rspec/rails/example/controller_example_group.rb#L12)).
 
-### Other features
+## Other features
 There is a plenty of other things in Apipie that are very cool, by I did not have a chance to use it yet.
 
 1. Localization. Currently it supports English, Russian, Chinese and Brazilian. If you want to add support for your language, use this as an example - [source](https://github.com/Apipie/apipie-rails/blob/master/config/locales/en.yml)
 2. Disqus integration. This is extremely useful when you have a decentralized team. If you have any questions - just leave a comment and wait for response! No need to define any models for storing users/comments/relations, everything is in the cloud.
 3. Custom markup processors. Not sure that anyone can need it, default markup processor looks very stable.
 
-## Customization
+# Customization
 
 Some of these items can be difficult to explain, if you have any questions after reading it, just google it, answers for all of them should be in ruby docs (or ping me if you still don't get it).
 
-### Extracting docs to mixins
+## Extracting docs to mixins
 
 This is the main question I have got after reading official README. I don't want to mix documentation and application logic. First of all we need to understand how exactly Apipie builds mapping between action names and compiled DSL. Even without reading source code the only guess that we may have is `method_added` hook. Every time when you define a method (on instance or on class, it does not matter), Ruby automatically fires `method_added` method on your class.
 
@@ -234,7 +234,7 @@ Refresh the page with documentation and see that it finally works!
 Here is a gist with a full code that wraps ugly code and blank methods:
 [full gist](https://gist.github.com/iliabylich/c8032b193405673062e7)
 
-### The power of ruby-based doc
+## The power of ruby-based doc
 
 Imagine the following scenario:
 
@@ -309,7 +309,7 @@ module Api::V1::UsersDoc
 end
 ```
 
-### Ability to define default documentation for all actions in resource
+## Ability to define default documentation for all actions in resource
 
 So, we have a `resource_description` and `api` methods, but how can we define common parts for all of our actions? I hate copy-paste driven development, let's write a DSL for this.
 
@@ -337,7 +337,7 @@ end
 
 So, we just store passed block and invoke it. This example is much simpler then the previous one.
 
-## Demo
+# Demo
 
 [URL](https://github.com/iliabylich/apipie-demo)
 
@@ -347,7 +347,7 @@ You can click by statically generated docs (thanks to GitHub pages):
 + [`Private::V2`](http://iliabylich.github.io/apipie-demo/doc/apidoc/private_v2.html)
 + [`Public`](http://iliabylich.github.io/apipie-demo/doc/apidoc/public.html)
 
-## Conclusion
+# Conclusion
 
 Apipie is an amazing library and its most significant advantage is that you document ruby using ruby (being a ruby developer), which gives you ability to define custom behaviors and scenarios. I can't even imagine myself writing API docs using `yardoc` (however, I use it to document plain ruby classes).
 

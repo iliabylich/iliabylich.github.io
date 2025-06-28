@@ -4,7 +4,7 @@ date: "2018-07-19"
 cover: ""
 ---
 
-## Before we start
+# Before we start
 
 **Disclaimer #1** first of all I'd like to say that I really like Ruby. I write a ton of Ruby code every single day and I prefer it over other languages. Please, do not take it seriously, Ruby is nice, and this post is mostly a joke.
 
@@ -12,7 +12,7 @@ cover: ""
 
 I was thinking for a while which item should go first, but finally I had to give up. I think all items are funny.
 
-## Regexp 'o' flag
+# Regexp 'o' flag
 
 I don't even know if there's anyone in the world using it. `o` flag is a very, very magical thing that "freezes" a regexp after parsing:
 
@@ -29,7 +29,7 @@ pry> 3.times.map { |i| /#{i}/o.object_id }
 
 That's a special syntax to define an inline regexp as a constant. It is a constant because its value is constant (`object_id` returns the same value). I think the main purpose of such flag is to reduce objects allocation, and I believe it was not initially designed for such cases. If you are too lazy to extract a static regexp to a constant, simply add an `o` flag.
 
-## Invalid encoding
+# Invalid encoding
 
 Well, I have to confess, sometimes I hate Ruby for various reasons, this feature is one of them.
 
@@ -56,7 +56,7 @@ In this case string is not a "real" string. This bytes sequence is simply invali
 2. raise an error when someone tries to put wrong bytes sequence to the string
 3. remove `String#valid_encoding?` method
 
-## Nested HEREdocs
+# Nested HEREdocs
 
 ```ruby
 p <<"A#{b}C"
@@ -70,7 +70,7 @@ A#{b}C
 
 I'm quite sure that there are no syntax highlighters that can **properly** handle this code. At the moment of writing GitHub is unable to do that. Try evaluating this code in IRB.
 
-## Setters and return values
+# Setters and return values
 
 As you most probably know in Ruby setters can't have return values. They always return their arguments:
 
@@ -100,7 +100,7 @@ pry> self.[]= 'return me'
 
 I can't imagine any reason to use such syntax, most probably it should be deprecated.
 
-## Passing blocks to the [] method
+# Passing blocks to the [] method
 
 Imagine the following piece of code:
 
@@ -134,7 +134,7 @@ Yes, this syntax was introduced in Ruby 2.5. Did you hear any announcements abou
 
 **Spoiler: there are no tests for this syntax in ruby/ruby repository. Guess why?**
 
-## Global variables
+# Global variables
 
 Let's take a simple code:
 
@@ -163,7 +163,7 @@ end
 
 After doing `require 'english'` you get two aliases for this global variable: `$OUTPUT_FIELD_SEPARATOR` and `$OFS`, that's the real name of this global variable.
 
-## Instance variables without @ prefix
+# Instance variables without @ prefix
 
 Spoiler: you may think that it's impossible because the parser rejects such code. But in fact, Ruby allows it and there are even some specs for this - [RubySpec](https://github.com/ruby/spec/blob/master/optional/capi/object_spec.rb#L803). I don't know much about Ruby internals, but at least one class uses instance variables without `@`, it's called `Range`. `(0..3)` has 3 instance variables:
 
@@ -206,7 +206,7 @@ The conclusion is simple: `excl` is an instance variable, but `Kernel#instance_v
 
 You can read my article about marshalling to get a full overview of its internals.
 
-## Implicit coercing
+# Implicit coercing
 
 As you may know there are two types of coercing in Ruby: explicit and implicit.
 
@@ -267,7 +267,7 @@ I'm not sure that this feature is required. But remember, that's only my opinion
 
 Explicit coercing is explicit and forces you to call `to_a/to_h/to_s` manually. Probably it would be better to restrict `*/**/&` operators to accept only `Array/Hash/Proc` objects (and to be as strict as possible).
 
-## Implicit `to_a`
+# Implicit `to_a`
 
 Previous section says that Ruby never invokes methods for explicit coercing on its own. There's one exception: `to_a` method.
 
@@ -289,7 +289,7 @@ p [a, b, c]
 
 For some reason the concept of implicit/explicit coercing does not work for this case.
 
-## HEREdoc identifiers and newlines
+# HEREdoc identifiers and newlines
 
 The section about nested HEREdocs shows a HEREdoc identifier that has an interpolation inside. Also, it's possible to use `"\n"`:
 
@@ -302,7 +302,7 @@ HERE
 
 it prints `"content\n"`. For some reason newline is not allowed in the middle of the HEREdoc identifier (and don't get me wrong, I think that newlines should be rejected, no matter in the middle or in the end).
 
-## `1if true`
+# `1if true`
 
 Yes, that's a valid syntax. Ruby has very special rules for white-spaces and newlines. `1i` is a special syntax for complex numbers, but `1if true` is `1 if true`. There's also a `1r` syntax for rational numbers, and yes, `1rescue nil` is `1 rescue nil`.
 
@@ -343,7 +343,7 @@ def m; 1redo; end
 
 Looks like there are special rules for keyword modifiers.
 
-## `defined?`
+# `defined?`
 
 I think this is the most controversial keyword in Ruby. It takes literally everything as an argument.
 
@@ -402,7 +402,7 @@ pry> defined?(
 
 That's too much for a single keyword.
 
-## `return` in the class/module body
+# `return` in the class/module body
 
 You can't call `return` from a module/class body:
 
@@ -433,7 +433,7 @@ pry> class << self; return; end if false
  => nil
 ```
 
-## Meta-characters
+# Meta-characters
 
 Again, this is something that probably could be removed from Ruby, I don't know anyone using it.
 
@@ -467,7 +467,7 @@ pry> "\u{    123   456   }"
  => "ģі"
 ```
 
-## Invisible rest argument
+# Invisible rest argument
 
 MRI has a special rule for `Proc` class: it expands a single array argument:
 
@@ -521,7 +521,7 @@ pry> Ripper.sexp('proc{|a,|}')[1][0][2][1][1]
 
 Do you see the difference?
 
-## Dynamicity of `optarg` default values
+# Dynamicity of `optarg` default values
 
 In Ruby optional arguments are very, very powerful. You can pass pretty much anything as a default value of the argument in the method signature:
 
@@ -578,7 +578,7 @@ p factorial(5)
 
 Yes, this method has no body but is still capable of calculating factorial.
 
-## Shadow arguments
+# Shadow arguments
 
 I think only people that work with parsing tools are aware of this feature. That's a special kind of argument that "shadows" outer variable. The syntax is `|;shadowarg|`:
 
@@ -591,7 +591,7 @@ pry> n = 1; proc { |;n| n }.call
 
 Basically, it's nice to have an ability to use own isolated set of local variables in your block and be sure that you don't change an outer scope. But again, does anyone use it? And also it reminds me a `var` keyword from the JavaScript.
 
-## Dynamicity of rescue
+# Dynamicity of rescue
 
 Take a look at the following code:
 
@@ -619,7 +619,7 @@ That's definitely very, very flexible but does anyone need it? I'd better reject
 
 I have seen the first snippet in the real codebase and it was quite difficult to understand why the spec that asserts something like `expect { code construction }.to raise_error(RuntimeError)` does not work.
 
-## Positional/keyword arguments
+# Positional/keyword arguments
 
 I used to think that positional and keyword arguments act like two completely separate groups of arguments. If the last argument is a Hash and you pass it to the method call it
 
@@ -646,6 +646,6 @@ I feel like it's a bug:
 4. And `a` must be `{ b: 2, 'b' => 3 }`
 5. And so `b` must be just `1` (default value)
 
-## Final words
+# Final words
 
 This story is not about bad parts of Ruby or anything like that. Don't feel bad because of this - I'm really sorry. I was trying to cover some rarely used features and explain as much as I can.

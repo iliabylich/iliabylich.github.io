@@ -4,7 +4,7 @@ date: "2015-07-01"
 cover: ""
 ---
 
-## What is Capybara, Poltergeist and PhantomJS?
+# What is Capybara, Poltergeist and PhantomJS?
 
 In this part I will try to cover the following aspects:
 
@@ -13,15 +13,15 @@ In this part I will try to cover the following aspects:
 3. Wrapping it into some common solution
 4. Advanced example - working with IndexedDB from Capybara
 
-### PhantomJS
+## PhantomJS
 
 First of all, we need to know what is PhantomJS. I would say it's a 'tool that acts like a browser but can be controlled from outside using simple command interface'. In more common words, it's a web driver. It's a full-featured WebKit (an engine of Chrome/Safari/few last versions of Opera and other browsers), but in console. You can use it for scripting, automating or testing.
 
-### Poltergeist
+## Poltergeist
 
 Poltergeist is a Ruby wrapper for PhantomJS. Usually you write the code for PhantomJS on JavaScript, with Poltergeist you can run it on Ruby.
 
-### Capybara
+## Capybara
 
 Well, I'm pretty sure you know what it is. It's a test framework. And it supports different web drivers like:
 
@@ -43,7 +43,7 @@ Disadvantages:
 
 `Poltergeist` - see above, headless WebKit, **does not require X server**, so you can run it everywhere.
 
-## Asynchronous JavaScript code in your tests
+# Asynchronous JavaScript code in your tests
 
 When you write integration tests sometimes you need to run asynchronous JavaScript in context of your page and get a response back to Ruby. Here is an example from my current project: the client part of our application supports offline mode, so we store the data in WebSQL and sync it with server once connection is restored. The API of WebSQL is asynchronous, so we have a result of execution in some provided callback:
 
@@ -58,7 +58,7 @@ We have integration tests with Capybara+Poltergeist+PhantomJS combo that tests t
 
 All these features require us to run JavaScript code manually in PhantomJS between/before tests.
 
-## Capybara/Poltergeist/PhantomJS installation
+# Capybara/Poltergeist/PhantomJS installation
 
 Quite simple:
 1. PhantomJS: `sudo apt-get install phantomjs` or download binaries from the official site (you can even try 2.0 beta there).
@@ -96,7 +96,7 @@ Capybara.default_driver = :poltergeist_debug
 
 With this configuration Poltergeist does not print any noisy output, but you can enable it by passing `DEBUG_PHANTOMJS=true`
 
-## Small example
+# Small example
 
 Here is a simple of the code that returns it's response asynchronously:
 
@@ -108,7 +108,7 @@ setTimeout(function() {
 
 This code actually does nothing, but it's a demonstration of how asynchronous stuff works.
 
-## But... Capybara waits for my AJAX requests
+# But... Capybara waits for my AJAX requests
 
 Yes, when you write something like:
 
@@ -129,7 +129,7 @@ It runs the code again and again, and stops if
 
 (A little remark here. Capybara saves the time on the beginning of this method and on every iteration compares this time with `Time.now` - this is a very nice hack to save Capybara from wrapping API calls into `Timecop.freeze` - good job!)
 
-## Can we reuse it?
+# Can we reuse it?
 
 Yes, of course. Let's simplify it a little bit:
 ```ruby
@@ -196,7 +196,7 @@ puts result
 # => 'some response'
 ```
 
-## Can we organize it as a common reusable solution?
+# Can we organize it as a common reusable solution?
 
 Why not. Here is a gem called [`capybara-async-runner`](https://github.com/iliabylich/capybara-async-runner). And here is how to use it.
 
@@ -261,7 +261,7 @@ There are few things that I need to explain:
 
 If you are familiar with templates in Ruby, just quickly look at the [code](https://github.com/iliabylich/capybara-async-runner/blob/master/lib/capybara/async_runner/env.rb), this class is a context of rendering.
 
-## Wrapping up
+# Wrapping up
 
 You need to follow these steps to create a command using a gem:
 1. Specify the directory with templates in the gem configuration file
@@ -272,7 +272,7 @@ You need to follow these steps to create a command using a gem:
 6. Define a response(s)
 7. Call them in the template
 
-## Passing data to template
+# Passing data to template
 
 You can pass any data to the template:
 
@@ -303,7 +303,7 @@ someLongRunningMethod(function() {
 })
 ```
 
-## Let's write something complex
+# Let's write something complex
 
 As I mentioned before, on my current project we use WebSQL, but it's [deprecated](http://www.w3.org/TR/webdatabase/), so I'm not going to use it in examples. Instead let's write a wrapper for IndexedDB.
 
@@ -316,13 +316,13 @@ Let's plan our scenario:
 4. Write some data to the database
 5. Read them and print
 
-### Visiting the page
+## Visiting the page
 
 ```ruby
 Capybara.current_session.visit('http://google.com')
 ```
 
-### Injecting `Dexie.js` into the page
+## Injecting `Dexie.js` into the page
 
 + [Command](https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/commands/wrapper_loader.rb)
 + [Template](https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/templates/wrapper/inject.js.erb)
@@ -350,7 +350,7 @@ All this manipulations are synchronous for Ruby. The end of running the command 
 
 Moreover, this command is safe, we can call it multiple times and it will inject the script into the page only once.
 
-### Create IndexedDB instance
+## Create IndexedDB instance
 
 + [Command](https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/commands/wrapper_initializer.rb)
 + [Template](https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/templates/wrapper/initialize.js.erb)
@@ -368,7 +368,7 @@ Explanation:
 3. If `errback` was called, returns `error` with error message
 4. Ruby command raises error if `error` was returned
 
-### Write some data to the database
+## Write some data to the database
 
 + [Command](https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/commands/insert.rb)
 + [Template](https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/templates/commands/insert.js.erb)
@@ -384,7 +384,7 @@ p "User ID: #{user_id}"
 
 This step is quite simple if you understand the previous one.
 
-### Reading data
+## Reading data
 
 + [Command](https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/commands/query.rb)
 + [Template](https://github.com/iliabylich/capybara-async-runner/blob/master/examples/indexeddb/templates/commands/query.js.erb)
@@ -407,7 +407,7 @@ After wrapping it even more we can get interface like [this](https://github.com/
 
 Full example can be found [here](https://github.com/iliabylich/capybara-async-runner/tree/master/examples/indexeddb)
 
-## Conclusion
+# Conclusion
 
 I would say the topic of this article is not so popular. Single page applications that work in offline mode (and because of this, use WebSQL/IndexedDB/some other asynchronous storage, probably) are still not frequent today. Usually when you build an SPA, you just write your tests using Jasmine or something like that. You mock your requests to the server API and test your client in some isolated environment. But these tests are still functional (you verify a single component - client, in this case - but not the whole application).
 

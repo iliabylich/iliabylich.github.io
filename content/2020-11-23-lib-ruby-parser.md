@@ -4,7 +4,7 @@ date: "2020-11-23"
 cover: ""
 ---
 
-## Intro
+# Intro
 
 So, I'm ready to announce that I have finished working on a new Ruby parser. It's called `lib-ruby-parser`.
 
@@ -16,7 +16,7 @@ Key features:
 4. It's precise. Unlike `whitequark/parser`, its lexer (or tokenizer if it sounds better for you) is based on MRI's `parse.y`. What does it mean? It means that I was not able to find any difference in tokenizing on 3 million lines of code that I have got by pulling sources of top 300 gems (by total downloads). I'll mention how I track it soon.
 5. It does not depend on Ruby. In fact, it has absolutely no "required" dependencies (only a few optional ones). So, it's possible to write bindings for any other language, and I have made them for C/C++/Node.js. Of course, it's possible to have bindings for Ruby (because there are bindings for C and it's easy to reuse them)
 
-## Implementation
+# Implementation
 
 Current performance (in release mode, with `jemalloc`) is ~200000 LOC/s. I think it can even be used for syntax highlighting (and in the browser, too, haha).
 
@@ -262,7 +262,7 @@ struct IfTernary {
 
 I have got the same performance as Ripper.
 
-## Future improvements
+# Future improvements
 
 I keep thinking about turning `lib-ruby-parser` into zero copy parser and I'm believe it's very possible.
 
@@ -307,7 +307,7 @@ However, then `input` must live as long as tokens and AST, and it sounds a bit p
 
 One option that I see is adding `Rc<Input>` to such values and store a range in `SubstringOfInput` enum variant. That's basically a `shared_ptr` from C++ world that wraps a raw pointer (like `T*`) + (pointer to) a number of existing "clones" of this pointer. Every time you copy it the shared number is incremented, destructor decreases it and once it's zero it also deletes `T`. It's quite cheap in terms of performance (something like `*n += 1` in constructor, `*n -= 1; drop(ptr) if n == 0;` in destructor)
 
-## C bindings
+# C bindings
 
 GitHub repository - [https://github.com/lib-ruby-parser/c-bindings](https://github.com/lib-ruby-parser/c-bindings)
 
@@ -317,7 +317,7 @@ The API is very similar, there's an additional layer between C and Rust that con
 
 It uses a combination of `enum` and `union` to represent a `Node`.
 
-## C++ bindings
+# C++ bindings
 
 [https://github.com/lib-ruby-parser/cpp-bindings](https://github.com/lib-ruby-parser/cpp-bindings)
 
@@ -329,7 +329,7 @@ Also, my `valgrind` on Mac could not detect calling `free` on `C++` object (that
 
 It uses modern `std::variant<Nodes...>` to represent a `Node`.
 
-## Node bindings
+# Node bindings
 
 As a proof of concept I also created bindings for Node.js - [https://github.com/lib-ruby-parser/node-bindings](https://github.com/lib-ruby-parser/node-bindings).
 
@@ -358,13 +358,13 @@ And I like that `node-addon-api` handles it [even better](https://github.com/nod
 
 Node.js bindings are based on C++ bindings from the previous section and they use a custom JavaScript class for each node type. Yes, there's also an extra layer that converts C++ objects to JavaScript.
 
-## WASM
+# WASM
 
 Rust can be compiled to WebAssembly, here's a demo - [https://lib-ruby-parser.github.io/wasm-bindings](https://lib-ruby-parser.github.io/wasm-bindings).
 
 It worked out of the box with one minor change. I had to mark `onigurama` dependency as optional and disable it for WASM build. Oh, I love how Rust can turn dependency into a feature that is optional and enabled/disabled by default as you configure it.
 
-## Final thoughts
+# Final thoughts
 
 This is one of the biggest open-source projects that I have ever made. It can be used from Rust/C/C++/Node.js/browser. It's fast (but remember, it can get even faster), it's precise and it's very strongly typed.
 

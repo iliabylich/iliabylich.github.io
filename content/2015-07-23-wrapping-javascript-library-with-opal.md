@@ -4,15 +4,15 @@ date: "2015-07-23"
 cover: ""
 ---
 
-## Introduction
+# Introduction
 
 The task that is solved here is not real, but it's still a good example of (probably?) real work with Opal. I could choose some complex enough JavaScript library and write a simple wrapper using Opal, but there's no fun. Instead, let's write a wrapper for existing rich client-side application (it may show you how to wrap your existing application logic). Well, wrapper for something like a client-side scheduler may sound boring, so I have chosen a JavaScript-based browser game called [`BrowserQuest`](http://browserquest.mozilla.org) [written](https://github.com/mozilla/BrowserQuest) by Mozilla, and I'll show you how to write a bot for it using Opal.
 
-## Opal
+# Opal
 
 There are so many posts about [Opal](https://github.com/opal/opal), so I'm just going to say "it's a Ruby to JavaScript" compiler, that's enough.
 
-## Environment
+# Environment
 
 First of all, we need something that runs the game and injects a bot into the page. I, personally, while writing integration tests (this is the place, where we usually face to web drivers), prefer PhantomJS, but it's headless, so you can't enjoy watching how your bot works. We have to use something like Capybara + Selenium:
 ```ruby
@@ -34,7 +34,7 @@ Capybara.run_server = false
 
 So, the script registers a driver, specifies its browser (Firefox), makes it default and runs Capybara in browser mode (i.e. without own server in the background)
 
-## Opening the page
+# Opening the page
 
 Dead simple:
 
@@ -61,7 +61,7 @@ Game.new('http://browserquest.mozilla.org/').play
 
 Now it runs a Firefox and opens the page with the game.
 
-## Compiling Opal
+# Compiling Opal
 
 So, there are two ways to compile Ruby into JavaScript:
 + compiling Ruby code as a string to JavaScript string
@@ -85,7 +85,7 @@ The first way is what we really need:
 4. create a file called `app.rb` that `require`-s other files
 5. embed `app.rb` to the page
 
-## Fetching the data from the game
+# Fetching the data from the game
 
 [This](https://github.com/mozilla/BrowserQuest/blob/master/client/js/main.js#L7) is the place where the main `App` class is created. But! It's defined in anonymous function, so this variable is not available outside the context.
 
@@ -118,7 +118,7 @@ Some explanations:
 + `%x{js code}` just passes provided JavaScript into compiled version (i.e. runs it without any translation)
 + After compiling this file we have access to a variable `currentApplication` that contains an instance of `App` class
 
-## Starting the game
+# Starting the game
 
 As you can see, to start the game you need to:
 1. type your player name
@@ -220,7 +220,7 @@ StartGame.new('Bot player').invoke.then do
 end
 ```
 
-## Time to wrap the code of the game
+# Time to wrap the code of the game
 
 As an enter point we are going to use global JavaScript variable `currentApplication`. It has a property `game` (that, unexpectedly, returns instance of `Game` class). `game` has a `player` property (instance of `Player`) and `entities` property which is an object containing all entities on the map, their types and coordinates. You can easily find their JavaScript implementations in the GitHub repository of the game.
 
@@ -289,7 +289,7 @@ And again, this class can wrap any JavaScript game object, has methods `player`,
 
 (we can test method `say` write now, just put `Game.current.say('Hello')` to the block where the game is ready and start chatting with other players)
 
-## Entities
+# Entities
 
 The game provides a global JavaScript object `Types` with all mobs/items/armors/weapons information, it allows to identify unknown entity, compare armors and weapons by rank. Basically, it provides everything for writing a bot logic.
 
@@ -349,7 +349,7 @@ class EntityCollection
 end
 ```
 
-## Player class
+# Player class
 
 (quickly and without any explanation):
 
@@ -381,7 +381,7 @@ class Player
 end
 ```
 
-## Writing the code of the bot
+# Writing the code of the bot
 
 It's not as difficult once we have all these classes prepared. The algorithm of  farming is like:
 1. Find a closest mob and kill it
@@ -416,7 +416,7 @@ class EntityCollection
 end
 ```
 
-### Killing a mob
+## Killing a mob
 
 ```ruby
 def kill_mob
@@ -427,7 +427,7 @@ def kill_mob
 end
 ```
 
-### Picking up an abstract item
+## Picking up an abstract item
 
 ```ruby
 def pick_up
@@ -435,7 +435,7 @@ def pick_up
 end
 ```
 
-### Picking up a weapon
+## Picking up a weapon
 
 ```ruby
 def get_armor
@@ -454,11 +454,11 @@ def get_armor
 end
 ```
 
-### Picking up an armor
+## Picking up an armor
 
 Just like a previous snippet, but with `armors` instead of `weapons`
 
-### What's missing?
+## What's missing?
 
 All of these steps should return promises, every single method written below should wait for player to stop moving and attacking. To make this we need some common method like:
 ```ruby
@@ -478,7 +478,7 @@ end
 
 And put it to the end of each action method.
 
-## Wrapping a wrapper
+# Wrapping a wrapper
 
 We need the main method `farm`, right?
 
@@ -498,6 +498,6 @@ end
 
 This, is probably the thing that I have personally learned during writing this article. Even if you think in Ruby, you still have to deal with asynchronous components like callbacks/promises. When you need to make an HTTP request in Ruby, you just get you favorite HTTP adapter (mine is `RestClient`), send a request and your interpreter waits for response. In JavaScript you have to process response in some callback, because you can't just stop your interpreter (you know, it blocks UI).
 
-## Conclusion
+# Conclusion
 
 As for me, the main thing Opal gives to you is some ability to think in terms of Ruby classes/modules/inheritance system. But it does not let you completely escape from JavaScript ecosystem (no callbacks? - block is a callback). I would say, most of Opal functionality related to Ruby classes can be replaced with, for example, [`JsClass`](http://jsclass.jcoglan.com/) library (which is really wonderful). Opal allows you to compile **existing** Ruby libraries to JavaScript and use them on the client - this is probably the main feature. Some day significant amount of Ruby libraries will be ported to client-side and probably some day we will think in terms of Ruby even on the client.

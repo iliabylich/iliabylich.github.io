@@ -4,13 +4,13 @@ date: "2021-12-28"
 cover: ""
 ---
 
-## Bindings
+# Bindings
 
 Quite a long time ago I started writing C/C++/Ruby/Node.js/WASM bindings so I could call [my Rust project](https://github.com/lib-ruby-parser/lib-ruby-parser) from those languages. It is a Ruby language parser.
 
 I tried multiple ways and found one that is very (VERY) controversial, but I think it deserves it's own article.
 
-## Traditional way
+# Traditional way
 
 Let's say you have a library in C. Just for simplicity, Rust is not special here.
 
@@ -49,7 +49,7 @@ Cons: really error-prone, libraries designed this way quite frequently have memo
 
 ![traditional-bindings.png](traditional-bindings.png)
 
-## Slow but more reliable solution
+# Slow but more reliable solution
 
 Of course it'd be unfair to not mention that it's always possible to type-cast structures from low-level language to high-level:
 
@@ -66,7 +66,7 @@ A small note on copying: it is possible to "move" some data in certain cases and
 + Node.js has a [`Napi::String`](https://github.com/nodejs/node-addon-api/blob/main/doc/string.md) class for that but it takes either a C++ `const std::string&` or `const char *`. From what I know internals are not available, so copying is necessary.
 + C++ has a `std::string` that does not have a "take-and-store-what's-given" constructor that takes a `char *` (I would call it a "move" constructor, but this name has a different meaning in C++ :D). There's a `const char *` constructor that performs copying. Of course it's possible to create a compiler-dependent type-casting to a class with the same set of fields, move pointer + `len` + capacity there and convert it back to `std::string`. It's ugly, but definitely doable.
 
-## A demo, small but representative
+# A demo, small but representative
 
 Let's start. I'd like to demonstrate a different solution on a tiny example. Let's write a micro-library that has several Rust structs, something like a function that, let's say, takes a `String` and returns a `Vec` of all non-ASCII chars. It's called `foo`.
 
@@ -84,7 +84,7 @@ fn test_foo() {
 
 There are two structs that belong to Rust world exclusively: `Vec` and `char`.
 
-## "Foreign" implementation
+# "Foreign" implementation
 
 Can we expose these two types in C? `Vec` is defined in Rust standard library and it has `#[repr(Rust)]`, `char` is a 4-byte structure with no public layout.
 
@@ -112,7 +112,7 @@ Here "Primitives" will be:
 
 By swapping implementations at link time we can get the same algorithm that works with a different set of structures from different languages. "Link-time polymorphism" seems to be a good name for this concept.
 
-## Example
+# Example
 
 I think it makes sense to start with C, this is what I would like to get eventually:
 
@@ -314,7 +314,7 @@ fn test_foo() {
 
 That was easy, right? Way less elegant but still easy.
 
-## Implementing bindings
+# Implementing bindings
 
 At this point you might have a guess on what's going to happen next. We are going to define a bunch of external C-ABI functions and blindly call them in all `todo!()` places. Later these functions will be implemented by the bindings library on C side:
 
@@ -504,7 +504,7 @@ $ EXTERNAL_LIB_PATH="../c-bindings" \
 
 and we get 1 passing test!
 
-## C++ bindings, quickly
+# C++ bindings, quickly
 
 I want this:
 
@@ -676,7 +676,7 @@ EXTERNAL_LIB_PATH="../cpp-bindings" \
   cargo test --features=external,link-with-cxx-runtime
 ```
 
-## Ruby bindings, also quickly
+# Ruby bindings, also quickly
 
 We want our `Char` to be a Ruby `String` and `CharList` to be an `Array`, in Ruby C API they are both represented as `VALUE` (that is technically a pointer to a tagged union (unless it's a small number/`true`/`false`/`nil`, then it's basically the value itself)).
 
@@ -815,7 +815,7 @@ $ ruby -r./ruby-bindings/foo -e 'p foo("abc😋中国")'
 
 In fact there are many more options that are passed to `clang` above, check out [the repository](https://github.com/iliabylich/writing-bindings-upside-down) if you want to try it yourself.
 
-## Memory leaks
+# Memory leaks
 
 All versions above have a memory leak that can be easily identified by compiling with
 
@@ -925,7 +925,7 @@ void char_list__drop(CharList_BLOB *self)
 }
 ```
 
-## Performance
+# Performance
 
 How about performance? When we compile with Rust primitives we use LTO and so things from Rust standard library can be optimized together with our code. Luckily, there's a way to do that for external primitives too.
 
@@ -1023,7 +1023,7 @@ Rust standard library is compiled directly to object files, but our code is `LLV
 
 Of course, it's not gonna work with Ruby or Node.js, both of them have a giant `libruby.so` (or `libnode.so`) that defines all functions and constants that your extension relies on. The extension itself is compiled with `-Wl,-undefined,dynamic_lookup` and symbol lookup is performed at runtime. I feel like technically it's possible, the entire Ruby/Node.js runtime could be compiled to a static `libruby.a`/`libnode.a` that defines all VM objects as external (because that's a singleton that we need to hook into), but all functions can provide their implementation (of course, in LLVM IR format), and so they can be inlined into our bindings implementation. I haven't experimented with it yet, and honestly I'm not going to :) If you know anything about existing discussions around it, please, ping me on Twitter.
 
-## The whole picture, again
+# The whole picture, again
 
 Demo repository is available [here](https://github.com/iliabylich/writing-bindings-upside-down)
 

@@ -4,11 +4,11 @@ date: "2015-08-21"
 cover: ""
 ---
 
-## The problem
+# The problem
 
 Consider the following situation: you have got an exception in production. Of course, all of us are good developers, but you know, sometimes \*it just happens. What do you usually do to get some information about the error? You just grab the request parameters to test it locally, right? Then I might have a better solution for you: dump your memory once an error happens and restore the dump later to debug it.
 
-## Binding
+# Binding
 
 In Ruby the best candidate for doing this is `Binding` class. If you have a binding, your can easily do some debug using well-known `pry` gem. But the binding itself cannot be dumped (at least not, using default Ruby tools).
 
@@ -30,7 +30,7 @@ Binding encapsulates the execution context at the place in your code where the i
 
 In fact, that's all you need to restore your binding.
 
-## Marshaling
+# Marshaling
 
 How can we dump an arbitrary structure? Ruby has a class in the standard library called `Marshal`. The two core methods of this class are `dump` and `load`:
 ```ruby
@@ -42,7 +42,7 @@ Marshal.load(marshaled)
 # => #<struct Point x=34, y=65>
 ```
 
-## Limitations
+# Limitations
 
 Unfortunately, not everything can be marshaled. According to the documentation, the following objects cannot be dumped:
 + bindings (e.g., the return value of binding itself)
@@ -52,7 +52,7 @@ Unfortunately, not everything can be marshaled. According to the documentation, 
 
 That sound really sad, but in most cases we can ignore these limitations. When was the last time you needed to debug an IO object that was doing something strange? In real life we rarely use any of these classes **during debugging process**. So, instead of dumping and loading back  an `IO` object we can just return a new one.
 
-## Converting objects to marshalable data
+# Converting objects to marshalable data
 
 Well, we can patch every single class in Ruby and add `marshal_load` and `marshal_dump` hooks to them, but that's just horrible. It would be much, much better to write a set of classes that are each responsible for converting a specific group of objects.
 
@@ -101,7 +101,7 @@ After converting this object using a system of dumpers result looks like this:
 
 This hash can be easily marshaled and restored back. But yes, we lose our `StringIO` instance - when the object is loaded back, that variable will be blank.
 
-## Dumping Magical objects
+# Dumping Magical objects
 
 After writing the first version of the library, I have tested it with a blank Rails application. The testing code was:
 ```ruby
@@ -138,7 +138,7 @@ So, it builds a mapping between `object_id` and the way how to get this object. 
 
 After this optimization we have to spend ~20 ms to build an object pool and ~200 ms to dump a binding.
 
-## Dumping recurring objects
+# Dumping recurring objects
 
 We can optimize it even more. A lot of things like `request`, `response` are shared as instance variables across ~10 objects. We can dump our `request` object only once, remember its `object_id` and use a reference while dumping other objects that use it.
 
@@ -154,7 +154,7 @@ In `MEM2` we restore a binding and create a mapping
 
 Using this mapping (in the gem it's called [memories](https://github.com/iliabylich/binding_dumper/blob/master/lib/binding_dumper/memories.rb)) we can restore the reference to duplicated objects.
 
-## Restoring a binding
+# Restoring a binding
 
 At this point you can be really confused, but relax, we are almost done.
 
@@ -211,7 +211,7 @@ end
 
 The actual implementation can be found [here](https://github.com/iliabylich/binding_dumper/blob/master/lib/binding_dumper/core_ext/binding_ext.rb). After calling `Binding.load(dumped).pry` you can start debugging it!
 
-## Compatibility with old versions of Ruby
+# Compatibility with old versions of Ruby
 
 Currently the gem supports Ruby versions from 1.9.3 to 2.2.3. I had a few issues with porting the code from 2.0.0 to 1.9.3, like the lack of keyword arguments and `Module#prepend`. The funniest one was that in versions before 2.1.0 there is no `binding.local_variable_set` - there is only `binding.eval` that takes a string, not a block.
 
@@ -222,22 +222,22 @@ undumped[:lvars].each do |lvar_name, lvar|
 end
 ```
 
-## Known issues
+# Known issues
 
 I have tested the gem locally with a few projects. Everything was fine, but:
 1. Encoding. The data that the gem produces should be stored in UTF-8
 2. The difference between Rails server and Rails console. There are some classes that are loaded only when the server is started (like `Rails::BacktraceCleaner` and some others from `NewRelic` gem). You have to require corresponding files manually before loading the binding in the console.
 
-## Demo
+# Demo
 
 To try it out, clone the [GitHub repository](https://github.com/iliabylich/binding_dumper), install dependencies, prepare the database using `bin/dummy_rake db:create db:migrate`, and start the server via `bin/dummy_rails s`. Then visit [http://localhost:3000/users](http://localhost:3000/users) to dump the binding of `UsersController#index`. After that you can open a console using `bin/dummy_rails c` and run `StoredBinding.last.debug`. You’re now in your controller, in the same state that it was in a moment ago when you hit that /users page!.
 
-## Testing
+# Testing
 
 The gem is fully tested with its specs running on [Travis CI](https://travis-ci.org/iliabylich/binding_dumper/). There's also a [script](https://github.com/iliabylich/binding_dumper/blob/master/bin/multitest) that can be used to run the whole test suite locally on **every** supported version of Ruby. But that's definitely not enough for a gem to become completely production-ready.
 
 That's why I ask everyone who read this article: if you think that the idea of this gem should stay alive, that this method of debugging can be useful, and you would like to use it yourself, please, try it out locally and share your finding with me (via Twitter or GitHub).
 
-## Links
+# Links
 
 [GitHub repository](https://github.com/iliabylich/binding_dumper)

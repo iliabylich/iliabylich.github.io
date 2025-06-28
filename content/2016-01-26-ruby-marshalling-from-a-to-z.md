@@ -4,7 +4,7 @@ date: "2016-01-26"
 cover: ""
 ---
 
-## What is Marshalling
+# What is Marshalling
 
 Marshalling is a serialization process when you convert an object to a binary string.
 Ruby has a standard class `Marshal` that does all the job for serialization and deserialization.
@@ -21,7 +21,7 @@ Marshal.load(marshalled)
 This article explains the format of marshalling and shows how to write a pure Ruby marshalling library
 compatible with the standard Ruby implementation.
 
-## The gem
+# The gem
 
 Let's try to make a pure Ruby gem that is compatible with standard `Marshal` class.
 
@@ -81,7 +81,7 @@ end
 
 ```
 
-## Reading
+# Reading
 
 As we decided before, `ReadBuffer` is our class responsible for reading an object from marshalled data.
 Here is how it should look:
@@ -101,7 +101,7 @@ end
 
 ```
 
-## Decompressing
+# Decompressing
 
 First let's take a look at `Marshal.dump`.
 
@@ -171,7 +171,7 @@ read_buffer.minor_version
  => 8
 ```
 
-## Getting objects from the raw data
+# Getting objects from the raw data
 
 When `Marshal` converts your object to a string, it uses very simple rules:
 
@@ -182,7 +182,7 @@ prepended by a special character (each character for each unique type)
 so there's always a root object in marshalled string (which is actually placed in the beginning of the string)
 + This object is followed by all other data, like instance variables, string encoding etc.
 
-## `NilClass`, `TrueClass`, `FalseClass`
+# `NilClass`, `TrueClass`, `FalseClass`
 
 ```ruby
 ReadBuffer.new(Marshal.dump(nil)).data
@@ -224,7 +224,7 @@ when 'T' then true
 when 'F' then false
 ```
 
-## Tests
+# Tests
 
 Of course, we can't develop without tests,
 
@@ -263,7 +263,7 @@ PureRubyMarshal
 3 examples, 0 failures
 ```
 
-## Integer
+# Integer
 
 All encoded integers are prepended with an `"i"` symbol. Added one more `when` to our `case`:
 
@@ -386,7 +386,7 @@ Complex data types like
 
 and others include numbers into their encoded structure to represent their length.
 
-## Symbol
+# Symbol
 
 ```ruby
 ReadBuffer.new(Marshal.dump(:a_symbol)).data
@@ -408,7 +408,7 @@ def read_symbol
 end
 ```
 
-## String
+# String
 
 ```ruby
 ReadBuffer.new(Marshal.dump("a string")).data
@@ -430,7 +430,7 @@ def read_string
 end
 ```
 
-## Array
+# Array
 
 ```ruby
 ReadBuffer.new(Marshal.dump([1,2,3])).data
@@ -454,7 +454,7 @@ def read_array
 end
 ```
 
-## Hash
+# Hash
 
 `Hash` is encoded as an array of key-value pairs:
 
@@ -479,7 +479,7 @@ def read_hash
 end
 ```
 
-## Float
+# Float
 
 `Float` is encoded as its string representation
 
@@ -504,7 +504,7 @@ def read_float
 end
 ```
 
-## Class
+# Class
 
 ```ruby
 ReadBuffer.new(Marshal.dump(Array)).data
@@ -546,7 +546,7 @@ end
 I have extracted `marshal_const_get` to a separate method to use it later for
 reading a `Module` from the marshalled data.
 
-## Module
+# Module
 
 Modules are similar to Classes, but the "magical" character is `"m"` instead of `"c"`
 (and, of course, messages of exceptions are about modules).
@@ -565,7 +565,7 @@ def read_module
 end
 ```
 
-## `Struct`
+# `Struct`
 
 `Struct` classes are encoded by their class names + their data:
 
@@ -601,7 +601,7 @@ end
 
 Why is class name encoded as a `Symbol`, not a `String`? See section 'Symbol link'
 
-## Regexp
+# Regexp
 
 ```ruby
 ReadBuffer.new(Marshal.dump(/a_regexp/)).data
@@ -625,7 +625,7 @@ def read_regexp
 end
 ```
 
-## Abstract object
+# Abstract object
 
 ```ruby
 class Point2
@@ -670,7 +670,7 @@ def read_object
 end
 ```
 
-## User class
+# User class
 
 User classes are classes inherited from default classes:
 
@@ -699,7 +699,7 @@ def read_userclass
 end
 ```
 
-## Extended object
+# Extended object
 
 Sometimes your object is very, very complex. Like an object extended with some modules:
 
@@ -732,7 +732,7 @@ def read_extended_object
 end
 ```
 
-## Symbol links
+# Symbol links
 
 I guess this idea was originally created for compressing marshalled output.
 Consider the following situation: you have a collection of objects of the same class
@@ -801,7 +801,7 @@ end
 I'll return to symbol links and my thoughts about how it can be used to compress marshalled output
 in "Optimizations" section.
 
-## Object links
+# Object links
 
 Same story here, when you have an object that appears multiple times in your data, `Marshal` will serialize it only once:
 
@@ -844,7 +844,7 @@ Which is mostly correct.
 The code for object links is quite big to paste it here, you can find it
 [here](https://github.com/iliabylich/pure_ruby_marshal/commit/a26aa1aecec20cee1c2a908673fe79275dcdfa58)
 
-## Other cases
+# Other cases
 
 To be honest, there are a few more cases, but they are too complex
 for implementing and pasting it here. I'm not going to cover here:
@@ -854,11 +854,11 @@ for implementing and pasting it here. I'm not going to cover here:
 + Edge cases of `Float` like infinity
 + Some stuff that I just don't know from marshalling like `UserDef`/`Hashdef`/`ModuleOld`
 
-## Writing
+# Writing
 
 If you have read the previous part, I suppose it should be clear for you how to write it yourself :)
 
-## Optimizations
+# Optimizations
 
 Let's try on the real-world examples. Stuff that usually gets serialized is your data.
 And I can remember only one example where `Marshal` is used - model caching.
@@ -1019,7 +1019,7 @@ That's 10 times less then initial size, good job!
 Of course, if you have columns with type `text` there's nothing to
 optimize, this is my example and my experience.
 
-## What is it for?
+# What is it for?
 
 I have been working for about 3 weeks on implementing `Marshal` module for [opal](https://github.com/opal/opal).
 It's almost compatible with MRI implementation. I believe `Marshal` is the thing
@@ -1027,7 +1027,7 @@ that can bring real isomorphism to opal applications. If you have an object that
 on the server and its class was compiled on the client, you can pass it **directly**
 from the server without any serialization on the client/server.
 
-## Links
+# Links
 
 [GitHub repository with `PureRubyMarshal`](https://github.com/iliabylich/pure_ruby_marshal)
 

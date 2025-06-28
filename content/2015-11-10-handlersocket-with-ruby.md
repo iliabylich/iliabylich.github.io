@@ -4,7 +4,7 @@ date: "2015-11-10"
 cover: ""
 ---
 
-## What is HandlerSocket (HS)
+# What is HandlerSocket (HS)
 
 + a plugin for MySQL
 + which allows you to read/write to MySQL
@@ -14,7 +14,7 @@ cover: ""
 
 HandlerSocket query language is very simple (I'd even say it's primitive), but it's much faster than MySQL's one. Though, of course, there are some limitations. Interested?
 
-## Installation
+# Installation
 
 You already have it if you are using Percona Server or MariaDB. If not, install it from [the source](https://github.com/DeNA/HandlerSocket-Plugin-for-MySQL).
 
@@ -23,7 +23,7 @@ To activate the plugin, run:
 INSTALL PLUGIN handlersocket SONAME 'handlersocket.so';
 ```
 
-## Configuration
+# Configuration
 
 My configuration is the following:
 
@@ -65,7 +65,7 @@ Rows_examined: 0
 
 which means that HS daemon is up and running.
 
-## Simple queries
+# Simple queries
 
 You can test it locally using `telnet`:
 
@@ -80,11 +80,11 @@ Type `P -> 0 -> your_database -> your_table -> PRIMARY -> id,some_column` (where
 
 This protocol looks ugly, but it may save you a lot of network usage. It's very compact, and parsing does not require any CPU usage.
 
-## Use cases
+# Use cases
 
 If you don't have too much queries per second, probably you don't need HS. It does not optimize queries, but you may save some time on request parsing + some network. You may find it interesting if you have a lot of simple queries, like simple `SELECT`'s by primary key.
 
-## Ruby adapter
+# Ruby adapter
 
 Here goes my Ruby for HandlerSocket protocol. You can find it [here](https://github.com/iliabylich/handlersocket-ruby).
 
@@ -94,7 +94,7 @@ It has two implementations inside:
 
 Ruby implementation is very slow, it's there mainly to explain the protocol. C-based is quite fast.
 
-## Adapter API
+# Adapter API
 
 To require a specific implementation, run
 
@@ -129,7 +129,7 @@ hs.find('0', '=', ['12'], ['100]'])
 
 Other commands like `auth`/`insert`/`update`/`delete` are not there yet. But it's not that difficult to add them, check out [this file](https://github.com/iliabylich/handlersocket-ruby/blob/master/lib/handlersocket.rb#L37), implementation of other methods also takes ~2 lines of code.
 
-## Benchmarks
+# Benchmarks
 
 The most interesting part. To run benchmarks locally, clone the gem repository on [GitHub](https://github.com/iliabylich/handlersocket-ruby) and run `rake benchmark`. It compares `mysql2` gem to Ruby-based and C-based implementations. Here are my results:
 
@@ -158,15 +158,15 @@ There's a `20-30x` performance difference between `mysql2` and a C-based version
 And I was really disappointed by performance of Ruby-based implementation. It's 2 millions times slower than C-based. Why? There's a magical number `50.0 i/s`, but I cannot find what does it mean. If you have an answer, please, ping me on Twitter.
 
 
-## Future plans
+# Future plans
 
 The gem *mostly* works, but there are some points that should be refined. Currently when network goes down there's no way to reconnect because HS protocol is stateful. There's no history tracking in HS objects, so if you open an index and then reconnect, you lose your opened index. I'm not sure if it should be implemented on a low level of abstraction in HS gem, probably it's better to make a separated high-level gem for AR that does this job.
 
-## Conclusion
+# Conclusion
 
 Once again, HandlerSocket saves your time on query parsing, building a query plan, it's more compact, but is very limited. If you don't have too many requests, don't even think about using it.
 
-## Links
+# Links
 
 [HandlerSocket protocol](https://github.com/DeNA/HandlerSocket-Plugin-for-MySQL/blob/master/docs-en/protocol.en.txt)
 

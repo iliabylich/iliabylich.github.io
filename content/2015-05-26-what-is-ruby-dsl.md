@@ -4,7 +4,7 @@ date: "2015-05-26"
 cover: ""
 ---
 
-## What is Ruby DSL?
+# What is Ruby DSL?
 
 As you already know, DSL means domain-specific language. It's like a language in a language. Here are some examples that we use every day:
 
@@ -51,7 +51,7 @@ survey 'Survey title' do
 end
 ```
 
-## Blocks and context
+# Blocks and context
 
 Ruby blocks are the heart of DSL in ruby. Blocks can be `call`-ed, `instance_eval`-ed and `instance_exec`-ed. The difference between `call` and `instance_eval` is the context of block execution:
 
@@ -70,7 +70,7 @@ proc2.call(object) # obj in proc2 is object
 
 `instance_exec` is pretty much like `instance_eval` but it also takes extra arguments that becomes accessible in the block.
 
-## So?
+# So?
 
 Here is the draft of the code that simulates a survey:
 
@@ -181,7 +181,7 @@ end
 
 [Full code is available on gist](https://gist.github.com/iliabylich/9ea5dd31ee92571f8d59) or [a bit more complex example with tests on GitHub](https://github.com/iliabylich/multi-level-dsl).
 
-## Advanced DSL example
+# Advanced DSL example
 
 DSL that we have made before allows us to write some code using shortcuts, but usually we create DSL to define new methods (or change existing ones).
 
@@ -202,7 +202,7 @@ u.full_name
 # => 'Another Name'
 ```
 
-## Defining methods dynamically
+# Defining methods dynamically
 
 Here we need `define_method` method. It takes two parameters: a method name and a block that becomes body of created method:
 
@@ -236,7 +236,7 @@ method2
 
 This allows us to pass any variables to DSL and use them in dynamically defined methods.
 
-## Where is the code?
+# Where is the code?
 
 Here is it:
 
@@ -270,7 +270,7 @@ u.full_name
 # => 'Full Name'
 ```
 
-## What's wrong in the previous example?
+# What's wrong in the previous example?
 
 What I personally don't like here is that there is no way to override defined method using `super` (I don't like `alias_method_chain`, we really can make it work using super method). Why super does not work? Because the method is defined directly on the class:
 
@@ -362,7 +362,7 @@ class User
 end
 ```
 
-## Conclusion
+# Conclusion
 
 DSL is a tool for fast prototyping, here are some advantages:
 1. It makes your code look nicer (the code that calls DSL)

@@ -4,7 +4,7 @@ date: "2020-01-26"
 cover: ""
 ---
 
-## TL;DR
+# TL;DR
 
 This article is about instruction sequences and evaluating them using pure Ruby.
 
@@ -22,7 +22,7 @@ Of course, no. Well, if you want.
 
 Yes, and it even passes most language specs from RubySpec test suite.
 
-## How Ruby evaluates your code.
+# How Ruby evaluates your code.
 
 Well, I think I should start with explaining basics. There is a plenty of articles about it, so I'll be short:
 
@@ -59,7 +59,7 @@ As you can see, there are 5 instructions:
 4. `opt_send_without_block` - optimized instruction for a generic method call without block
 5. `leave` - an equivalent of `return`
 
-## The structure of the instruction sequence (ISeq)
+# The structure of the instruction sequence (ISeq)
 
 Let's start with the example above.
 
@@ -111,7 +111,7 @@ Each instruction is either:
 
 Only arrays are "real" instructions, numbers and symbols are special debug entries that are used internally by the VM. In our case a number followed by the `:RUBY_EVENT_LINE` is a mark that MRI uses to know what is the number of the line that is currently being interpreted (for example, all backtrace entries include these numbers)
 
-## Building a PoC
+# Building a PoC
 
 How can we evaluate instructions above? Well, we definitely need a stack:
 
@@ -159,7 +159,7 @@ You should see `[5]`.
 
 All instructions above simply pull some values from the stack, do some computations and push the result back.
 
-## Self
+# Self
 
 Let's think about `self` for a minute:
 
@@ -181,7 +181,7 @@ The first `puts self` prints `main`, while the second one prints `X`.
 
 Here comes the concept of frames.
 
-## Frames
+# Frames
 
 Frame is an object inside the virtual machine that represents a closure. Or a `binding`. It's an isolated "world" with its own set of locals, its own `self`, its own `file`/`line` information, it's own `rescue` and `ensure` handlers etc.
 
@@ -275,7 +275,7 @@ So, the `TopFrame` class is a `Struct`-like class that:
 
 We will create as many classes as we need to cover all kinds of frames (I will return to it later, I promise)
 
-## Wrapping the ISeq
+# Wrapping the ISeq
 
 I don't like working with plain arrays, and as I mentioned above there's a ton of useful information in the instruction sequence that we get from `RubyVM::InstructionSequence.compile("code").to_a`.
 
@@ -325,7 +325,7 @@ Instance methods are self-descriptive, but just in case:
 5. `lvar_names` is an array of all local variable names that are used in the frame
 6. `args_info` is a special Hash with a meta-information about arguments (empty for all frames except methods)
 
-## Frame stack
+# Frame stack
 
 Frames are organized as a stack internally, every time when we enter a frame Ruby pushes it on a stack. When the frame ends (i.e. when its list of instruction ends or there's a special `[:leave]` instruction) it pops it.
 
@@ -390,7 +390,7 @@ puts caller
 # => "/path/to/test.rb:42: in `<compiled>'"
 ```
 
-## Writing the evaluator
+# Writing the evaluator
 
 Let's write it in a "script style" (it is simplified for a good reason, real code is much more complicated):
 
@@ -419,15 +419,15 @@ end
 
 Generally speaking, the code above is the core of the VM. Once it's executed both `frame_stack` and `stack` must be empty. I added a bunch of consistency checks in my implementation, but for the sake of simplicity I'm going to omit them here.
 
-## Instructions
+# Instructions
 
 I'll try to be short here, there are about 100 instructions in Ruby, and some of them look similar.
 
-### `putself`, `putobject`, `putnil`, `putstring`, `putiseq`
+## `putself`, `putobject`, `putnil`, `putstring`, `putiseq`
 
 All of these guys push a simple object at the top of the stack. `putnil` pushes a known global `nil` object, others have an argument that is used in `stack.push(argument)`
 
-### optimized instructions like `opt_plus`
+## optimized instructions like `opt_plus`
 
 Ruby has a mode (that is turned on by default) that optimizes some frequently used method calls, like `+` or `.size`. It is possible to turn them off by manipulating `RubyVM::InstructionSequence.compile_option` (if you set `:specialized_instruction` to `false` you'll get a normal method call instead of the specialized instruction).
 
@@ -456,7 +456,7 @@ RubyVM::INSTRUCTION_NAMES.grep(/\Aopt_/)
 
 On Ruby 2.6.4 there are 34 of them.
 
-### `opt_send_without_block` (or `send` if specialized instructions are disabled)
+## `opt_send_without_block` (or `send` if specialized instructions are disabled)
 
 This is an instruction that is used to invoke methods. `puts 123` looks like this:
 
@@ -492,7 +492,7 @@ So here we
 4. then call `recv.send(mid, *args)` (in our case it's `self.send(:puts, *[123])`
 5. and then we push the result back to the stack
 
-### method definition
+## method definition
 
 I intentionally started with method calls because Ruby defines methods via method calls. Yes.
 
@@ -631,7 +631,7 @@ def push_frame(iseq, **payload)
 end
 ```
 
-### local variables
+## local variables
 
 there are 2 most-commonly used instructions to get/set locals:
 
@@ -775,7 +775,7 @@ This one is a bit more complicated:
 4. if it's there we use it; if not - we declare it in the current frame
 5. and then we set the value
 
-### method arguments
+## method arguments
 
 Every method has a list of arguments. Yes, sometimes it's empty, but even in such case we do an arity check. In general arguments initialization is a part of every method call.
 
@@ -983,7 +983,7 @@ end
 
 Method frame is just a regular frame that extracts arguments during its initialization.
 
-### constants
+## constants
 
 A regular constant assignment (like `A = 1`) is based on a scope (`Module.nesting` for relative lookup) and two instructions:
 
@@ -1087,7 +1087,7 @@ def setconstant(name)
 end
 ```
 
-### Instance/Class variables
+## Instance/Class variables
 
 Instance variables are always picked from the `self` of the current frame (they literally look like a simplified version of local variables that are always stored in `self` of the current scope):
 
@@ -1137,7 +1137,7 @@ def execute_getclassvariable(name)
 end
 ```
 
-### Literals
+## Literals
 
 But how can we construct arrays, hashes?
 
@@ -1214,7 +1214,7 @@ end
 
 would print `3` and `2`.
 
-### Splats
+## Splats
 
 Splat is one of the most beautiful features of Ruby. Splat is `foo, bar = *baz` (and also `[*foo, *bar]`):
 
@@ -1273,7 +1273,7 @@ In fact `expandarray` is much, much more complicated, you can go to the reposito
 
 Keyword splats (like `{ **x, **y }`) are really similar to array splats, I'm not going to cover them here.
 
-### conditions (if/unless)
+## conditions (if/unless)
 
 To handle conditions Ruby uses local `goto` (just like in C). Target of the `goto`-like instruction is a label:
 
@@ -1325,7 +1325,7 @@ MRI also has `branchif` and `branchnil`:
 + `branchif` does `if cond`  as a main check
 + `branchnil` does `if cond.nil?`
 
-### String interpolation/concatenation
+## String interpolation/concatenation
 
 Ruby has a few compile-time optimizations that optimize code like
 
@@ -1435,7 +1435,7 @@ def execute_concatstrings(count)
 end
 ```
 
-### Blocks
+## Blocks
 
 Blocks are passed to method calls as a third argument:
 
@@ -1544,7 +1544,7 @@ This instruction also pops a receiver and arguments, but what's important, it al
 
 Implicit block like `b = proc {}; m(&b)` does not need any additional implementation. Method `proc` here takes a block (handled by the first `if` branch), it gets stored in a local variable and we pass it to the method as a block argument (`elseif` branch).
 
-### Lambdas
+## Lambdas
 
 It's complicated and I don't have a complete solution that covers all cases (I guess because MRI does not expose enough APIs to do it. Or I'm just not smart enough).
 
@@ -1596,7 +1596,7 @@ end
 
 Arity check is enabled only if our proc is a lambda.
 
-### Calling a block
+## Calling a block
 
 If you remember when we define a method we tell it to save given block in a method frame:
 
@@ -1642,7 +1642,7 @@ end
 
 Our frame class factory need to be extended to generate this method by default and return false from it. `MethodFrame` has to override it and return `true`. Polymorphism!
 
-### Super
+## Super
 
 Calling `super` is very similar to calling `yield`: it can be replaced with `method(__method__).super_method.call(args)`.
 
@@ -1681,7 +1681,7 @@ end
 
 I did not implement it because MSpec does not rely on it and I usually try to avoid sequences of `super` calls.
 
-### Global variables
+## Global variables
 
 Similar to locals and instance variables, there are `getglobal`/`setglobal` instructions. They also take a variable name as an argument.
 
@@ -1700,7 +1700,7 @@ def execute_setglobal((name))
 end
 ```
 
-### `defined?` keyword
+## `defined?` keyword
 
 As you may know this keyword can handle pretty much anything:
 
@@ -1777,7 +1777,7 @@ end
 
 All other branches are similar, they do some check and push a constant string or `nil` back to the stack.
 
-### Range literals
+## Range literals
 
 For static ranges (like `(1..2)`) Ruby uses inlining and a well-known `putobject` instruction. But what if it's dynamic? Like `(a..b)`
 
@@ -1816,7 +1816,7 @@ def execute_newrange(flag)
 end
 ```
 
-### Long jumps
+## Long jumps
 
 This is probably the most complicated part. What if you have a method that has a loop inside a loop that does `return`? You want to stop executing both loops and simply exit the method, right?
 
@@ -1923,7 +1923,7 @@ def execute_throw(throw_type)
 end
 ```
 
-### `longjmp` in MRI
+## `longjmp` in MRI
 
 But does it work in the same way in MRI? C does not have exceptions. And at the same time there is a bunch of places where MRI does something like
 
@@ -1947,7 +1947,7 @@ There are C calls that perform a `goto` to any place (that was previously marked
 
 Even if you don't `raise` an exception and only do `begin; ...; rescue; end` in your code you still have to save the context (to jump to it once you `raise` an error). MRI does not know at compile time which methods can throw an error (and do you throw them at all), so each `rescue` produces a `setjmp` call (and each `raise` triggers a `longjmp` and passes `closest rescue` -> `saved env` as an argument)
 
-### `rescue`/`ensure`
+## `rescue`/`ensure`
 
 So now we know that raise/rescue works via long jumps under the hood. Let's implement our own exceptions.
 
@@ -2172,7 +2172,7 @@ But why do we handle only the first handler? Can there be multiple handlers? The
 + MRI merges multiple consecutive `rescue` handlers (by using `case error` branching in a rescue body)
 + `rescue` itself is frame, and so nested `rescue` is a rescue handler of the rescue handler
 
-### `throw`/`catch` methods
+## `throw`/`catch` methods
 
 As a side (and I personally think a very interesting) note, while I was working on this project I have realized that specs for `Kernel#throw` are not working for me at all. They were literally completely broken (even after I finished working on a very basic implementation of exceptions):
 
@@ -2302,7 +2302,7 @@ Comparison:
 
 There's almost no difference! The reason is simple: the only thing that is different is creation of the exception object. `throw` does not do it.
 
-### Utility instructions
+## Utility instructions
 
 There are also a few interesting instructions that MRI uses to evaluate your complex code:
 
@@ -2315,7 +2315,7 @@ There are also a few interesting instructions that MRI uses to evaluate your com
 + `dup` - like `dupn(1)`
 + `reverse(n)` - reverses N stack elements (i.e. does `n.times.map { pop }.each { |value| push(value) }`)
 
-## Final words
+# Final words
 
 First of all, I'd like to say thank you to everyone who made YARV. I was not able to find a single place where MRI behaves inefficiently (and I spent many hours looking into instructions).
 

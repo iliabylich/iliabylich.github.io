@@ -4,7 +4,7 @@ date: "2015-04-14"
 cover: ""
 ---
 
-## What is this?
+# What is this?
 
 `ExceptionManager` is a gem for getting extra information from your exception.
 
@@ -73,7 +73,7 @@ rescue => e
 end
 ```
 
-## Integration with NewRelic
+# Integration with NewRelic
 
 Just use the following snippet:
 
@@ -88,7 +88,7 @@ end
 
 NewRelic gem by default calls `.original_exception.to_s` on every caught exception. Yes, looks dirty, but saves a lot of time!
 
-## How it works
+# How it works
 
 In old versions of ruby there was a `Kernel` method called `set_trace_func` which allows to set trigger for every executed line (including c-calls).
 
@@ -108,7 +108,7 @@ end
 
 And then we can get everything through this binding
 
-## Compatibility
+# Compatibility
 
 `ExceptionManager` is compatible (and tested on Travis CI) with the following versions of ruby
 
@@ -118,6 +118,6 @@ And then we can get everything through this binding
 
 (In other words, in all versions of ruby that has `TracePoint` class).
 
-## Questions
+# Questions
 
 If you have any questions/suggestions feel free [to create an issue on GitHub](https://github.com/iliabylich/exception_manager/issues).
