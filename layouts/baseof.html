@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ .Site.LanguageCode }}">
+<html class="min-h-screen" lang="{{ .Site.LanguageCode }}">
 
 <head>
     {{ partial "head.html" . }}
 </head>
 
-<body class="m-auto px-4 xl:pl-80 font-inter dark:bg-gray-900 text-black dark:text-gray-400">
+<body class="min-h-screen m-auto px-4 xl:pl-80 font-inter dark:bg-gray-900 text-black dark:text-gray-400">
     {{ partial "nav.html" . }}
 
     {{ block "main" . }}{{ end }}
