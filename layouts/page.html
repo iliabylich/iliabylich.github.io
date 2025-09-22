@@ -10,4 +10,8 @@
 
 <main>{{ .Content }}</main>
 
+{{ if not hugo.IsServer }}
+<img src="https://pageview.ibylich.dev/count?p={{ .RelPermalink }}" alt="Page views">
+{{ end }}
+
 {{ end }}
