@@ -4,7 +4,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.3f922bfd5ac142c073e0ced7069e606fbbe8d57793c389504e8ffe3348473e63.css" integrity="sha256-P5Ir/VrBQsBz4M7XBp5gb7vo1XeTw4lQTo/&#43;M0hHPmM=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/main.b04ab5eeade65175729c1ccf9cf986e8cbba483d4053c84fa7f2439a5239384c.css" integrity="sha256-sEq17q3mUXVynBzPnPmG6Mu6SD1AU8hPp/JDmlI5OEw=" crossorigin="anonymous">
 
 
 
@@ -316,7 +316,7 @@ is the place where the main <code>App</code> class is created. But! It&rsquo;s d
 </span></span><span style=display:flex><span>  <span style=color:#66d9ef>end</span>
 </span></span><span style=display:flex><span><span style=color:#66d9ef>end</span></span></span></pre></div><p>This, is probably the thing that I have personally learned during writing this article. Even if you think in Ruby, you still have to deal with asynchronous components like callbacks/promises. When you need to make an HTTP request in Ruby, you just get you favorite HTTP adapter (mine is <code>RestClient</code>), send a request and your interpreter waits for response. In JavaScript you have to process response in some callback, because you can&rsquo;t just stop your interpreter (you know, it blocks UI).</p><h1 id=conclusion class="text-4xl border-b-2 mt-8 mb-2 border-black dark:border-gray-400">Conclusion
 <a href=#conclusion>#</a></h1><p>As for me, the main thing Opal gives to you is some ability to think in terms of Ruby classes/modules/inheritance system. But it does not let you completely escape from JavaScript ecosystem (no callbacks? - block is a callback). I would say, most of Opal functionality related to Ruby classes can be replaced with, for example, <a class="text-blue-500 hover:underline" href=http://jsclass.jcoglan.com/ target=_blank rel="noreferrer nofollow"><code>JsClass</code></a>
-library (which is really wonderful). Opal allows you to compile <strong>existing</strong> Ruby libraries to JavaScript and use them on the client - this is probably the main feature. Some day significant amount of Ruby libraries will be ported to client-side and probably some day we will think in terms of Ruby even on the client.</p></main><br><footer><script type=module defer>
+library (which is really wonderful). Opal allows you to compile <strong>existing</strong> Ruby libraries to JavaScript and use them on the client - this is probably the main feature. Some day significant amount of Ruby libraries will be ported to client-side and probably some day we will think in terms of Ruby even on the client.</p></main><img src="https://pageview.ibylich.dev/count?p=%2f2015-07-23-wrapping-javascript-library-with-opal%2f" alt="Page views"><br><footer><script type=module defer>
   const copyToClipboard = (e) => {
     const button = e.target;
     const src = button.nextElementSibling.textContent

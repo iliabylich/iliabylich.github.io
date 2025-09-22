@@ -4,7 +4,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.3f922bfd5ac142c073e0ced7069e606fbbe8d57793c389504e8ffe3348473e63.css" integrity="sha256-P5Ir/VrBQsBz4M7XBp5gb7vo1XeTw4lQTo/&#43;M0hHPmM=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/main.b04ab5eeade65175729c1ccf9cf986e8cbba483d4053c84fa7f2439a5239384c.css" integrity="sha256-sEq17q3mUXVynBzPnPmG6Mu6SD1AU8hPp/JDmlI5OEw=" crossorigin="anonymous">
 
 
 
@@ -282,7 +282,7 @@
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>p m(<span style=color:#e6db74>b</span>: <span style=color:#ae81ff>2</span>, <span style=color:#e6db74>&#39;b&#39;</span> <span style=color:#f92672>=&gt;</span> <span style=color:#ae81ff>3</span>)
 </span></span><span style=display:flex><span><span style=color:#75715e># =&gt; [{&#34;b&#34;=&gt;3}, 2]</span></span></span></pre></div><p>I feel like it&rsquo;s a bug:</p><ol><li>There&rsquo;s only one argument provided</li><li>And some of its keys are not symbols</li><li>So MRI should not use it for keyword arguments initialization</li><li>And <code>a</code> must be <code>{ b: 2, 'b' => 3 }</code></li><li>And so <code>b</code> must be just <code>1</code> (default value)</li></ol><h1 id=final-words class="text-4xl border-b-2 mt-8 mb-2 border-black dark:border-gray-400">Final words
-<a href=#final-words>#</a></h1><p>This story is not about bad parts of Ruby or anything like that. Don&rsquo;t feel bad because of this - I&rsquo;m really sorry. I was trying to cover some rarely used features and explain as much as I can.</p></main><br><footer><script type=module defer>
+<a href=#final-words>#</a></h1><p>This story is not about bad parts of Ruby or anything like that. Don&rsquo;t feel bad because of this - I&rsquo;m really sorry. I was trying to cover some rarely used features and explain as much as I can.</p></main><img src="https://pageview.ibylich.dev/count?p=%2f2018-07-19-my-favorite-parts-of-ruby%2f" alt="Page views"><br><footer><script type=module defer>
   const copyToClipboard = (e) => {
     const button = e.target;
     const src = button.nextElementSibling.textContent

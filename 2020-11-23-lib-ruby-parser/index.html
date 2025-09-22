@@ -4,7 +4,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.3f922bfd5ac142c073e0ced7069e606fbbe8d57793c389504e8ffe3348473e63.css" integrity="sha256-P5Ir/VrBQsBz4M7XBp5gb7vo1XeTw4lQTo/&#43;M0hHPmM=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/main.b04ab5eeade65175729c1ccf9cf986e8cbba483d4053c84fa7f2439a5239384c.css" integrity="sha256-sEq17q3mUXVynBzPnPmG6Mu6SD1AU8hPp/JDmlI5OEw=" crossorigin="anonymous">
 
 
 
@@ -175,7 +175,7 @@ by sticking to C++ exceptions.</p><p>Node.js bindings are based on C++ bindings 
 .</p><p>It worked out of the box with one minor change. I had to mark <code>onigurama</code> dependency as optional and disable it for WASM build. Oh, I love how Rust can turn dependency into a feature that is optional and enabled/disabled by default as you configure it.</p><h1 id=final-thoughts class="text-4xl border-b-2 mt-8 mb-2 border-black dark:border-gray-400">Final thoughts
 <a href=#final-thoughts>#</a></h1><p>This is one of the biggest open-source projects that I have ever made. It can be used from Rust/C/C++/Node.js/browser. It&rsquo;s fast (but remember, it can get even faster), it&rsquo;s precise and it&rsquo;s very strongly typed.</p><p>Also, if you need a custom setup (like custom C++ classes or maybe a completely different API) there&rsquo;s a <a class="text-blue-500 hover:underline" href=https://github.com/lib-ruby-parser/nodes target=_blank rel="noreferrer nofollow">meta-repository</a>
 with all nodes information. You can use it to build your own bindings (or maybe new bindings for other languages), it has a <code>nodes</code> function that returns a <code>Vec&lt;Node></code> (<code>Node</code> here is just a &ldquo;configuration&rdquo; of a single <code>Node</code> variant from Rust - <a class="text-blue-500 hover:underline" href=https://github.com/lib-ruby-parser/nodes/blob/master/src/node.rs#L6 target=_blank rel="noreferrer nofollow">source</a>
-)</p><p>Bindings still have a room for improvements (for example, there&rsquo;s no way to pass custom <code>ParserOptions</code> to the parser), and current version of <code>lib-ruby-parser</code> is <code>0.7.0</code>.</p><p>However, I think it&rsquo;s ready. It&rsquo;s stable and I&rsquo;m not going to introduce any major changes anymore. I&rsquo;m going to cut <code>3.0.0</code> once Ruby 3 is released. Don&rsquo;t hesitate to drop me a message if it works well for you.</p></main><br><footer><script type=module defer>
+)</p><p>Bindings still have a room for improvements (for example, there&rsquo;s no way to pass custom <code>ParserOptions</code> to the parser), and current version of <code>lib-ruby-parser</code> is <code>0.7.0</code>.</p><p>However, I think it&rsquo;s ready. It&rsquo;s stable and I&rsquo;m not going to introduce any major changes anymore. I&rsquo;m going to cut <code>3.0.0</code> once Ruby 3 is released. Don&rsquo;t hesitate to drop me a message if it works well for you.</p></main><img src="https://pageview.ibylich.dev/count?p=%2f2020-11-23-lib-ruby-parser%2f" alt="Page views"><br><footer><script type=module defer>
   const copyToClipboard = (e) => {
     const button = e.target;
     const src = button.nextElementSibling.textContent

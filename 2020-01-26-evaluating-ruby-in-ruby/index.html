@@ -4,7 +4,7 @@
 
 
 
-<link rel="stylesheet" href="/css/main.3f922bfd5ac142c073e0ced7069e606fbbe8d57793c389504e8ffe3348473e63.css" integrity="sha256-P5Ir/VrBQsBz4M7XBp5gb7vo1XeTw4lQTo/&#43;M0hHPmM=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/main.b04ab5eeade65175729c1ccf9cf986e8cbba483d4053c84fa7f2439a5239384c.css" integrity="sha256-sEq17q3mUXVynBzPnPmG6Mu6SD1AU8hPp/JDmlI5OEw=" crossorigin="anonymous">
 
 
 
@@ -1406,7 +1406,7 @@
 </span></span><span style=display:flex><span>               <span style=color:#66d9ef>raise</span>:    <span style=color:#ae81ff>10627</span><span style=color:#f92672>.</span><span style=color:#ae81ff>8</span> i<span style=color:#f92672>/</span>s <span style=color:#f92672>-</span> <span style=color:#ae81ff>1</span><span style=color:#f92672>.</span><span style=color:#ae81ff>05</span>x  slower</span></span></pre></div><p>There&rsquo;s almost no difference! The reason is simple: the only thing that is different is creation of the exception object. <code>throw</code> does not do it.</p><h2 id=utility-instructions class="text-2xl border-b-2 mt-8 mb-2 border-black dark:border-gray-400">Utility instructions
 <a href=#utility-instructions>#</a></h2><p>There are also a few interesting instructions that MRI uses to evaluate your complex code:</p><ul><li><code>adjuststack(n)</code> - does <code>n.times { pop }</code></li><li><code>nop</code> - literally does nothing</li><li><code>dupn(n)</code> - does <code>pop</code> N times and then pushes them twice (or basically duplicates N last items)</li><li><code>setn(n)</code> - does <code>stack[-n-1] = stack.top</code></li><li><code>topn(n)</code> - does <code>push(stack[-n-1])</code></li><li><code>swap</code> - swaps top two stack elements</li><li><code>dup</code> - like <code>dupn(1)</code></li><li><code>reverse(n)</code> - reverses N stack elements (i.e. does <code>n.times.map { pop }.each { |value| push(value) }</code>)</li></ul><h1 id=final-words class="text-4xl border-b-2 mt-8 mb-2 border-black dark:border-gray-400">Final words
 <a href=#final-words>#</a></h1><p>First of all, I&rsquo;d like to say thank you to everyone who made YARV. I was not able to find a single place where MRI behaves inefficiently (and I spent many hours looking into instructions).</p><p>Once again, the code is available <a class="text-blue-500 hover:underline" href=https://github.com/iliabylich/my.rb target=_blank rel="noreferrer nofollow">here</a>
-, feel free to create issues/message me in Twitter. And please, don&rsquo;t use it in the real world.</p></main><br><footer><script type=module defer>
+, feel free to create issues/message me in Twitter. And please, don&rsquo;t use it in the real world.</p></main><img src="https://pageview.ibylich.dev/count?p=%2f2020-01-26-evaluating-ruby-in-ruby%2f" alt="Page views"><br><footer><script type=module defer>
   const copyToClipboard = (e) => {
     const button = e.target;
     const src = button.nextElementSibling.textContent
