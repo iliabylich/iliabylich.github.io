@@ -47,10 +47,12 @@
 .&lt;/p&gt;
 &lt;blockquote class="border-l-4 border-blue-200 pl-2"&gt;
  &lt;p&gt;Is it a Ruby implementation?&lt;/p&gt;
+
 &lt;/blockquote&gt;
 &lt;p&gt;No. It&amp;rsquo;s just a runner of instructions. It is similar to MRI&amp;rsquo;s virtual machine, but it lacks many features and it&amp;rsquo;s 100 times slower.&lt;/p&gt;
 &lt;blockquote class="border-l-4 border-blue-200 pl-2"&gt;
  &lt;p&gt;Can I use it in my applications?&lt;/p&gt;
+
 &lt;/blockquote&gt;
 &lt;p&gt;Of course, no. Well, if you want.&lt;/p&gt;</description></item><item><title>My favorite parts of Ruby</title><link>/2018-07-19-my-favorite-parts-of-ruby/</link><pubDate>Thu, 19 Jul 2018 00:00:00 +0000</pubDate><guid>/2018-07-19-my-favorite-parts-of-ruby/</guid><description>&lt;h1 id="before-we-start" class="text-4xl border-b-2 mt-8 mb-2 border-black dark:border-gray-400"&gt;
  Before we start
