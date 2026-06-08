@@ -7,7 +7,7 @@
     <link>{{ .Permalink }}</link>
     <description>Recent content on {{ .Site.Title }}</description>
     <generator>Hugo</generator>
-    <language>{{ .Language.LanguageCode }}</language>
+    <language>{{ .Site.Language.Locale }}</language>
     <lastBuildDate>{{ $lastPage.Lastmod.Format "Mon, 02 Jan 2006 15:04:05 -0700" }}</lastBuildDate>
 
     {{- $rssFeed := .OutputFormats.Get "RSS" }}
