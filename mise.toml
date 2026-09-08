@@ -1,0 +1,24 @@
+[task_config]
+shell = "bash -c"
+
+[tools]
+hugo-extended = "latest"
+node = "26"
+
+[env]
+NPM_CONFIG_FUND = "false"
+NPM_CONFIG_AUDIT = "false"
+
+[tasks.install]
+run = "npm ci"
+
+[tasks.dev]
+depends = ["install"]
+run = "hugo serve"
+
+[tasks.dist]
+depends = ["install"]
+run = "hugo --minify"
+
+[tasks.clean]
+run = "rm -rf public .hugo_build.lock hugo_stats.json"
