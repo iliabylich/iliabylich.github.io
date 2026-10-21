@@ -1,8 +1,3 @@
-[settings]
-sandbox.deny_read = true
-sandbox.deny_write = true
-sandbox.deny_env = true
-
 [task_config]
 shell = "bash -c"
 
@@ -10,31 +5,16 @@ shell = "bash -c"
 hugo-extended = "latest"
 node = "26"
 
-[env]
-NPM_CONFIG_FUND = "false"
-NPM_CONFIG_AUDIT = "false"
-NPM_CONFIG_CACHE = "{{config_root}}/.npm-cache"
-HUGO_CACHEDIR = "{{config_root}}/resources/_gen/.cache"
-
 [tasks.install]
 run = "npm ci"
-allow_write = ["{{config_root}}"]
-allow_env = ["NPM_CONFIG_*"]
 
 [tasks.dev]
 depends = ["install"]
 run = "hugo serve"
-allow_write = ["{{config_root}}"]
-allow_env = ["HUGO_*"]
 
 [tasks.dist]
 depends = ["install"]
 run = "hugo --minify"
-deny_net = true
-allow_write = ["{{config_root}}"]
-allow_env = ["HUGO_*"]
 
 [tasks.clean]
 run = "rm -rf public .hugo_build.lock hugo_stats.json .npm-cache node_modules"
-deny_net = true
-allow_write = ["{{config_root}}"]
